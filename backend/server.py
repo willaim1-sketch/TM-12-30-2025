@@ -909,6 +909,98 @@ async def generate_image(data: dict, user: User = Depends(require_admin)):
         raise HTTPException(status_code=500, detail="No image was generated")
 
 # =============================================================================
+# STRIPE SETTINGS (Admin)
+# =============================================================================
+
+@api_router.get("/admin/stripe-settings")
+async def get_stripe_settings(user: User = Depends(require_admin)):
+    settings = await db.stripe_settings.find_one({"settings_id": "stripe"}, {"_id": 0})
+    if not settings:
+        return {"stripe_api_key": "", "stripe_webhook_secret": ""}
+    # Mask the key for security
+    masked_key = ""
+    if settings.get("stripe_api_key"):
+        key = settings["stripe_api_key"]
+        masked_key = key[:7] + "..." + key[-4:] if len(key) > 11 else "***"
+    return {
+        "stripe_api_key": masked_key,
+        "stripe_webhook_secret": "***" if settings.get("stripe_webhook_secret") else ""
+    }
+
+@api_router.put("/admin/stripe-settings")
+async def update_stripe_settings(data: dict, user: User = Depends(require_admin)):
+    update_data = {"settings_id": "stripe"}
+    
+    # Only update if new value provided (not masked)
+    if data.get("stripe_api_key") and not data["stripe_api_key"].startswith("sk_"):
+        # Keep existing key if masked value sent
+        existing = await db.stripe_settings.find_one({"settings_id": "stripe"}, {"_id": 0})
+        if existing:
+            update_data["stripe_api_key"] = existing.get("stripe_api_key", "")
+    elif data.get("stripe_api_key"):
+        update_data["stripe_api_key"] = data["stripe_api_key"]
+        # Also update environment for immediate use
+        os.environ["STRIPE_API_KEY"] = data["stripe_api_key"]
+    
+    if data.get("stripe_webhook_secret") and data["stripe_webhook_secret"] != "***":
+        update_data["stripe_webhook_secret"] = data["stripe_webhook_secret"]
+    
+    await db.stripe_settings.update_one(
+        {"settings_id": "stripe"},
+        {"$set": update_data},
+        upsert=True
+    )
+    return {"status": "updated"}
+
+# =============================================================================
+# MENU RATINGS (Public)
+# =============================================================================
+
+class MenuRating(BaseModel):
+    rating_id: str = Field(default_factory=lambda: f"rating_{uuid.uuid4().hex[:12]}")
+    item_id: str
+    rating: int  # 1-5
+    customer_name: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+@api_router.post("/menu/items/{item_id}/rate")
+async def rate_menu_item(item_id: str, data: dict):
+    rating_value = data.get("rating", 5)
+    if rating_value < 1 or rating_value > 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+    
+    rating = MenuRating(
+        item_id=item_id,
+        rating=rating_value,
+        customer_name=data.get("customer_name")
+    )
+    rating_dict = rating.model_dump()
+    rating_dict["created_at"] = rating_dict["created_at"].isoformat()
+    await db.menu_ratings.insert_one(rating_dict)
+    
+    # Calculate new average
+    all_ratings = await db.menu_ratings.find({"item_id": item_id}, {"_id": 0}).to_list(1000)
+    avg_rating = sum(r["rating"] for r in all_ratings) / len(all_ratings) if all_ratings else 0
+    
+    # Update item with average rating
+    await db.menu_items.update_one(
+        {"item_id": item_id},
+        {"$set": {"average_rating": round(avg_rating, 1), "rating_count": len(all_ratings)}}
+    )
+    
+    return {"average_rating": round(avg_rating, 1), "rating_count": len(all_ratings)}
+
+@api_router.get("/menu/items/{item_id}/ratings")
+async def get_menu_item_ratings(item_id: str):
+    ratings = await db.menu_ratings.find({"item_id": item_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    item = await db.menu_items.find_one({"item_id": item_id}, {"_id": 0, "average_rating": 1, "rating_count": 1})
+    return {
+        "ratings": ratings,
+        "average_rating": item.get("average_rating", 0) if item else 0,
+        "rating_count": item.get("rating_count", 0) if item else 0
+    }
+
+# =============================================================================
 # SEED DATA
 # =============================================================================
 
