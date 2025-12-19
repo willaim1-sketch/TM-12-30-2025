@@ -517,9 +517,9 @@ const MenuPage = () => {
                         </Button>
                         <button
                           onClick={() => setShareItem(item)}
-                          className="p-3 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors"
+                          className="p-3 bg-[#2A2A2A] rounded-md hover:bg-[#3A3A3A] transition-colors"
                         >
-                          <Share2 size={18} className="text-slate-400" />
+                          <Share2 size={18} className="text-white/60" />
                         </button>
                       </div>
                     )}
@@ -533,7 +533,7 @@ const MenuPage = () => {
         {/* Empty State */}
         {filteredItems.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-slate-400 text-lg">No items in this category yet.</p>
+            <p className="text-white/60 text-xl">No items in this category yet.</p>
           </div>
         )}
       </div>
