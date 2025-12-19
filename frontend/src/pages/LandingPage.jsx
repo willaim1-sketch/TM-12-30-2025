@@ -406,7 +406,7 @@ const OrderCTASection = () => {
           <motion.h2 variants={fadeInUp} className="text-4xl lg:text-5xl font-display font-bold text-white">
             Skip the Line, <span className="text-red-500 italic">Order Online</span>
           </motion.h2>
-          <motion.p variants={fadeInUp} className="text-slate-300 text-lg max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-white/80 text-lg max-w-2xl mx-auto">
             Big tamales, beans, rice, and guac - ready when you are. Order now and pick up hot & fresh!
           </motion.p>
           <motion.div variants={fadeInUp}>
@@ -425,7 +425,7 @@ const OrderCTASection = () => {
 // Testimonials Section
 const TestimonialsSection = ({ testimonials }) => {
   return (
-    <section id="testimonials" className="py-24 px-6 bg-slate-950 noise-overlay">
+    <section id="testimonials" className="py-24 px-6 bg-[#0A0A0A] noise-overlay">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial="hidden"
@@ -460,11 +460,11 @@ const TestimonialsSection = ({ testimonials }) => {
                   <Star key={i} size={18} className="text-red-500 fill-red-500" />
                 ))}
               </div>
-              <p className="text-slate-300 italic mb-6">"{testimonial.content}"</p>
+              <p className="text-white/80 italic mb-6">"{testimonial.content}"</p>
               <div>
                 <p className="text-white font-semibold">{testimonial.author_name}</p>
                 {testimonial.author_title && (
-                  <p className="text-slate-400 text-sm">{testimonial.author_title}</p>
+                  <p className="text-white/50 text-base">{testimonial.author_title}</p>
                 )}
               </div>
             </motion.div>
@@ -499,7 +499,7 @@ const LocationSection = ({ settings }) => {
                 <MapPin className="text-red-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <p className="text-white font-semibold mb-1">Address</p>
-                  <p className="text-slate-400">{settings?.address || "123 Main Street, Austin, TX"}</p>
+                  <p className="text-white/60">{settings?.address || "123 Main Street, Austin, TX"}</p>
                 </div>
               </div>
 
@@ -507,7 +507,7 @@ const LocationSection = ({ settings }) => {
                 <Phone className="text-red-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <p className="text-white font-semibold mb-1">Phone</p>
-                  <p className="text-slate-400">{settings?.phone || "(512) 555-0123"}</p>
+                  <p className="text-white/60">{settings?.phone || "(512) 555-0123"}</p>
                 </div>
               </div>
 
