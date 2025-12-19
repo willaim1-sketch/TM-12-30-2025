@@ -173,6 +173,10 @@ class SiteSettings(BaseModel):
     address: str = "123 Main Street, Austin, TX"
     phone: str = "(512) 555-0123"
     email: str = "hello@thetamaleman.com"
+    notification_emails: List[str] = []  # Multiple emails for order notifications
+    header_logo: Optional[str] = None  # 200x60px
+    footer_logo: Optional[str] = None  # 250x150px (bigger for footer)
+    favicon: Optional[str] = None  # 64x64px
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
@@ -198,6 +202,10 @@ class SiteSettingsUpdate(BaseModel):
     address: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
+    notification_emails: Optional[List[str]] = None
+    header_logo: Optional[str] = None
+    footer_logo: Optional[str] = None
+    favicon: Optional[str] = None
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
