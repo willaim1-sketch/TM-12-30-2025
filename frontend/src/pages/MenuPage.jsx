@@ -178,7 +178,32 @@ const RatingStars = ({ item, onRate }) => {
 
 // Item Detail Modal
 const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onUpdateQuantity }) => {
+  const [selectedToppings, setSelectedToppings] = useState([]);
+
+  // Reset toppings when item changes
+  useEffect(() => {
+    setSelectedToppings([]);
+  }, [item?.item_id]);
+
   if (!item) return null;
+
+  const toggleTopping = (topping) => {
+    setSelectedToppings(prev => {
+      const exists = prev.find(t => t.name === topping.name);
+      if (exists) {
+        return prev.filter(t => t.name !== topping.name);
+      }
+      return [...prev, topping];
+    });
+  };
+
+  const toppingsTotal = selectedToppings.reduce((sum, t) => sum + (t.price || 0), 0);
+  const itemTotal = (item.price || 0) + toppingsTotal;
+
+  const handleAddWithToppings = () => {
+    onAddToCart(item, selectedToppings);
+    setSelectedToppings([]);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -204,28 +229,59 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
 
           <p className="text-white/80 text-lg">{item.description}</p>
 
-          {/* Toppings */}
+          {/* Toppings - Now Selectable */}
           {item.toppings && item.toppings.length > 0 && (
             <div>
-              <h4 className="text-white font-semibold mb-2">Available Add-ons</h4>
-              <div className="flex flex-wrap gap-2">
-                {item.toppings.map((topping, idx) => (
-                  <span key={idx} className="text-base text-white/80 bg-[#2A2A2A] px-3 py-1 rounded-full">
-                    {topping.name} +${topping.price?.toFixed(2)}
-                  </span>
-                ))}
+              <h4 className="text-white font-semibold mb-3">Add-ons (tap to select)</h4>
+              <div className="space-y-2">
+                {item.toppings.map((topping, idx) => {
+                  const isSelected = selectedToppings.find(t => t.name === topping.name);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => toggleTopping(topping)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                        isSelected 
+                          ? 'bg-red-600/20 border-2 border-red-600' 
+                          : 'bg-[#2A2A2A] border-2 border-transparent hover:border-white/20'
+                      }`}
+                      data-testid={`topping-${idx}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                          isSelected ? 'bg-red-600 border-red-600' : 'border-white/40'
+                        }`}>
+                          {isSelected && <Check size={14} className="text-white" />}
+                        </div>
+                        <span className="text-white text-lg">{topping.name}</span>
+                      </div>
+                      <span className="text-red-500 font-semibold">+${topping.price?.toFixed(2)}</span>
+                    </button>
+                  );
+                })}
               </div>
+              {selectedToppings.length > 0 && (
+                <div className="mt-3 p-3 bg-[#2A2A2A] rounded-lg">
+                  <div className="flex justify-between text-white/70">
+                    <span>Base price:</span>
+                    <span>${item.price?.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-white/70">
+                    <span>Add-ons ({selectedToppings.length}):</span>
+                    <span>+${toppingsTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-white font-bold border-t border-white/10 pt-2 mt-2">
+                    <span>Item Total:</span>
+                    <span className="text-red-500">${itemTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Image dimensions note */}
-          <p className="text-white/40 text-sm">
-            Image size: 600 x 450px (4:3 ratio recommended)
-          </p>
-
           {/* Add to Cart */}
           <div className="flex gap-4 pt-4 border-t border-white/10">
-            {cartQuantity > 0 ? (
+            {cartQuantity > 0 && selectedToppings.length === 0 ? (
               <div className="flex items-center gap-4 flex-1">
                 <button
                   onClick={() => onUpdateQuantity(item.item_id, -1)}
@@ -242,8 +298,8 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
                 </button>
               </div>
             ) : (
-              <Button onClick={() => onAddToCart(item)} className="btn-primary flex-1 py-3">
-                Add to Cart
+              <Button onClick={handleAddWithToppings} className="btn-primary flex-1 py-3">
+                Add to Cart {selectedToppings.length > 0 && `- $${itemTotal.toFixed(2)}`}
               </Button>
             )}
           </div>
