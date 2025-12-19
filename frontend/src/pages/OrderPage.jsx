@@ -151,14 +151,14 @@ const OrderPage = () => {
 
   if (cart.length === 0 && !searchParams.get("cancelled")) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
           <h2 className="text-3xl font-display font-bold text-white mb-4">Your cart is empty</h2>
-          <p className="text-slate-400 mb-8">Add some delicious tamales to get started!</p>
+          <p className="text-white/60 mb-8">Add some delicious tamales to get started!</p>
           <Link to="/menu">
             <Button className="btn-primary" data-testid="browse-menu-btn">Browse Menu</Button>
           </Link>
@@ -168,11 +168,11 @@ const OrderPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/menu" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors" data-testid="order-back-btn">
+          <Link to="/menu" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors" data-testid="order-back-btn">
             <ArrowLeft size={20} />
             <span>Back to Menu</span>
           </Link>
@@ -198,7 +198,7 @@ const OrderPage = () => {
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="customer_name" className="text-slate-300 mb-2 block">Full Name *</Label>
+                    <Label htmlFor="customer_name" className="text-white/70 mb-2 block">Full Name *</Label>
                     <Input
                       id="customer_name"
                       name="customer_name"
@@ -212,7 +212,7 @@ const OrderPage = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="customer_email" className="text-slate-300 mb-2 block">Email *</Label>
+                    <Label htmlFor="customer_email" className="text-white/70 mb-2 block">Email *</Label>
                     <Input
                       id="customer_email"
                       name="customer_email"
@@ -227,7 +227,7 @@ const OrderPage = () => {
                   </div>
                   
                   <div className="md:col-span-2">
-                    <Label htmlFor="customer_phone" className="text-slate-300 mb-2 block">Phone *</Label>
+                    <Label htmlFor="customer_phone" className="text-white/70 mb-2 block">Phone *</Label>
                     <Input
                       id="customer_phone"
                       name="customer_phone"
@@ -249,7 +249,7 @@ const OrderPage = () => {
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="pickup_date" className="text-slate-300 mb-2 block">Pickup Date *</Label>
+                    <Label htmlFor="pickup_date" className="text-white/70 mb-2 block">Pickup Date *</Label>
                     <Select onValueChange={(value) => handleSelectChange("pickup_date", value)} required>
                       <SelectTrigger className="input-dark" data-testid="select-date">
                         <SelectValue placeholder="Select date" />
@@ -265,7 +265,7 @@ const OrderPage = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="pickup_time" className="text-slate-300 mb-2 block">Pickup Time *</Label>
+                    <Label htmlFor="pickup_time" className="text-white/70 mb-2 block">Pickup Time *</Label>
                     <Select onValueChange={(value) => handleSelectChange("pickup_time", value)} required>
                       <SelectTrigger className="input-dark" data-testid="select-time">
                         <SelectValue placeholder="Select time" />
@@ -325,7 +325,7 @@ const OrderPage = () => {
                   <div key={item.item_id} className="flex items-center gap-4 py-4 border-b border-slate-800">
                     <div className="flex-1">
                       <h4 className="text-white font-semibold">{item.name}</h4>
-                      <p className="text-slate-400 text-sm">${item.price.toFixed(2)} each</p>
+                      <p className="text-white/60 text-sm">${item.price.toFixed(2)} each</p>
                     </div>
                     
                     <div className="flex items-center gap-2">
@@ -355,7 +355,7 @@ const OrderPage = () => {
                     <button
                       type="button"
                       onClick={() => removeItem(item.item_id)}
-                      className="text-slate-400 hover:text-red-500 transition-colors"
+                      className="text-white/60 hover:text-red-500 transition-colors"
                       data-testid={`remove-item-${item.item_id}`}
                     >
                       <Trash2 size={18} />
@@ -366,11 +366,11 @@ const OrderPage = () => {
 
               {/* Totals */}
               <div className="space-y-3 pt-4 border-t border-slate-800">
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-white/60">
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-white/60">
                   <span>Tax (8.25%)</span>
                   <span>${tax.toFixed(2)}</span>
                 </div>

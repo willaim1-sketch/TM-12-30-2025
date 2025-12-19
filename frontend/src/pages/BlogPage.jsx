@@ -38,18 +38,18 @@ const BlogPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors" data-testid="blog-back-btn">
+          <Link to="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors" data-testid="blog-back-btn">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
@@ -81,7 +81,7 @@ const BlogPage = () => {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <p className="text-slate-400 text-lg mb-6">No blog posts yet. Check back soon!</p>
+            <p className="text-white/60 text-lg mb-6">No blog posts yet. Check back soon!</p>
             <Link to="/">
               <Button className="btn-secondary" data-testid="blog-home-btn">Back to Home</Button>
             </Link>
@@ -110,7 +110,7 @@ const BlogPage = () => {
 
                 {/* Content */}
                 <div className="p-6">
-                  <div className="flex items-center gap-2 text-slate-400 text-sm mb-3">
+                  <div className="flex items-center gap-2 text-white/60 text-sm mb-3">
                     <Calendar size={14} />
                     <span>
                       {new Date(post.created_at).toLocaleDateString('en-US', {
@@ -125,7 +125,7 @@ const BlogPage = () => {
                     {post.title}
                   </h2>
 
-                  <p className="text-slate-400 text-sm line-clamp-3 mb-4">
+                  <p className="text-white/60 text-sm line-clamp-3 mb-4">
                     {post.excerpt || post.content?.substring(0, 150) + "..."}
                   </p>
 
@@ -144,12 +144,12 @@ const BlogPage = () => {
       </div>
 
       {/* Footer CTA */}
-      <section className="py-16 px-6 bg-slate-900 border-t border-slate-800">
+      <section className="py-16 px-6 bg-[#1A1A1A] border-t border-white/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-display font-bold text-white mb-4">
             Hungry Yet?
           </h2>
-          <p className="text-slate-400 mb-8">
+          <p className="text-white/60 mb-8">
             Order our delicious tamales online and pick them up fresh!
           </p>
           <Link to="/order">
