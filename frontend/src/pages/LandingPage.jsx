@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { MapPin, Phone, Mail, Clock, Star, ChevronDown, Menu, X, Facebook, Instagram, Twitter } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Star, ChevronDown, Menu, X, Facebook, Instagram, Twitter, ShoppingBag } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
 
@@ -40,9 +40,9 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="#about" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-about">About</a>
           <Link to="/menu" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-menu">Menu</Link>
+          <Link to="/merch" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-merch">Merch</Link>
           <a href="#testimonials" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-testimonials">Reviews</a>
           <a href="#location" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-location">Location</a>
-          <Link to="/blog" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-blog">Blog</Link>
         </div>
 
         <div className="hidden md:block">
@@ -70,9 +70,9 @@ const Navbar = () => {
           <div className="flex flex-col gap-4">
             <a href="#about" className="text-slate-300 hover:text-white transition-colors py-2">About</a>
             <Link to="/menu" className="text-slate-300 hover:text-white transition-colors py-2">Menu</Link>
+            <Link to="/merch" className="text-slate-300 hover:text-white transition-colors py-2">Merch Shop</Link>
             <a href="#testimonials" className="text-slate-300 hover:text-white transition-colors py-2">Reviews</a>
             <a href="#location" className="text-slate-300 hover:text-white transition-colors py-2">Location</a>
-            <Link to="/blog" className="text-slate-300 hover:text-white transition-colors py-2">Blog</Link>
             <Link to="/order">
               <Button className="btn-primary w-full mt-2" data-testid="mobile-order-btn">Order Online</Button>
             </Link>
@@ -83,10 +83,10 @@ const Navbar = () => {
   );
 };
 
-// Hero Section
+// Hero Section with Silhouette
 const HeroSection = ({ settings }) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -104,19 +104,58 @@ const HeroSection = ({ settings }) => {
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="space-y-8"
+          className="space-y-6"
         >
           <motion.p variants={fadeInUp} className="text-red-500 uppercase tracking-[0.3em] text-sm font-semibold">
-            Authentic Gourmet Experience
+            Home-Style Fast Food Since 1998
           </motion.p>
           
           <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-white leading-tight">
-            {settings?.hero_title || "Authentic Gourmet"}<br />
+            {settings?.hero_title || "Big, Bold"}<br />
             <span className="text-red-500 italic">Tamales</span>
           </motion.h1>
+
+          {/* Silhouette Section - The Legend */}
+          <motion.div 
+            variants={fadeInUp}
+            className="flex flex-col items-center py-6"
+          >
+            <div className="relative">
+              {/* Silhouette figure */}
+              <div className="w-32 h-40 relative">
+                <svg viewBox="0 0 100 140" className="w-full h-full drop-shadow-2xl">
+                  {/* Chef silhouette with tamale */}
+                  <defs>
+                    <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#1e293b" />
+                      <stop offset="100%" stopColor="#0f172a" />
+                    </linearGradient>
+                  </defs>
+                  {/* Head */}
+                  <ellipse cx="50" cy="20" rx="18" ry="20" fill="url(#silhouetteGrad)" />
+                  {/* Chef hat */}
+                  <path d="M30 15 Q30 0 50 0 Q70 0 70 15 L68 20 L32 20 Z" fill="url(#silhouetteGrad)" />
+                  {/* Body */}
+                  <path d="M30 40 Q25 45 25 60 L25 100 Q25 110 35 115 L65 115 Q75 110 75 100 L75 60 Q75 45 70 40 Z" fill="url(#silhouetteGrad)" />
+                  {/* Arms holding tamale */}
+                  <path d="M25 50 Q10 55 15 75 L35 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
+                  <path d="M75 50 Q90 55 85 75 L65 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
+                  {/* Giant Tamale */}
+                  <ellipse cx="50" cy="85" rx="25" ry="12" fill="#DC2626" />
+                  <ellipse cx="50" cy="85" rx="20" ry="8" fill="#fbbf24" />
+                  {/* Legs */}
+                  <rect x="35" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
+                  <rect x="53" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
+                </svg>
+              </div>
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-red-600/20 blur-3xl rounded-full"></div>
+            </div>
+            <p className="text-slate-400 text-sm mt-4 italic">The Legend Behind the Tamale</p>
+          </motion.div>
           
           <motion.p variants={fadeInUp} className="text-slate-300 text-lg max-w-2xl mx-auto">
-            {settings?.hero_subtitle || "Crafted with passion, served with pride. Experience the finest handmade tamales in town."}
+            {settings?.hero_subtitle || "Just like Mom makes! Big portions, bold flavors, and the famous Super Dooper Dooper Tamale that put us on the map."}
           </motion.p>
           
           <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -170,13 +209,13 @@ const AboutSection = ({ settings }) => {
             <div className="aspect-[4/5] rounded-lg overflow-hidden">
               <img 
                 src={settings?.chef_image || "https://images.unsplash.com/photo-1695909287955-9c349a13a813?w=800"}
-                alt="Our Chef"
+                alt="Our Kitchen"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-red-600 text-white p-6 rounded-lg">
               <p className="text-4xl font-display font-bold">25+</p>
-              <p className="text-sm uppercase tracking-wider">Years of Tradition</p>
+              <p className="text-sm uppercase tracking-wider">Years of Flavor</p>
             </div>
           </motion.div>
 
@@ -184,17 +223,17 @@ const AboutSection = ({ settings }) => {
           <motion.div variants={fadeInUp} className="space-y-6">
             <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold">Our Story</p>
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">
-              {settings?.about_title || "A Family Legacy of Flavor"}
+              {settings?.about_title || "Mom's Kitchen, Your Table"}
             </h2>
             <p className="text-slate-300 text-lg leading-relaxed">
-              {settings?.about_content || "For generations, our family has been crafting tamales using recipes passed down from our grandmother's kitchen in Mexico. Every tamale we make carries the love and tradition of authentic Mexican cuisine."}
+              {settings?.about_content || "Started in a small kitchen with big dreams, The Tamale Man has been serving up home-style Mexican comfort food for over 25 years. No fancy stuff here - just real food, big portions, and flavors that remind you of mom's cooking."}
             </p>
             <p className="text-slate-400 leading-relaxed">
-              Our commitment to quality means we use only the freshest ingredients, hand-select our chilies, and slow-cook our meats to perfection. Each tamale is wrapped by hand, just as it has been done for centuries.
+              Our Super Dooper Dooper Tamale isn't just a menu item - it's a legend. Packed with seasoned meat, wrapped in love, and big enough to make you say "WOW!" Every tamale, every plate of beans and rice, every scoop of guac is made fresh daily.
             </p>
             <div className="pt-4">
-              <p className="text-white font-display text-xl italic">— {settings?.chef_name || "Chef Carlos"}</p>
-              <p className="text-slate-400 text-sm">Head Chef & Founder</p>
+              <p className="text-white font-display text-xl italic">— {settings?.chef_name || "The Tamale Man"}</p>
+              <p className="text-slate-400 text-sm">Founder & Head Cook</p>
             </div>
           </motion.div>
         </motion.div>
@@ -216,10 +255,10 @@ const FeaturedMenuSection = ({ items }) => {
           className="text-center mb-16"
         >
           <motion.p variants={fadeInUp} className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold mb-4">
-            Chef's Recommendations
+            Fan Favorites
           </motion.p>
           <motion.h2 variants={fadeInUp} className="text-4xl lg:text-5xl font-display font-bold text-white">
-            Signature Dishes
+            Big Flavors, Big Portions
           </motion.h2>
         </motion.div>
 
@@ -271,6 +310,74 @@ const FeaturedMenuSection = ({ items }) => {
   );
 };
 
+// Merch Promo Section
+const MerchPromoSection = () => {
+  return (
+    <section className="py-20 px-6 bg-gradient-to-br from-red-900/30 to-slate-950">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="grid lg:grid-cols-2 gap-12 items-center"
+        >
+          {/* Content */}
+          <motion.div variants={fadeInUp} className="space-y-6">
+            <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold">
+              Rep The Tamale Man
+            </p>
+            <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">
+              Get Your <span className="text-red-500">Merch!</span>
+            </h2>
+            <p className="text-slate-300 text-lg">
+              Show your love for The Tamale Man! T-shirts, cups, souvenirs, and gear featuring our famous Super Dooper Dooper Tamale. Perfect gifts or just to flex your tamale pride!
+            </p>
+            <Link to="/merch">
+              <Button className="btn-primary text-lg px-8 py-4" data-testid="shop-merch-btn">
+                <ShoppingBag className="mr-2" size={20} />
+                Shop Merch
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Merch Preview */}
+          <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-4">
+            <div className="card-dark p-4 text-center">
+              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                <div className="text-6xl">👕</div>
+              </div>
+              <p className="text-white font-semibold">T-Shirts</p>
+              <p className="text-red-500 font-bold">From $24.99</p>
+            </div>
+            <div className="card-dark p-4 text-center">
+              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                <div className="text-6xl">🥤</div>
+              </div>
+              <p className="text-white font-semibold">Cups & Mugs</p>
+              <p className="text-red-500 font-bold">From $14.99</p>
+            </div>
+            <div className="card-dark p-4 text-center">
+              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                <div className="text-6xl">🧢</div>
+              </div>
+              <p className="text-white font-semibold">Hats</p>
+              <p className="text-red-500 font-bold">From $19.99</p>
+            </div>
+            <div className="card-dark p-4 text-center">
+              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                <div className="text-6xl">🎁</div>
+              </div>
+              <p className="text-white font-semibold">Souvenirs</p>
+              <p className="text-red-500 font-bold">From $9.99</p>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
 // Order CTA Section
 const OrderCTASection = () => {
   return (
@@ -294,13 +401,13 @@ const OrderCTASection = () => {
           className="space-y-8"
         >
           <motion.p variants={fadeInUp} className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold">
-            Ready to Order?
+            Hungry? We Got You!
           </motion.p>
           <motion.h2 variants={fadeInUp} className="text-4xl lg:text-5xl font-display font-bold text-white">
             Skip the Line, <span className="text-red-500 italic">Order Online</span>
           </motion.h2>
           <motion.p variants={fadeInUp} className="text-slate-300 text-lg max-w-2xl mx-auto">
-            Place your order now and have your tamales ready for pickup. Fresh, hot, and waiting for you.
+            Big tamales, beans, rice, and guac - ready when you are. Order now and pick up hot & fresh!
           </motion.p>
           <motion.div variants={fadeInUp}>
             <Link to="/order">
@@ -331,7 +438,7 @@ const TestimonialsSection = ({ testimonials }) => {
             What People Say
           </motion.p>
           <motion.h2 variants={fadeInUp} className="text-4xl lg:text-5xl font-display font-bold text-white">
-            Customer Reviews
+            Customer Love
           </motion.h2>
         </motion.div>
 
@@ -383,7 +490,7 @@ const LocationSection = ({ settings }) => {
           {/* Info */}
           <motion.div variants={fadeInUp} className="space-y-8">
             <div>
-              <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold mb-4">Visit Us</p>
+              <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold mb-4">Come Visit</p>
               <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">Find Us Here</h2>
             </div>
 
@@ -505,7 +612,7 @@ const Footer = ({ settings }) => {
           <div className="md:col-span-2">
             <h3 className="text-2xl font-display font-bold text-white mb-4">The Tamale Man</h3>
             <p className="text-slate-400 mb-6 max-w-md">
-              Authentic gourmet tamales made with love and tradition. Experience the finest Mexican cuisine in town.
+              Home-style fast food tamales made with love. Big portions, bold flavors, and the legendary Super Dooper Dooper Tamale!
             </p>
             <div className="flex gap-4">
               {settings?.facebook_url && (
@@ -532,6 +639,7 @@ const Footer = ({ settings }) => {
             <ul className="space-y-2">
               <li><Link to="/menu" className="text-slate-400 hover:text-red-500 transition-colors">Menu</Link></li>
               <li><Link to="/order" className="text-slate-400 hover:text-red-500 transition-colors">Order Online</Link></li>
+              <li><Link to="/merch" className="text-slate-400 hover:text-red-500 transition-colors">Merch Shop</Link></li>
               <li><Link to="/blog" className="text-slate-400 hover:text-red-500 transition-colors">Blog</Link></li>
               <li><a href="#about" className="text-slate-400 hover:text-red-500 transition-colors">About Us</a></li>
               <li><Link to="/admin/login" className="text-slate-400 hover:text-red-500 transition-colors" data-testid="footer-admin-login">Admin Login</Link></li>
@@ -603,6 +711,7 @@ const LandingPage = () => {
       <HeroSection settings={settings} />
       <AboutSection settings={settings} />
       <FeaturedMenuSection items={featuredItems} />
+      <MerchPromoSection />
       <OrderCTASection />
       <TestimonialsSection testimonials={testimonials} />
       <LocationSection settings={settings} />
