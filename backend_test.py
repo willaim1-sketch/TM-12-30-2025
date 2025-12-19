@@ -376,6 +376,140 @@ class TamaleManAPITester:
             self.log_test("Menu Item Ratings Retrieval", False, str(e))
             return False
 
+    def test_merch_items_endpoint(self):
+        """Test merch items endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/merch/items", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                details += f", Found {len(data)} merch items"
+                
+                # Check if we have expected categories
+                if len(data) > 0:
+                    categories = set(item.get("category", "") for item in data)
+                    expected_categories = {"apparel", "drinkware", "accessories", "souvenirs"}
+                    found_expected = categories.intersection(expected_categories)
+                    details += f", Categories found: {list(categories)}"
+                    
+                    # Check item structure
+                    first_item = data[0]
+                    required_fields = ["item_id", "name", "price", "category", "sizes"]
+                    missing_fields = [field for field in required_fields if field not in first_item]
+                    
+                    if missing_fields:
+                        success = False
+                        details += f", Missing fields: {missing_fields}"
+                    else:
+                        details += f", Items have proper structure"
+                else:
+                    # Empty response is OK - might be using default items from frontend
+                    details += " (empty - using frontend defaults)"
+                    
+            self.log_test("Merch Items", success, details)
+            return success, data if success else []
+        except Exception as e:
+            self.log_test("Merch Items", False, str(e))
+            return False, []
+
+    def test_merch_categories_filter(self):
+        """Test merch items filtering by category"""
+        try:
+            # Test each category
+            categories = ["apparel", "drinkware", "accessories", "souvenirs"]
+            all_success = True
+            details_list = []
+            
+            for category in categories:
+                response = requests.get(f"{self.api_url}/merch/items?category={category}", timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    details_list.append(f"{category}: {len(data)} items")
+                    
+                    # Verify all items belong to the requested category
+                    if data:
+                        wrong_category = [item for item in data if item.get("category") != category]
+                        if wrong_category:
+                            all_success = False
+                            details_list.append(f"{category}: contains wrong category items")
+                else:
+                    all_success = False
+                    details_list.append(f"{category}: failed ({response.status_code})")
+            
+            details = ", ".join(details_list)
+            self.log_test("Merch Category Filtering", all_success, details)
+            return all_success
+        except Exception as e:
+            self.log_test("Merch Category Filtering", False, str(e))
+            return False
+
+    def test_merch_item_detail(self):
+        """Test individual merch item endpoint"""
+        try:
+            # First get merch items to test detail endpoint
+            items_response = requests.get(f"{self.api_url}/merch/items", timeout=10)
+            if items_response.status_code != 200:
+                self.log_test("Merch Item Detail", False, "Could not fetch merch items list")
+                return False
+            
+            items = items_response.json()
+            if not items:
+                # Try with a known default item ID from the frontend
+                test_item_id = "merch_tshirt_black"
+            else:
+                test_item_id = items[0]["item_id"]
+            
+            response = requests.get(f"{self.api_url}/merch/items/{test_item_id}", timeout=10)
+            success = response.status_code in [200, 404]  # 404 is OK if no items in DB yet
+            details = f"Status: {response.status_code}"
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ["item_id", "name", "price", "category"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details += f", Missing fields: {missing_fields}"
+                else:
+                    details += f", Item detail: {data.get('name', 'N/A')}"
+            elif response.status_code == 404:
+                details += " (item not found - expected if using frontend defaults)"
+            else:
+                success = False
+                details += " (unexpected status code)"
+                
+            self.log_test("Merch Item Detail", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Merch Item Detail", False, str(e))
+            return False
+
+    def test_admin_merch_endpoints(self):
+        """Test admin merch endpoints (should require auth)"""
+        try:
+            # Test GET admin merch items (should require auth)
+            response = requests.get(f"{self.api_url}/admin/merch/items", timeout=10)
+            
+            # Should return 401 (unauthorized) since we don't have admin auth
+            success = response.status_code == 401
+            details = f"Status: {response.status_code} (expected 401 for unauthenticated request)"
+            
+            if response.status_code == 200:
+                details += ", Admin endpoint accessible without auth (security issue)"
+                success = False
+            elif response.status_code != 401:
+                details += f", Unexpected status code for protected endpoint"
+                success = False
+                
+            self.log_test("Admin Merch Endpoints (Auth Required)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Admin Merch Endpoints (Auth Required)", False, str(e))
+            return False
+
     def test_stripe_settings_endpoints(self):
         """Test Stripe settings endpoints (admin auth required)"""
         try:
