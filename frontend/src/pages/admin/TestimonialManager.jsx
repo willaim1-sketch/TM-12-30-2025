@@ -113,8 +113,8 @@ const TestimonialManager = () => {
 
       {testimonials.length === 0 ? (
         <div className="text-center py-20 card-dark">
-          <Star className="mx-auto mb-4 text-slate-400" size={48} />
-          <p className="text-slate-400 mb-4">No testimonials yet</p>
+          <Star className="mx-auto mb-4 text-white/60" size={48} />
+          <p className="text-white/60 mb-4">No testimonials yet</p>
           <Button onClick={() => { resetForm(); setShowDialog(true); }} className="btn-primary">
             Add Your First Testimonial
           </Button>
@@ -134,7 +134,7 @@ const TestimonialManager = () => {
                     <Star 
                       key={i} 
                       size={16} 
-                      className={i < testimonial.rating ? "text-red-500 fill-red-500" : "text-slate-600"} 
+                      className={i < testimonial.rating ? "text-red-500 fill-red-500" : "text-white/40"} 
                     />
                   ))}
                 </div>
@@ -143,16 +143,16 @@ const TestimonialManager = () => {
                 )}
               </div>
 
-              <p className="text-slate-300 italic mb-4 line-clamp-4">"{testimonial.content}"</p>
+              <p className="text-white/70 italic mb-4 line-clamp-4">"{testimonial.content}"</p>
 
               <div className="mb-4">
                 <p className="text-white font-semibold">{testimonial.author_name}</p>
                 {testimonial.author_title && (
-                  <p className="text-slate-500 text-sm">{testimonial.author_title}</p>
+                  <p className="text-white/50 text-sm">{testimonial.author_title}</p>
                 )}
               </div>
 
-              <div className="flex gap-2 pt-4 border-t border-slate-800">
+              <div className="flex gap-2 pt-4 border-t border-white/10">
                 <Button
                   onClick={() => openEdit(testimonial)}
                   variant="outline"
@@ -179,7 +179,7 @@ const TestimonialManager = () => {
 
       {/* Testimonial Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editing ? 'Edit Testimonial' : 'Add Testimonial'}
@@ -188,7 +188,7 @@ const TestimonialManager = () => {
 
           <div className="space-y-6">
             <div>
-              <Label className="text-slate-300">Author Name *</Label>
+              <Label className="text-white/70">Author Name *</Label>
               <Input
                 value={form.author_name}
                 onChange={(e) => setForm(prev => ({ ...prev, author_name: e.target.value }))}
@@ -199,7 +199,7 @@ const TestimonialManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Author Title (optional)</Label>
+              <Label className="text-white/70">Author Title (optional)</Label>
               <Input
                 value={form.author_title}
                 onChange={(e) => setForm(prev => ({ ...prev, author_title: e.target.value }))}
@@ -210,7 +210,7 @@ const TestimonialManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Testimonial Content *</Label>
+              <Label className="text-white/70">Testimonial Content *</Label>
               <Textarea
                 value={form.content}
                 onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
@@ -221,7 +221,7 @@ const TestimonialManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Rating</Label>
+              <Label className="text-white/70">Rating</Label>
               <div className="flex gap-2 mt-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -233,7 +233,7 @@ const TestimonialManager = () => {
                   >
                     <Star 
                       size={24} 
-                      className={star <= form.rating ? "text-red-500 fill-red-500" : "text-slate-600"} 
+                      className={star <= form.rating ? "text-red-500 fill-red-500" : "text-white/40"} 
                     />
                   </button>
                 ))}
@@ -246,10 +246,10 @@ const TestimonialManager = () => {
                 onCheckedChange={(checked) => setForm(prev => ({ ...prev, is_featured: checked }))}
                 data-testid="testimonial-featured-switch"
               />
-              <Label className="text-slate-300">Feature on homepage</Label>
+              <Label className="text-white/70">Feature on homepage</Label>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowDialog(false)} className="btn-secondary">
                 Cancel
               </Button>

@@ -106,7 +106,7 @@ const SEOManager = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold text-white">SEO Manager</h1>
-          <p className="text-slate-400 mt-1">Optimize your pages for search engines</p>
+          <p className="text-white/60 mt-1">Optimize your pages for search engines</p>
         </div>
         <Button 
           onClick={() => { resetForm(); setShowDialog(true); }}
@@ -121,7 +121,7 @@ const SEOManager = () => {
       {/* Quick Setup */}
       <div className="card-dark p-6 mb-8">
         <h3 className="text-white font-semibold mb-4">Quick Setup</h3>
-        <p className="text-slate-400 text-sm mb-4">
+        <p className="text-white/60 text-sm mb-4">
           Click on a page below to configure its SEO settings:
         </p>
         <div className="flex flex-wrap gap-3">
@@ -141,7 +141,7 @@ const SEOManager = () => {
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   existingPage 
                     ? 'bg-green-600/20 border border-green-600 text-green-400' 
-                    : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700'
+                    : 'bg-[#2A2A2A] border border-white/20 text-white/70 hover:bg-[#3A3A3A]'
                 }`}
                 data-testid={`setup-${page.slug}`}
               >
@@ -168,14 +168,14 @@ const SEOManager = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <Globe className="text-red-500" size={20} />
-                    <span className="text-slate-400 font-mono text-sm">/{page.page_slug}</span>
+                    <span className="text-white/60 font-mono text-sm">/{page.page_slug}</span>
                   </div>
                   <h4 className="text-white font-semibold mb-1">{page.meta_title}</h4>
-                  <p className="text-slate-400 text-sm line-clamp-2">{page.meta_description}</p>
+                  <p className="text-white/60 text-sm line-clamp-2">{page.meta_description}</p>
                   {page.keywords?.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {page.keywords.map((keyword, idx) => (
-                        <span key={idx} className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">
+                        <span key={idx} className="text-xs bg-[#2A2A2A] text-white/60 px-2 py-1 rounded">
                           {keyword}
                         </span>
                       ))}
@@ -201,7 +201,7 @@ const SEOManager = () => {
 
       {/* SEO Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editing ? 'Edit SEO Settings' : 'Add SEO Settings'}
@@ -210,7 +210,7 @@ const SEOManager = () => {
 
           <div className="space-y-6">
             <div>
-              <Label className="text-slate-300">Page Slug *</Label>
+              <Label className="text-white/70">Page Slug *</Label>
               <Input
                 value={form.page_slug}
                 onChange={(e) => setForm(prev => ({ ...prev, page_slug: e.target.value }))}
@@ -219,15 +219,15 @@ const SEOManager = () => {
                 disabled={!!editing}
                 data-testid="seo-slug-input"
               />
-              <p className="text-slate-500 text-xs mt-1">This identifies which page these settings apply to</p>
+              <p className="text-white/50 text-xs mt-1">This identifies which page these settings apply to</p>
             </div>
 
-            <div className="border-t border-slate-800 pt-6">
+            <div className="border-t border-white/10 pt-6">
               <h4 className="text-white font-semibold mb-4">Basic Meta Tags</h4>
               
               <div className="space-y-4">
                 <div>
-                  <Label className="text-slate-300">Meta Title * (50-60 characters ideal)</Label>
+                  <Label className="text-white/70">Meta Title * (50-60 characters ideal)</Label>
                   <Input
                     value={form.meta_title}
                     onChange={(e) => setForm(prev => ({ ...prev, meta_title: e.target.value }))}
@@ -235,11 +235,11 @@ const SEOManager = () => {
                     placeholder="The Tamale Man - Authentic Gourmet Tamales"
                     data-testid="seo-title-input"
                   />
-                  <p className="text-slate-500 text-xs mt-1">{form.meta_title.length}/60 characters</p>
+                  <p className="text-white/50 text-xs mt-1">{form.meta_title.length}/60 characters</p>
                 </div>
 
                 <div>
-                  <Label className="text-slate-300">Meta Description (150-160 characters ideal)</Label>
+                  <Label className="text-white/70">Meta Description (150-160 characters ideal)</Label>
                   <Textarea
                     value={form.meta_description}
                     onChange={(e) => setForm(prev => ({ ...prev, meta_description: e.target.value }))}
@@ -247,11 +247,11 @@ const SEOManager = () => {
                     placeholder="Experience the finest handcrafted tamales in town..."
                     data-testid="seo-description-input"
                   />
-                  <p className="text-slate-500 text-xs mt-1">{form.meta_description.length}/160 characters</p>
+                  <p className="text-white/50 text-xs mt-1">{form.meta_description.length}/160 characters</p>
                 </div>
 
                 <div>
-                  <Label className="text-slate-300">Keywords (comma separated)</Label>
+                  <Label className="text-white/70">Keywords (comma separated)</Label>
                   <Input
                     value={keywordsInput}
                     onChange={(e) => setKeywordsInput(e.target.value)}
@@ -263,12 +263,12 @@ const SEOManager = () => {
               </div>
             </div>
 
-            <div className="border-t border-slate-800 pt-6">
+            <div className="border-t border-white/10 pt-6">
               <h4 className="text-white font-semibold mb-4">Open Graph (Social Sharing)</h4>
               
               <div className="space-y-4">
                 <div>
-                  <Label className="text-slate-300">OG Title (for Facebook/Twitter)</Label>
+                  <Label className="text-white/70">OG Title (for Facebook/Twitter)</Label>
                   <Input
                     value={form.og_title}
                     onChange={(e) => setForm(prev => ({ ...prev, og_title: e.target.value }))}
@@ -279,7 +279,7 @@ const SEOManager = () => {
                 </div>
 
                 <div>
-                  <Label className="text-slate-300">OG Description</Label>
+                  <Label className="text-white/70">OG Description</Label>
                   <Textarea
                     value={form.og_description}
                     onChange={(e) => setForm(prev => ({ ...prev, og_description: e.target.value }))}
@@ -290,7 +290,7 @@ const SEOManager = () => {
                 </div>
 
                 <div>
-                  <Label className="text-slate-300">OG Image URL (1200x630px recommended)</Label>
+                  <Label className="text-white/70">OG Image URL (1200x630px recommended)</Label>
                   <Input
                     value={form.og_image}
                     onChange={(e) => setForm(prev => ({ ...prev, og_image: e.target.value }))}
@@ -305,7 +305,7 @@ const SEOManager = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowDialog(false)} className="btn-secondary">
                 Cancel
               </Button>

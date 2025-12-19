@@ -12,10 +12,10 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const statusColors = {
   pending: "bg-yellow-600",
-  confirmed: "bg-blue-600",
+  confirmed: "bg-red-600",
   preparing: "bg-purple-600",
   ready: "bg-green-600",
-  completed: "bg-slate-600",
+  completed: "bg-white/30",
   cancelled: "bg-red-600"
 };
 
@@ -72,7 +72,7 @@ const OrderManager = () => {
           <SelectTrigger className="w-[180px] input-dark" data-testid="order-filter">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-900 border-slate-800">
+          <SelectContent className="bg-[#1A1A1A] border-white/10">
             <SelectItem value="all" className="text-white">All Orders</SelectItem>
             <SelectItem value="pending" className="text-white">Pending</SelectItem>
             <SelectItem value="confirmed" className="text-white">Confirmed</SelectItem>
@@ -86,8 +86,8 @@ const OrderManager = () => {
 
       {filteredOrders.length === 0 ? (
         <div className="text-center py-20 card-dark">
-          <AlertCircle className="mx-auto mb-4 text-slate-400" size={48} />
-          <p className="text-slate-400">No orders found</p>
+          <AlertCircle className="mx-auto mb-4 text-white/60" size={48} />
+          <p className="text-white/60">No orders found</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -101,7 +101,7 @@ const OrderManager = () => {
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="font-mono text-sm text-slate-400">{order.order_id}</span>
+                    <span className="font-mono text-sm text-white/60">{order.order_id}</span>
                     <Badge className={`${statusColors[order.status]} text-white`}>
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </Badge>
@@ -110,16 +110,16 @@ const OrderManager = () => {
                     </Badge>
                   </div>
                   <h3 className="text-white font-semibold">{order.customer_name}</h3>
-                  <p className="text-slate-400 text-sm">{order.customer_email}</p>
-                  <p className="text-slate-400 text-sm">{order.customer_phone}</p>
+                  <p className="text-white/60 text-sm">{order.customer_email}</p>
+                  <p className="text-white/60 text-sm">{order.customer_phone}</p>
                 </div>
 
                 <div className="text-left lg:text-right">
                   <p className="text-2xl font-bold text-red-500">${order.total?.toFixed(2)}</p>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-white/60 text-sm">
                     Pickup: {order.pickup_date} at {order.pickup_time}
                   </p>
-                  <p className="text-slate-500 text-xs">
+                  <p className="text-white/50 text-xs">
                     {new Date(order.created_at).toLocaleString()}
                   </p>
                 </div>
@@ -142,7 +142,7 @@ const OrderManager = () => {
                     <SelectTrigger className="w-[140px] input-dark" data-testid={`status-select-${order.order_id}`}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800">
+                    <SelectContent className="bg-[#1A1A1A] border-white/10">
                       <SelectItem value="pending" className="text-white">Pending</SelectItem>
                       <SelectItem value="confirmed" className="text-white">Confirmed</SelectItem>
                       <SelectItem value="preparing" className="text-white">Preparing</SelectItem>
@@ -155,8 +155,8 @@ const OrderManager = () => {
               </div>
 
               {/* Quick Items Preview */}
-              <div className="mt-4 pt-4 border-t border-slate-800">
-                <p className="text-slate-400 text-sm">
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="text-white/60 text-sm">
                   {order.items?.map(item => `${item.quantity}x ${item.name}`).join(', ')}
                 </p>
               </div>
@@ -167,7 +167,7 @@ const OrderManager = () => {
 
       {/* Order Detail Dialog */}
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Order Details</DialogTitle>
           </DialogHeader>
@@ -176,29 +176,29 @@ const OrderManager = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-mono text-sm text-slate-400">{selectedOrder.order_id}</p>
+                  <p className="font-mono text-sm text-white/60">{selectedOrder.order_id}</p>
                   <h3 className="text-xl text-white font-semibold">{selectedOrder.customer_name}</h3>
-                  <p className="text-slate-400">{selectedOrder.customer_email}</p>
-                  <p className="text-slate-400">{selectedOrder.customer_phone}</p>
+                  <p className="text-white/60">{selectedOrder.customer_email}</p>
+                  <p className="text-white/60">{selectedOrder.customer_phone}</p>
                 </div>
                 <div className="text-right">
                   <Badge className={`${statusColors[selectedOrder.status]} text-white mb-2`}>
                     {selectedOrder.status}
                   </Badge>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-white/60 text-sm">
                     Pickup: {selectedOrder.pickup_date}
                   </p>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-white/60 text-sm">
                     at {selectedOrder.pickup_time}
                   </p>
                 </div>
               </div>
 
-              <div className="border-t border-slate-800 pt-4">
+              <div className="border-t border-white/10 pt-4">
                 <h4 className="text-white font-semibold mb-3">Items</h4>
                 <div className="space-y-2">
                   {selectedOrder.items?.map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-slate-300">
+                    <div key={idx} className="flex justify-between text-white/70">
                       <span>{item.quantity}x {item.name}</span>
                       <span>${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
@@ -206,12 +206,12 @@ const OrderManager = () => {
                 </div>
               </div>
 
-              <div className="border-t border-slate-800 pt-4 space-y-2">
-                <div className="flex justify-between text-slate-400">
+              <div className="border-t border-white/10 pt-4 space-y-2">
+                <div className="flex justify-between text-white/60">
                   <span>Subtotal</span>
                   <span>${selectedOrder.subtotal?.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-white/60">
                   <span>Tax</span>
                   <span>${selectedOrder.tax?.toFixed(2)}</span>
                 </div>
@@ -222,9 +222,9 @@ const OrderManager = () => {
               </div>
 
               {selectedOrder.comments && (
-                <div className="border-t border-slate-800 pt-4">
+                <div className="border-t border-white/10 pt-4">
                   <h4 className="text-white font-semibold mb-2">Special Instructions</h4>
-                  <p className="text-slate-400">{selectedOrder.comments}</p>
+                  <p className="text-white/60">{selectedOrder.comments}</p>
                 </div>
               )}
             </div>

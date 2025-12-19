@@ -132,7 +132,7 @@ const FAQManager = () => {
 
       {faqs.length === 0 ? (
         <div className="text-center py-20 card-dark">
-          <p className="text-slate-400 mb-4">No FAQs yet</p>
+          <p className="text-white/60 mb-4">No FAQs yet</p>
           <Button onClick={() => { resetForm(); setShowDialog(true); }} className="btn-primary">
             Add Your First FAQ
           </Button>
@@ -147,22 +147,22 @@ const FAQManager = () => {
               className={`card-dark p-6 ${!faq.is_active ? 'opacity-60' : ''}`}
             >
               <div className="flex items-start gap-4">
-                <div className="text-slate-600 cursor-grab">
+                <div className="text-white/40 cursor-grab">
                   <GripVertical size={20} />
                 </div>
                 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-slate-500 text-sm">#{faq.display_order}</span>
-                    <Badge className="bg-slate-700 text-slate-300">
+                    <span className="text-white/50 text-sm">#{faq.display_order}</span>
+                    <Badge className="bg-[#3A3A3A] text-white/70">
                       {categoryLabels[faq.category] || faq.category}
                     </Badge>
                     {!faq.is_active && (
-                      <Badge className="bg-slate-600">Hidden</Badge>
+                      <Badge className="bg-white/30">Hidden</Badge>
                     )}
                   </div>
                   <h3 className="text-white font-semibold mb-2">{faq.question}</h3>
-                  <p className="text-slate-400 text-sm">{faq.answer}</p>
+                  <p className="text-white/60 text-sm">{faq.answer}</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ const FAQManager = () => {
 
       {/* FAQ Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editing ? 'Edit FAQ' : 'Add FAQ'}
@@ -206,7 +206,7 @@ const FAQManager = () => {
 
           <div className="space-y-6">
             <div>
-              <Label className="text-slate-300">Question *</Label>
+              <Label className="text-white/70">Question *</Label>
               <Input
                 value={form.question}
                 onChange={(e) => setForm(prev => ({ ...prev, question: e.target.value }))}
@@ -217,7 +217,7 @@ const FAQManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Answer *</Label>
+              <Label className="text-white/70">Answer *</Label>
               <Textarea
                 value={form.answer}
                 onChange={(e) => setForm(prev => ({ ...prev, answer: e.target.value }))}
@@ -229,7 +229,7 @@ const FAQManager = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-slate-300">Category</Label>
+                <Label className="text-white/70">Category</Label>
                 <Select
                   value={form.category}
                   onValueChange={(value) => setForm(prev => ({ ...prev, category: value }))}
@@ -237,7 +237,7 @@ const FAQManager = () => {
                   <SelectTrigger className="input-dark mt-1" data-testid="faq-category-select">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800">
+                  <SelectContent className="bg-[#1A1A1A] border-white/10">
                     <SelectItem value="general" className="text-white">General</SelectItem>
                     <SelectItem value="dietary" className="text-white">Dietary</SelectItem>
                     <SelectItem value="ordering" className="text-white">Ordering</SelectItem>
@@ -247,7 +247,7 @@ const FAQManager = () => {
               </div>
 
               <div>
-                <Label className="text-slate-300">Display Order</Label>
+                <Label className="text-white/70">Display Order</Label>
                 <Input
                   type="number"
                   value={form.display_order}
@@ -258,7 +258,7 @@ const FAQManager = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowDialog(false)} className="btn-secondary">
                 Cancel
               </Button>

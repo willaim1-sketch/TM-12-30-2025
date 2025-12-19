@@ -137,7 +137,7 @@ const BlogManager = () => {
 
       {posts.length === 0 ? (
         <div className="text-center py-20 card-dark">
-          <p className="text-slate-400 mb-4">No blog posts yet</p>
+          <p className="text-white/60 mb-4">No blog posts yet</p>
           <Button onClick={() => { resetForm(); setShowDialog(true); }} className="btn-primary">
             Write Your First Post
           </Button>
@@ -155,15 +155,15 @@ const BlogManager = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-white font-semibold text-lg">{post.title}</h3>
-                    <Badge className={post.is_published ? "bg-green-600" : "bg-slate-600"}>
+                    <Badge className={post.is_published ? "bg-green-600" : "bg-white/30"}>
                       {post.is_published ? "Published" : "Draft"}
                     </Badge>
                   </div>
-                  <p className="text-slate-400 text-sm mb-2">/{post.slug}</p>
-                  <p className="text-slate-500 text-sm line-clamp-2">
+                  <p className="text-white/60 text-sm mb-2">/{post.slug}</p>
+                  <p className="text-white/50 text-sm line-clamp-2">
                     {post.excerpt || post.content?.substring(0, 150)}...
                   </p>
-                  <p className="text-slate-600 text-xs mt-2">
+                  <p className="text-white/40 text-xs mt-2">
                     {new Date(post.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -204,7 +204,7 @@ const BlogManager = () => {
 
       {/* Post Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editing ? 'Edit Post' : 'New Post'}
@@ -213,7 +213,7 @@ const BlogManager = () => {
 
           <div className="space-y-6">
             <div>
-              <Label className="text-slate-300">Title *</Label>
+              <Label className="text-white/70">Title *</Label>
               <Input
                 value={form.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
@@ -224,7 +224,7 @@ const BlogManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Slug *</Label>
+              <Label className="text-white/70">Slug *</Label>
               <Input
                 value={form.slug}
                 onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
@@ -235,7 +235,7 @@ const BlogManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Content *</Label>
+              <Label className="text-white/70">Content *</Label>
               <Textarea
                 value={form.content}
                 onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
@@ -246,7 +246,7 @@ const BlogManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Excerpt (Short description)</Label>
+              <Label className="text-white/70">Excerpt (Short description)</Label>
               <Textarea
                 value={form.excerpt}
                 onChange={(e) => setForm(prev => ({ ...prev, excerpt: e.target.value }))}
@@ -257,7 +257,7 @@ const BlogManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Featured Image URL</Label>
+              <Label className="text-white/70">Featured Image URL</Label>
               <Input
                 value={form.featured_image}
                 onChange={(e) => setForm(prev => ({ ...prev, featured_image: e.target.value }))}
@@ -267,11 +267,11 @@ const BlogManager = () => {
               />
             </div>
 
-            <div className="border-t border-slate-800 pt-6">
+            <div className="border-t border-white/10 pt-6">
               <h4 className="text-white font-semibold mb-4">SEO Settings</h4>
               <div className="space-y-4">
                 <div>
-                  <Label className="text-slate-300">Meta Title</Label>
+                  <Label className="text-white/70">Meta Title</Label>
                   <Input
                     value={form.meta_title}
                     onChange={(e) => setForm(prev => ({ ...prev, meta_title: e.target.value }))}
@@ -281,7 +281,7 @@ const BlogManager = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-300">Meta Description</Label>
+                  <Label className="text-white/70">Meta Description</Label>
                   <Textarea
                     value={form.meta_description}
                     onChange={(e) => setForm(prev => ({ ...prev, meta_description: e.target.value }))}
@@ -299,7 +299,7 @@ const BlogManager = () => {
                 onCheckedChange={(checked) => setForm(prev => ({ ...prev, is_published: checked }))}
                 data-testid="post-publish-switch"
               />
-              <Label className="text-slate-300">
+              <Label className="text-white/70">
                 {form.is_published ? (
                   <span className="flex items-center gap-1"><Eye size={16} /> Published</span>
                 ) : (
@@ -308,7 +308,7 @@ const BlogManager = () => {
               </Label>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowDialog(false)} className="btn-secondary">
                 Cancel
               </Button>

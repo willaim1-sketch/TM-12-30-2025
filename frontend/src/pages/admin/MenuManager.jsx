@@ -221,7 +221,7 @@ const MenuManager = () => {
       </div>
 
       <Tabs defaultValue="items" className="space-y-6">
-        <TabsList className="bg-slate-900 border border-slate-800">
+        <TabsList className="bg-[#1A1A1A] border border-white/10">
           <TabsTrigger value="items" className="data-[state=active]:bg-red-600">Menu Items</TabsTrigger>
           <TabsTrigger value="categories" className="data-[state=active]:bg-red-600">Categories</TabsTrigger>
         </TabsList>
@@ -235,7 +235,7 @@ const MenuManager = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="card-dark overflow-hidden"
               >
-                <div className="aspect-video bg-slate-800 overflow-hidden">
+                <div className="aspect-video bg-[#2A2A2A] overflow-hidden">
                   <img
                     src={item.image_url || "https://images.unsplash.com/photo-1582170090097-b251ddbbf7f3?w=400"}
                     alt={item.name}
@@ -252,7 +252,7 @@ const MenuManager = () => {
                       <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">Featured</span>
                     )}
                   </div>
-                  <p className="text-slate-400 text-sm line-clamp-2 mb-4">{item.description}</p>
+                  <p className="text-white/60 text-sm line-clamp-2 mb-4">{item.description}</p>
                   <div className="flex gap-2">
                     <Button
                       onClick={() => openEditItem(item)}
@@ -280,7 +280,7 @@ const MenuManager = () => {
 
           {items.length === 0 && (
             <div className="text-center py-20 card-dark">
-              <p className="text-slate-400 mb-4">No menu items yet</p>
+              <p className="text-white/60 mb-4">No menu items yet</p>
               <Button onClick={() => { resetItemForm(); setShowItemDialog(true); }} className="btn-primary">
                 Add Your First Item
               </Button>
@@ -300,14 +300,14 @@ const MenuManager = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-white font-semibold text-lg">{category.name}</h3>
-                    <p className="text-slate-400 text-sm">Order: {category.display_order}</p>
+                    <p className="text-white/60 text-sm">Order: {category.display_order}</p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded ${category.is_active ? 'bg-green-600' : 'bg-slate-600'} text-white`}>
+                  <span className={`text-xs px-2 py-1 rounded ${category.is_active ? 'bg-green-600' : 'bg-white/30'} text-white`}>
                     {category.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                <p className="text-slate-400 text-sm mb-4">{category.description || 'No description'}</p>
-                <p className="text-slate-500 text-sm mb-4">
+                <p className="text-white/60 text-sm mb-4">{category.description || 'No description'}</p>
+                <p className="text-white/50 text-sm mb-4">
                   {items.filter(i => i.category_id === category.category_id).length} items
                 </p>
                 <div className="flex gap-2">
@@ -336,7 +336,7 @@ const MenuManager = () => {
 
           {categories.length === 0 && (
             <div className="text-center py-20 card-dark">
-              <p className="text-slate-400 mb-4">No categories yet</p>
+              <p className="text-white/60 mb-4">No categories yet</p>
               <Button onClick={() => { resetCategoryForm(); setShowCategoryDialog(true); }} className="btn-primary">
                 Add Your First Category
               </Button>
@@ -347,7 +347,7 @@ const MenuManager = () => {
 
       {/* Item Dialog */}
       <Dialog open={showItemDialog} onOpenChange={setShowItemDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingItem ? 'Edit Menu Item' : 'Add Menu Item'}
@@ -357,7 +357,7 @@ const MenuManager = () => {
           <div className="space-y-6">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-slate-300">Name *</Label>
+                <Label className="text-white/70">Name *</Label>
                 <Input
                   value={itemForm.name}
                   onChange={(e) => setItemForm(prev => ({ ...prev, name: e.target.value }))}
@@ -367,7 +367,7 @@ const MenuManager = () => {
                 />
               </div>
               <div>
-                <Label className="text-slate-300">Price *</Label>
+                <Label className="text-white/70">Price *</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -381,7 +381,7 @@ const MenuManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Category *</Label>
+              <Label className="text-white/70">Category *</Label>
               <Select
                 value={itemForm.category_id}
                 onValueChange={(value) => setItemForm(prev => ({ ...prev, category_id: value }))}
@@ -389,7 +389,7 @@ const MenuManager = () => {
                 <SelectTrigger className="input-dark mt-1" data-testid="item-category-select">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800">
+                <SelectContent className="bg-[#1A1A1A] border-white/10">
                   {categories.map((cat) => (
                     <SelectItem key={cat.category_id} value={cat.category_id} className="text-white">
                       {cat.name}
@@ -400,7 +400,7 @@ const MenuManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Description</Label>
+              <Label className="text-white/70">Description</Label>
               <Textarea
                 value={itemForm.description}
                 onChange={(e) => setItemForm(prev => ({ ...prev, description: e.target.value }))}
@@ -411,7 +411,7 @@ const MenuManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Image</Label>
+              <Label className="text-white/70">Image</Label>
               <div className="mt-1 flex gap-4">
                 <Input
                   value={itemForm.image_url}
@@ -443,10 +443,10 @@ const MenuManager = () => {
                 onCheckedChange={(checked) => setItemForm(prev => ({ ...prev, is_featured: checked }))}
                 data-testid="item-featured-switch"
               />
-              <Label className="text-slate-300">Featured item (shown on homepage)</Label>
+              <Label className="text-white/70">Featured item (shown on homepage)</Label>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowItemDialog(false)} className="btn-secondary">
                 Cancel
               </Button>
@@ -461,7 +461,7 @@ const MenuManager = () => {
 
       {/* Category Dialog */}
       <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800">
+        <DialogContent className="bg-[#1A1A1A] border-white/10">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingCategory ? 'Edit Category' : 'Add Category'}
@@ -470,7 +470,7 @@ const MenuManager = () => {
 
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Name *</Label>
+              <Label className="text-white/70">Name *</Label>
               <Input
                 value={categoryForm.name}
                 onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
@@ -481,7 +481,7 @@ const MenuManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Description</Label>
+              <Label className="text-white/70">Description</Label>
               <Textarea
                 value={categoryForm.description}
                 onChange={(e) => setCategoryForm(prev => ({ ...prev, description: e.target.value }))}
@@ -492,7 +492,7 @@ const MenuManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Display Order</Label>
+              <Label className="text-white/70">Display Order</Label>
               <Input
                 type="number"
                 value={categoryForm.display_order}
@@ -502,7 +502,7 @@ const MenuManager = () => {
               />
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowCategoryDialog(false)} className="btn-secondary">
                 Cancel
               </Button>

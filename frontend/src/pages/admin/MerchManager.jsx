@@ -123,7 +123,7 @@ const MerchManager = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold text-white">Merch Shop</h1>
-          <p className="text-slate-400 mt-1">{items.length} items in store</p>
+          <p className="text-white/60 mt-1">{items.length} items in store</p>
         </div>
         <Button 
           onClick={() => { resetForm(); setShowDialog(true); }}
@@ -137,8 +137,8 @@ const MerchManager = () => {
 
       {items.length === 0 ? (
         <div className="text-center py-20 card-dark">
-          <ShoppingBag className="mx-auto mb-4 text-slate-400" size={48} />
-          <p className="text-slate-400 mb-4">No merch items yet</p>
+          <ShoppingBag className="mx-auto mb-4 text-white/60" size={48} />
+          <p className="text-white/60 mb-4">No merch items yet</p>
           <Button onClick={() => { resetForm(); setShowDialog(true); }} className="btn-primary">
             Add Your First Merch Item
           </Button>
@@ -152,7 +152,7 @@ const MerchManager = () => {
               animate={{ opacity: 1, y: 0 }}
               className="card-dark overflow-hidden"
             >
-              <div className="aspect-square bg-slate-800 overflow-hidden">
+              <div className="aspect-square bg-[#2A2A2A] overflow-hidden">
                 <img
                   src={item.image_url || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"}
                   alt={item.name}
@@ -169,11 +169,11 @@ const MerchManager = () => {
                     <Badge className="bg-red-600 text-white text-xs">Featured</Badge>
                   )}
                 </div>
-                <p className="text-slate-400 text-sm mb-2 line-clamp-2">{item.description}</p>
+                <p className="text-white/60 text-sm mb-2 line-clamp-2">{item.description}</p>
                 <div className="flex flex-wrap gap-1 mb-4">
-                  <Badge className="bg-slate-700 text-slate-300 text-xs">{item.category}</Badge>
+                  <Badge className="bg-[#3A3A3A] text-white/70 text-xs">{item.category}</Badge>
                   {item.sizes?.slice(0, 3).map((size, idx) => (
-                    <Badge key={idx} className="bg-slate-800 text-slate-400 text-xs">{size}</Badge>
+                    <Badge key={idx} className="bg-[#2A2A2A] text-white/60 text-xs">{size}</Badge>
                   ))}
                 </div>
                 <div className="flex gap-2">
@@ -204,7 +204,7 @@ const MerchManager = () => {
 
       {/* Merch Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editing ? 'Edit Merch Item' : 'Add Merch Item'}
@@ -213,7 +213,7 @@ const MerchManager = () => {
 
           <div className="space-y-6">
             <div>
-              <Label className="text-slate-300">Name *</Label>
+              <Label className="text-white/70">Name *</Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
@@ -224,7 +224,7 @@ const MerchManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Price *</Label>
+              <Label className="text-white/70">Price *</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -237,7 +237,7 @@ const MerchManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Category</Label>
+              <Label className="text-white/70">Category</Label>
               <Select
                 value={form.category}
                 onValueChange={(value) => setForm(prev => ({ ...prev, category: value }))}
@@ -245,7 +245,7 @@ const MerchManager = () => {
                 <SelectTrigger className="input-dark mt-1" data-testid="merch-category-select">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-800">
+                <SelectContent className="bg-[#1A1A1A] border-white/10">
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id} className="text-white">
                       {cat.name}
@@ -256,7 +256,7 @@ const MerchManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Description</Label>
+              <Label className="text-white/70">Description</Label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
@@ -267,7 +267,7 @@ const MerchManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Image URL</Label>
+              <Label className="text-white/70">Image URL</Label>
               <Input
                 value={form.image_url}
                 onChange={(e) => setForm(prev => ({ ...prev, image_url: e.target.value }))}
@@ -281,7 +281,7 @@ const MerchManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Sizes (comma separated)</Label>
+              <Label className="text-white/70">Sizes (comma separated)</Label>
               <Input
                 value={form.sizes}
                 onChange={(e) => setForm(prev => ({ ...prev, sizes: e.target.value }))}
@@ -289,7 +289,7 @@ const MerchManager = () => {
                 placeholder="S, M, L, XL, 2XL"
                 data-testid="merch-sizes-input"
               />
-              <p className="text-slate-500 text-xs mt-1">For one-size items, enter "One Size"</p>
+              <p className="text-white/50 text-xs mt-1">For one-size items, enter "One Size"</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -298,10 +298,10 @@ const MerchManager = () => {
                 onCheckedChange={(checked) => setForm(prev => ({ ...prev, is_featured: checked }))}
                 data-testid="merch-featured-switch"
               />
-              <Label className="text-slate-300">Featured item</Label>
+              <Label className="text-white/70">Featured item</Label>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
               <Button variant="outline" onClick={() => setShowDialog(false)} className="btn-secondary">
                 Cancel
               </Button>

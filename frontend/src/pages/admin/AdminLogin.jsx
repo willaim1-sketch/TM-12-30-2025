@@ -32,14 +32,14 @@ const AdminLogin = () => {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -47,13 +47,13 @@ const AdminLogin = () => {
       >
         <div className="text-center mb-8">
           <h1 className="text-3xl font-display font-bold text-white mb-2">Admin Dashboard</h1>
-          <p className="text-slate-400">Sign in to manage your restaurant</p>
+          <p className="text-white/60">Sign in to manage your restaurant</p>
         </div>
 
         <div className="card-dark p-8">
           <Button
             onClick={handleGoogleLogin}
-            className="w-full bg-white text-slate-900 hover:bg-slate-100 font-semibold py-4 flex items-center justify-center gap-3"
+            className="w-full bg-white text-slate-900 hover:bg-gray-100 font-semibold py-4 flex items-center justify-center gap-3"
             data-testid="google-login-btn"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -77,13 +77,13 @@ const AdminLogin = () => {
             Continue with Google
           </Button>
 
-          <p className="text-center text-slate-500 text-sm mt-6">
+          <p className="text-center text-white/50 text-sm mt-6">
             Only authorized administrators can access this area.
           </p>
         </div>
 
         <div className="text-center mt-8">
-          <a href="/" className="text-slate-400 hover:text-white transition-colors">
+          <a href="/" className="text-white/60 hover:text-white transition-colors">
             &larr; Back to Website
           </a>
         </div>

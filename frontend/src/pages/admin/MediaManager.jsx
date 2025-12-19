@@ -123,8 +123,8 @@ const MediaManager = () => {
 
       {media.length === 0 ? (
         <div className="text-center py-20 card-dark">
-          <Image className="mx-auto mb-4 text-slate-400" size={48} />
-          <p className="text-slate-400 mb-4">No media files yet</p>
+          <Image className="mx-auto mb-4 text-white/60" size={48} />
+          <p className="text-white/60 mb-4">No media files yet</p>
           <Button onClick={() => setShowDialog(true)} className="btn-primary">
             Add Your First Image
           </Button>
@@ -138,7 +138,7 @@ const MediaManager = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="card-dark overflow-hidden group"
             >
-              <div className="aspect-square bg-slate-800 relative">
+              <div className="aspect-square bg-[#2A2A2A] relative">
                 <img
                   src={item.url}
                   alt={item.alt_text || item.filename}
@@ -149,7 +149,7 @@ const MediaManager = () => {
                     onClick={() => copyUrl(item.url)}
                     variant="outline"
                     size="sm"
-                    className="bg-slate-800 border-slate-600 text-white"
+                    className="bg-[#2A2A2A] border-slate-600 text-white"
                     data-testid={`copy-url-${item.media_id}`}
                   >
                     <Copy size={14} />
@@ -166,7 +166,7 @@ const MediaManager = () => {
               </div>
               <div className="p-3">
                 <p className="text-white text-sm truncate">{item.filename}</p>
-                <p className="text-slate-500 text-xs truncate">{item.alt_text || 'No alt text'}</p>
+                <p className="text-white/50 text-xs truncate">{item.alt_text || 'No alt text'}</p>
               </div>
             </motion.div>
           ))}
@@ -175,14 +175,14 @@ const MediaManager = () => {
 
       {/* Add Media Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 max-w-lg">
+        <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Add Media</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6">
             {/* AI Generation */}
-            <div className="p-4 bg-slate-800 rounded-lg">
+            <div className="p-4 bg-[#2A2A2A] rounded-lg">
               <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                 <Wand2 size={18} className="text-red-500" />
                 AI Image Generation
@@ -206,10 +206,10 @@ const MediaManager = () => {
               </div>
             </div>
 
-            <div className="text-center text-slate-400">— or add URL —</div>
+            <div className="text-center text-white/60">— or add URL —</div>
 
             <div>
-              <Label className="text-slate-300">Image URL</Label>
+              <Label className="text-white/70">Image URL</Label>
               <Input
                 value={form.url}
                 onChange={(e) => setForm(prev => ({ ...prev, url: e.target.value }))}
@@ -220,7 +220,7 @@ const MediaManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Filename</Label>
+              <Label className="text-white/70">Filename</Label>
               <Input
                 value={form.filename}
                 onChange={(e) => setForm(prev => ({ ...prev, filename: e.target.value }))}
@@ -231,7 +231,7 @@ const MediaManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Alt Text (for SEO)</Label>
+              <Label className="text-white/70">Alt Text (for SEO)</Label>
               <Input
                 value={form.alt_text}
                 onChange={(e) => setForm(prev => ({ ...prev, alt_text: e.target.value }))}
@@ -242,7 +242,7 @@ const MediaManager = () => {
             </div>
 
             {form.url && (
-              <div className="border border-slate-800 rounded-lg overflow-hidden">
+              <div className="border border-white/10 rounded-lg overflow-hidden">
                 <img src={form.url} alt="Preview" className="w-full h-48 object-cover" />
               </div>
             )}

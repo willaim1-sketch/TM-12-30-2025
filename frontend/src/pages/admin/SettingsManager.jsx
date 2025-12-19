@@ -14,14 +14,14 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Image dimension guide component
 const ImageGuide = ({ label, width, height, description }) => (
-  <div className="flex items-start gap-2 p-3 bg-slate-800/50 rounded-lg text-sm">
+  <div className="flex items-start gap-2 p-3 bg-[#2A2A2A]/50 rounded-lg text-sm">
     <Info size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
     <div>
-      <span className="text-slate-300 font-medium">{label}</span>
-      <p className="text-slate-400 text-xs mt-1">
+      <span className="text-white/70 font-medium">{label}</span>
+      <p className="text-white/60 text-xs mt-1">
         Recommended: <span className="text-red-400 font-mono">{width} x {height}px</span>
       </p>
-      {description && <p className="text-slate-500 text-xs mt-1">{description}</p>}
+      {description && <p className="text-white/50 text-xs mt-1">{description}</p>}
     </div>
   </div>
 );
@@ -107,7 +107,7 @@ const SettingsManager = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-slate-900 border border-slate-800 flex-wrap h-auto gap-1 p-1">
+        <TabsList className="bg-[#1A1A1A] border border-white/10 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="general" className="data-[state=active]:bg-red-600">General</TabsTrigger>
           <TabsTrigger value="hero" className="data-[state=active]:bg-red-600">Hero Section</TabsTrigger>
           <TabsTrigger value="about" className="data-[state=active]:bg-red-600">About</TabsTrigger>
@@ -124,7 +124,7 @@ const SettingsManager = () => {
         <TabsContent value="general">
           <div className="card-dark p-6 space-y-6">
             <div>
-              <Label className="text-slate-300">Site Name</Label>
+              <Label className="text-white/70">Site Name</Label>
               <Input
                 value={settings.site_name || ""}
                 onChange={(e) => updateSettings("site_name", e.target.value)}
@@ -133,7 +133,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Tagline</Label>
+              <Label className="text-white/70">Tagline</Label>
               <Input
                 value={settings.tagline || ""}
                 onChange={(e) => updateSettings("tagline", e.target.value)}
@@ -142,7 +142,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Meta Title (SEO)</Label>
+              <Label className="text-white/70">Meta Title (SEO)</Label>
               <Input
                 value={settings.meta_title || ""}
                 onChange={(e) => updateSettings("meta_title", e.target.value)}
@@ -151,7 +151,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Meta Description (SEO)</Label>
+              <Label className="text-white/70">Meta Description (SEO)</Label>
               <Textarea
                 value={settings.meta_description || ""}
                 onChange={(e) => updateSettings("meta_description", e.target.value)}
@@ -165,7 +165,7 @@ const SettingsManager = () => {
         <TabsContent value="hero">
           <div className="card-dark p-6 space-y-6">
             <div>
-              <Label className="text-slate-300">Hero Title</Label>
+              <Label className="text-white/70">Hero Title</Label>
               <Input
                 value={settings.hero_title || ""}
                 onChange={(e) => updateSettings("hero_title", e.target.value)}
@@ -174,7 +174,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Hero Subtitle</Label>
+              <Label className="text-white/70">Hero Subtitle</Label>
               <Textarea
                 value={settings.hero_subtitle || ""}
                 onChange={(e) => updateSettings("hero_subtitle", e.target.value)}
@@ -183,7 +183,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Hero Background Image</Label>
+              <Label className="text-white/70">Hero Background Image</Label>
               <ImageGuide 
                 label="Hero Background" 
                 width="1920" 
@@ -212,7 +212,7 @@ const SettingsManager = () => {
         <TabsContent value="about">
           <div className="card-dark p-6 space-y-6">
             <div>
-              <Label className="text-slate-300">About Title</Label>
+              <Label className="text-white/70">About Title</Label>
               <Input
                 value={settings.about_title || ""}
                 onChange={(e) => updateSettings("about_title", e.target.value)}
@@ -221,7 +221,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">About Content</Label>
+              <Label className="text-white/70">About Content</Label>
               <Textarea
                 value={settings.about_content || ""}
                 onChange={(e) => updateSettings("about_content", e.target.value)}
@@ -230,7 +230,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Chef Name</Label>
+              <Label className="text-white/70">Chef Name</Label>
               <Input
                 value={settings.chef_name || ""}
                 onChange={(e) => updateSettings("chef_name", e.target.value)}
@@ -239,7 +239,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Chef Image</Label>
+              <Label className="text-white/70">Chef Image</Label>
               <ImageGuide 
                 label="Chef/Team Photo" 
                 width="800" 
@@ -272,9 +272,9 @@ const SettingsManager = () => {
               Image Dimension Guide
             </h3>
             
-            <Alert className="bg-slate-800 border-slate-700 mb-6">
+            <Alert className="bg-[#2A2A2A] border-white/20 mb-6">
               <AlertCircle className="h-4 w-4 text-red-500" />
-              <AlertDescription className="text-slate-300">
+              <AlertDescription className="text-white/70">
                 For best results, use images that match the recommended dimensions. Larger images will be cropped to fit.
               </AlertDescription>
             </Alert>
@@ -297,11 +297,11 @@ const SettingsManager = () => {
               </div>
             </div>
 
-            <div className="mt-8 p-4 bg-slate-800 rounded-lg">
+            <div className="mt-8 p-4 bg-[#2A2A2A] rounded-lg">
               <h4 className="text-white font-medium mb-3">Quick Image URLs</h4>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-slate-400 text-sm">Hero Image</Label>
+                  <Label className="text-white/60 text-sm">Hero Image</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       value={settings.hero_image || ""}
@@ -313,7 +313,7 @@ const SettingsManager = () => {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-slate-400 text-sm">Chef Image</Label>
+                  <Label className="text-white/60 text-sm">Chef Image</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       value={settings.chef_image || ""}
@@ -332,7 +332,7 @@ const SettingsManager = () => {
         <TabsContent value="contact">
           <div className="card-dark p-6 space-y-6">
             <div>
-              <Label className="text-slate-300">Address</Label>
+              <Label className="text-white/70">Address</Label>
               <Input
                 value={settings.address || ""}
                 onChange={(e) => updateSettings("address", e.target.value)}
@@ -341,7 +341,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Phone</Label>
+              <Label className="text-white/70">Phone</Label>
               <Input
                 value={settings.phone || ""}
                 onChange={(e) => updateSettings("phone", e.target.value)}
@@ -350,7 +350,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Email</Label>
+              <Label className="text-white/70">Email</Label>
               <Input
                 value={settings.email || ""}
                 onChange={(e) => updateSettings("email", e.target.value)}
@@ -359,7 +359,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Google Maps Embed URL</Label>
+              <Label className="text-white/70">Google Maps Embed URL</Label>
               <Input
                 value={settings.google_maps_embed || ""}
                 onChange={(e) => updateSettings("google_maps_embed", e.target.value)}
@@ -368,11 +368,11 @@ const SettingsManager = () => {
                 data-testid="setting-maps"
               />
             </div>
-            <div className="border-t border-slate-800 pt-6">
+            <div className="border-t border-white/10 pt-6">
               <h3 className="text-white font-semibold mb-4">Social Media</h3>
               <div className="space-y-4">
                 <div>
-                  <Label className="text-slate-300">Facebook URL</Label>
+                  <Label className="text-white/70">Facebook URL</Label>
                   <Input
                     value={settings.facebook_url || ""}
                     onChange={(e) => updateSettings("facebook_url", e.target.value)}
@@ -382,7 +382,7 @@ const SettingsManager = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-300">Instagram URL</Label>
+                  <Label className="text-white/70">Instagram URL</Label>
                   <Input
                     value={settings.instagram_url || ""}
                     onChange={(e) => updateSettings("instagram_url", e.target.value)}
@@ -392,7 +392,7 @@ const SettingsManager = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-300">Twitter URL</Label>
+                  <Label className="text-white/70">Twitter URL</Label>
                   <Input
                     value={settings.twitter_url || ""}
                     onChange={(e) => updateSettings("twitter_url", e.target.value)}
@@ -411,7 +411,7 @@ const SettingsManager = () => {
             <h3 className="text-white font-semibold mb-6">Opening Hours</h3>
             <div className="space-y-4">
               {(settings.opening_hours || []).map((hour, index) => (
-                <div key={hour.day} className="flex items-center gap-4 p-4 bg-slate-800 rounded-lg">
+                <div key={hour.day} className="flex items-center gap-4 p-4 bg-[#2A2A2A] rounded-lg">
                   <span className="w-28 text-white font-semibold">{hour.day}</span>
                   <div className="flex items-center gap-2">
                     <Switch
@@ -419,7 +419,7 @@ const SettingsManager = () => {
                       onCheckedChange={(checked) => updateOpeningHours(index, "is_closed", !checked)}
                       data-testid={`hours-toggle-${hour.day}`}
                     />
-                    <span className="text-slate-400 text-sm w-16">
+                    <span className="text-white/60 text-sm w-16">
                       {hour.is_closed ? "Closed" : "Open"}
                     </span>
                   </div>
@@ -432,7 +432,7 @@ const SettingsManager = () => {
                         className="input-dark w-32"
                         data-testid={`hours-open-${hour.day}`}
                       />
-                      <span className="text-slate-400">to</span>
+                      <span className="text-white/60">to</span>
                       <Input
                         type="time"
                         value={hour.close_time || ""}
@@ -452,7 +452,7 @@ const SettingsManager = () => {
           <div className="card-dark p-6 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <Label className="text-slate-300">Primary Color</Label>
+                <Label className="text-white/70">Primary Color</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <input
                     type="color"
@@ -469,7 +469,7 @@ const SettingsManager = () => {
                 </div>
               </div>
               <div>
-                <Label className="text-slate-300">Secondary Color</Label>
+                <Label className="text-white/70">Secondary Color</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <input
                     type="color"
@@ -487,7 +487,7 @@ const SettingsManager = () => {
               </div>
             </div>
             <div>
-              <Label className="text-slate-300">Heading Font</Label>
+              <Label className="text-white/70">Heading Font</Label>
               <Input
                 value={settings.font_heading || "Playfair Display"}
                 onChange={(e) => updateSettings("font_heading", e.target.value)}
@@ -496,7 +496,7 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Body Font</Label>
+              <Label className="text-white/70">Body Font</Label>
               <Input
                 value={settings.font_body || "Manrope"}
                 onChange={(e) => updateSettings("font_body", e.target.value)}
@@ -513,7 +513,7 @@ const SettingsManager = () => {
               <CreditCard className="text-red-500" size={24} />
               <div>
                 <h3 className="text-white font-semibold text-lg">Stripe Payment Settings</h3>
-                <p className="text-slate-400 text-sm">Configure your Stripe account to receive payments</p>
+                <p className="text-white/60 text-sm">Configure your Stripe account to receive payments</p>
               </div>
             </div>
 
@@ -533,8 +533,8 @@ const SettingsManager = () => {
             </Alert>
 
             <div>
-              <Label className="text-slate-300">Stripe Secret Key</Label>
-              <p className="text-slate-500 text-xs mb-2">Starts with sk_live_ (production) or sk_test_ (testing)</p>
+              <Label className="text-white/70">Stripe Secret Key</Label>
+              <p className="text-white/50 text-xs mb-2">Starts with sk_live_ (production) or sk_test_ (testing)</p>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
@@ -548,7 +548,7 @@ const SettingsManager = () => {
                   <button
                     type="button"
                     onClick={() => setShowStripeKey(!showStripeKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
                   >
                     {showStripeKey ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -557,8 +557,8 @@ const SettingsManager = () => {
             </div>
 
             <div>
-              <Label className="text-slate-300">Webhook Secret (Optional)</Label>
-              <p className="text-slate-500 text-xs mb-2">For receiving payment notifications. Starts with whsec_</p>
+              <Label className="text-white/70">Webhook Secret (Optional)</Label>
+              <p className="text-white/50 text-xs mb-2">For receiving payment notifications. Starts with whsec_</p>
               <Input
                 type="password"
                 value={stripeSettings.stripe_webhook_secret || ""}
@@ -569,7 +569,7 @@ const SettingsManager = () => {
               />
             </div>
 
-            <div className="pt-4 border-t border-slate-800">
+            <div className="pt-4 border-t border-white/10">
               <Button 
                 onClick={handleSaveStripe} 
                 disabled={saving} 
@@ -581,11 +581,11 @@ const SettingsManager = () => {
               </Button>
             </div>
 
-            <div className="mt-6 p-4 bg-slate-800 rounded-lg">
+            <div className="mt-6 p-4 bg-[#2A2A2A] rounded-lg">
               <h4 className="text-white font-medium mb-2">Payment Status</h4>
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${stripeSettings.stripe_api_key ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                <span className="text-slate-300 text-sm">
+                <span className="text-white/70 text-sm">
                   {stripeSettings.stripe_api_key 
                     ? "Stripe is configured and ready to receive payments" 
                     : "Add your Stripe API key to start receiving payments"}
