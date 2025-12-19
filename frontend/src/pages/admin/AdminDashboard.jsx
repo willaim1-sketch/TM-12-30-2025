@@ -96,7 +96,7 @@ const DashboardHome = () => {
               <stat.icon className={`${stat.color}`} size={24} />
             </div>
             <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-            <p className="text-slate-400 text-sm">{stat.label}</p>
+            <p className="text-white/60 text-sm">{stat.label}</p>
           </motion.div>
         ))}
       </div>
@@ -107,15 +107,15 @@ const DashboardHome = () => {
           <div className="space-y-3">
             <Link to="/admin/menu" className="block p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
               <p className="text-white font-semibold">Manage Menu</p>
-              <p className="text-slate-400 text-sm">Add or edit menu items</p>
+              <p className="text-white/60 text-sm">Add or edit menu items</p>
             </Link>
             <Link to="/admin/orders" className="block p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
               <p className="text-white font-semibold">View Orders</p>
-              <p className="text-slate-400 text-sm">Check recent orders</p>
+              <p className="text-white/60 text-sm">Check recent orders</p>
             </Link>
             <Link to="/admin/settings" className="block p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
               <p className="text-white font-semibold">Site Settings</p>
-              <p className="text-slate-400 text-sm">Update content and design</p>
+              <p className="text-white/60 text-sm">Update content and design</p>
             </Link>
           </div>
         </div>
@@ -124,7 +124,7 @@ const DashboardHome = () => {
           <h2 className="text-xl font-display font-bold text-white mb-4">Getting Started</h2>
           <div className="space-y-4 text-slate-300">
             <p>Welcome to your restaurant admin dashboard! Here you can:</p>
-            <ul className="list-disc list-inside space-y-2 text-slate-400">
+            <ul className="list-disc list-inside space-y-2 text-white/60">
               <li>Manage your menu items and categories</li>
               <li>View and process customer orders</li>
               <li>Respond to contact form submissions</li>
@@ -161,7 +161,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-[#0A0A0A] flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
@@ -172,17 +172,17 @@ const AdminDashboard = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#1A1A1A] border-r border-white/10 
         transform transition-transform duration-300 lg:transform-none
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-slate-800">
+          <div className="p-6 border-b border-white/10">
             <Link to="/admin" className="flex items-center gap-2">
               <span className="text-xl font-display font-bold text-white">The Tamale Man</span>
             </Link>
-            <p className="text-slate-500 text-sm mt-1">Admin Dashboard</p>
+            <p className="text-white/50 text-sm mt-1">Admin Dashboard</p>
           </div>
 
           {/* Navigation */}
@@ -197,7 +197,7 @@ const AdminDashboard = () => {
                       flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
                       ${isActive(item.path, item.exact)
                         ? 'bg-red-600 text-white'
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        : 'text-white/60 hover:bg-slate-800 hover:text-white'
                       }
                     `}
                     data-testid={`nav-${item.label.toLowerCase()}`}
@@ -211,7 +211,7 @@ const AdminDashboard = () => {
           </nav>
 
           {/* User Info */}
-          <div className="p-4 border-t border-slate-800">
+          <div className="p-4 border-t border-white/10">
             <div className="flex items-center gap-3 mb-4">
               {user?.picture ? (
                 <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full" />
@@ -222,7 +222,7 @@ const AdminDashboard = () => {
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold truncate">{user?.name || 'Admin'}</p>
-                <p className="text-slate-500 text-sm truncate">{user?.email}</p>
+                <p className="text-white/50 text-sm truncate">{user?.email}</p>
               </div>
             </div>
             <Button
@@ -241,7 +241,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 px-6 py-4">
+        <header className="sticky top-0 z-30 bg-[#0A0A0A]/80 backdrop-blur-md border-b border-white/10 px-6 py-4">
           <div className="flex items-center justify-between">
             <button
               className="lg:hidden text-white p-2"
@@ -256,7 +256,7 @@ const AdminDashboard = () => {
                 href="/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors text-sm"
+                className="text-white/60 hover:text-white transition-colors text-sm"
               >
                 View Website &rarr;
               </a>

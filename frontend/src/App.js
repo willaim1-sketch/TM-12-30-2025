@@ -50,7 +50,7 @@ const AuthCallback = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
       <div className="text-white text-xl">Authenticating...</div>
     </div>
   );
@@ -86,7 +86,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -137,7 +137,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App min-h-screen bg-slate-950">
+    <div className="App min-h-screen bg-[#0A0A0A]">
       <Toaster position="top-right" richColors />
       <BrowserRouter>
         <AppRouter />
