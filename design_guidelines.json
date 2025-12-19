@@ -1,0 +1,162 @@
+{
+  "project_name": "The Tamale Man",
+  "design_philosophy": {
+    "identity": "E1: The Anti-AI Designer",
+    "theme": "Cinematic Noir & Crimson",
+    "core_concept": "Fast Food x Fine Dining Fusion. We are selling 'Gourmet Tamales', not just street food. The design must feel expensive, moody, and urgent.",
+    "emotional_tone": "Craving, Warmth, Sophistication, Speed",
+    "visual_style": "Dark Mode Luxury. Deep slate backgrounds, high-contrast white text, and piercing crimson accents. Texture over gradients."
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Playfair Display, serif",
+      "usage": "All H1-H3 headings. Use 'italic' variants for emphasis words.",
+      "weight": "Bold (700) or Black (900)",
+      "letter_spacing": "tracking-tight"
+    },
+    "body": {
+      "font_family": "Manrope, sans-serif",
+      "usage": "Paragraphs, UI elements, buttons, inputs.",
+      "weight": "Regular (400) to Bold (700)",
+      "letter_spacing": "tracking-normal"
+    },
+    "accents": {
+      "font_family": "Manrope, sans-serif",
+      "usage": "Overlines, tags, prices.",
+      "style": "Uppercase, tracking-widest, text-xs"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Tamale Crimson",
+        "hex": "#DC2626",
+        "tailwind": "bg-red-600",
+        "usage": "Primary CTAs, Price tags, Active states, Borders on hover"
+      },
+      "background": {
+        "name": "Void Slate",
+        "hex": "#020617",
+        "tailwind": "bg-slate-950",
+        "usage": "Main page background"
+      },
+      "surface": {
+        "name": "Charcoal",
+        "hex": "#0F172A",
+        "tailwind": "bg-slate-900",
+        "usage": "Cards, Modals, Sections"
+      },
+      "text": {
+        "primary": "#F8FAFC",
+        "secondary": "#94A3B8",
+        "muted": "#475569"
+      }
+    },
+    "gradients": {
+      "hero_overlay": "bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent",
+      "glow": "bg-gradient-to-r from-red-600/20 to-orange-600/20 blur-3xl"
+    }
+  },
+  "layout_strategies": {
+    "spacing": {
+      "base": "Generous. Use p-8 to p-24 for sections.",
+      "container_padding": "p-6 or p-8 for cards to prevent text collision."
+    },
+    "grids": {
+      "marketing": "The 'Tetris' Grid. Asymmetrical layouts. 12-column base. Mix wide spans (col-span-8) with narrow spans (col-span-4).",
+      "menu": "The 'Bento' Grid. Dense, visual cards. Images take up 50% of the card height.",
+      "dashboard": "The 'Control Room'. High density, sharp edges, minimal gaps (gap-4)."
+    }
+  },
+  "components": {
+    "buttons": {
+      "style": "Sharp edges or minimal rounded-md. No pill shapes for this brand.",
+      "primary": "bg-red-600 text-white hover:bg-red-700 hover:scale-[1.02] transition-all duration-300 font-bold tracking-wide",
+      "secondary": "border border-slate-700 bg-transparent text-white hover:bg-slate-800 hover:border-slate-600"
+    },
+    "cards": {
+      "style": "Flat, dark surface (bg-slate-900). 1px border (border-slate-800).",
+      "hover": "hover:border-red-600/50 hover:shadow-[0_0_30px_-10px_rgba(220,38,38,0.3)] transition-all duration-500"
+    },
+    "inputs": {
+      "style": "bg-slate-950 border-slate-800 text-white focus:border-red-600 focus:ring-1 focus:ring-red-600 rounded-md h-12"
+    },
+    "navigation": {
+      "style": "Glassmorphism. bg-slate-950/80 backdrop-blur-md border-b border-white/5"
+    }
+  },
+  "visual_enhancers": {
+    "textures": "Use subtle noise overlays on the dark background to prevent banding and add 'film grain' feel.",
+    "shadows": "Colored shadows. When a red button glows, the shadow should be red, not black.",
+    "motion": "Slow, cinematic fades. Parallax on scroll for images."
+  },
+  "image_urls": {
+    "hero_backgrounds": [
+      {
+        "url": "https://images.unsplash.com/photo-1670943544416-81155850b6f7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsdXh1cnklMjByZXN0YXVyYW50JTIwaW50ZXJpb3IlMjBkYXJrJTIwcmVkJTIwYWNjZW50c3xlbnwwfHx8fDE3NjYxMTE2MTh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Moody red lighting restaurant interior - Perfect for Hero Background",
+        "category": "hero"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1744928869793-3908b4649ad6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBsdXh1cnklMjByZXN0YXVyYW50JTIwaW50ZXJpb3IlMjBkYXJrJTIwcmVkJTIwYWNjZW50c3xlbnwwfHx8fDE3NjYxMTE2MTh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Stylish bar with window light - Good for 'Visit Us' section",
+        "category": "location"
+      }
+    ],
+    "food_and_menu": [
+      {
+        "url": "https://images.unsplash.com/photo-1582170090097-b251ddbbf7f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxnb3VybWV0JTIwdGFtYWxlcyUyMHBsYXRlZCUyMGRhcmslMjBiYWNrZ3JvdW5kJTIwbHV4dXJ5fGVufDB8fHx8MTc2NjExMTYxM3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Plated Mexican dish on blue ceramic - Use for 'Signature Dish'",
+        "category": "menu_item"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1764154727059-8320ad2052f4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHw0fHxmcmVzaCUyMHJlZCUyMGNoaWxpJTIwcGVwcGVycyUyMGFuZCUyMGNvcm4lMjBpbmdyZWRpZW50cyUyMGFydGlzdGljfGVufDB8fHx8MTc2NjExMTYxNnww&ixlib=rb-4.1.0&q=85",
+        "description": "Red hot peppers on black - Use for 'Ingredients' or 'Spicy' feature",
+        "category": "ingredients"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1645208631833-398528d1d947?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwyfHxmcmVzaCUyMHJlZCUyMGNoaWxpJTIwcGVwcGVycyUyMGFuZCUyMGNvcm4lMjBpbmdyZWRpZW50cyUyMGFydGlzdGljfGVufDB8fHx8MTc2NjExMTYxNnww&ixlib=rb-4.1.0&q=85",
+        "description": "Pile of red peppers - Texture background",
+        "category": "texture"
+      }
+    ],
+    "people_and_service": [
+      {
+        "url": "https://images.unsplash.com/photo-1695909287955-9c349a13a813?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxtZXhpY2FuJTIwY2hlZiUyMHBsYXRpbmclMjBmb29kJTIwbW9kZXJuJTIwa2l0Y2hlbnxlbnwwfHx8fDE3NjYxMTE2MTR8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Chef preparing food in dark kitchen - Use for 'Our Story' or 'Chef'",
+        "category": "chef"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1730302737756-0bf0cb6b496b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHw0fHxnb3VybWV0JTIwdGFtYWxlcyUyMHBsYXRlZCUyMGRhcmslMjBiYWNrZ3JvdW5kJTIwbHV4dXJ5fGVufDB8fHx8MTc2NjExMTYxM3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Server holding tray - Use for 'Order Online' CTA",
+        "category": "service"
+      }
+    ]
+  },
+  "instructions_to_main_agent": {
+    "general": "You are building a high-end, moody restaurant site. Do not make it look like a generic white-background SaaS. Embrace the dark mode.",
+    "setup": [
+      "Install 'lucide-react' for icons.",
+      "Install 'framer-motion' for animations.",
+      "Ensure Tailwind config includes the custom colors (slate-950, red-600).",
+      "Use 'Playfair Display' from Google Fonts."
+    ],
+    "implementation_order": [
+      "1. Setup global CSS (dark theme default, fonts).",
+      "2. Build the 'Navbar' (Glassmorphism).",
+      "3. Build the 'Hero' (Full height, cinematic).",
+      "4. Build the 'MenuGrid' (Bento style).",
+      "5. Build the 'OrderModal' (Clean, functional)."
+    ],
+    "critical_rules": [
+      "Never use pure black (#000000). Use Slate-950 (#020617).",
+      "Always add hover states to interactive elements.",
+      "Use data-testid attributes for all buttons and inputs."
+    ]
+  },
+  "universal_guidelines": {
+    "anti_slop": "Avoid generic centered layouts. Use asymmetry. Use noise textures.",
+    "accessibility": "Ensure red text on dark backgrounds meets contrast ratios. Use lighter reds for text if needed.",
+    "motion": "Use framer-motion for entrance animations (staggerChildren)."
+  }
+}
