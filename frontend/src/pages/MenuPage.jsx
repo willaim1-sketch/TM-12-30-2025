@@ -161,14 +161,14 @@ const RatingStars = ({ item, onRate }) => {
               className={`${
                 (hoveredRating || item.average_rating || 0) >= star 
                   ? 'text-yellow-500 fill-yellow-500' 
-                  : 'text-slate-600'
+                  : 'text-white/30'
               } transition-colors`}
             />
           </button>
         ))}
       </div>
       {item.rating_count > 0 && (
-        <span className="text-slate-400 text-xs">
+        <span className="text-white/60 text-sm">
           ({item.average_rating?.toFixed(1)}) {item.rating_count} ratings
         </span>
       )}
@@ -182,7 +182,7 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="relative">
           <img 
             src={item.image_url || "https://images.unsplash.com/photo-1582170090097-b251ddbbf7f3?w=600"} 
@@ -202,7 +202,7 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
             </div>
           </div>
 
-          <p className="text-slate-300">{item.description}</p>
+          <p className="text-white/80 text-lg">{item.description}</p>
 
           {/* Toppings */}
           {item.toppings && item.toppings.length > 0 && (
@@ -210,7 +210,7 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
               <h4 className="text-white font-semibold mb-2">Available Add-ons</h4>
               <div className="flex flex-wrap gap-2">
                 {item.toppings.map((topping, idx) => (
-                  <span key={idx} className="text-sm text-slate-300 bg-slate-800 px-3 py-1 rounded-full">
+                  <span key={idx} className="text-base text-white/80 bg-[#2A2A2A] px-3 py-1 rounded-full">
                     {topping.name} +${topping.price?.toFixed(2)}
                   </span>
                 ))}
@@ -219,7 +219,7 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
           )}
 
           {/* Image dimensions note */}
-          <p className="text-slate-500 text-xs">
+          <p className="text-white/40 text-sm">
             Image size: 600 x 450px (4:3 ratio recommended)
           </p>
 
