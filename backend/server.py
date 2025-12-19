@@ -909,6 +909,76 @@ async def generate_image(data: dict, user: User = Depends(require_admin)):
         raise HTTPException(status_code=500, detail="No image was generated")
 
 # =============================================================================
+# MERCH STORE
+# =============================================================================
+
+class MerchItem(BaseModel):
+    item_id: str = Field(default_factory=lambda: f"merch_{uuid.uuid4().hex[:12]}")
+    name: str
+    description: str
+    price: float
+    image_url: Optional[str] = None
+    category: str = "apparel"  # apparel, drinkware, accessories, souvenirs
+    sizes: List[str] = ["One Size"]
+    is_featured: bool = False
+    is_available: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class MerchItemCreate(BaseModel):
+    name: str
+    description: str
+    price: float
+    image_url: Optional[str] = None
+    category: str = "apparel"
+    sizes: List[str] = ["One Size"]
+    is_featured: bool = False
+
+# Public merch endpoints
+@api_router.get("/merch/items")
+async def get_merch_items(category: Optional[str] = None):
+    query = {"is_available": True}
+    if category:
+        query["category"] = category
+    items = await db.merch_items.find(query, {"_id": 0}).to_list(100)
+    return items
+
+@api_router.get("/merch/items/{item_id}")
+async def get_merch_item(item_id: str):
+    item = await db.merch_items.find_one({"item_id": item_id}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Merch item not found")
+    return item
+
+# Admin merch endpoints
+@api_router.get("/admin/merch/items")
+async def get_all_merch_items(user: User = Depends(require_admin)):
+    items = await db.merch_items.find({}, {"_id": 0}).to_list(100)
+    return items
+
+@api_router.post("/admin/merch/items", response_model=MerchItem)
+async def create_merch_item(item: MerchItemCreate, user: User = Depends(require_admin)):
+    merch_item = MerchItem(**item.model_dump())
+    item_dict = merch_item.model_dump()
+    item_dict["created_at"] = item_dict["created_at"].isoformat()
+    await db.merch_items.insert_one(item_dict)
+    return merch_item
+
+@api_router.put("/admin/merch/items/{item_id}")
+async def update_merch_item(item_id: str, data: dict, user: User = Depends(require_admin)):
+    result = await db.merch_items.update_one(
+        {"item_id": item_id},
+        {"$set": data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Merch item not found")
+    return {"status": "updated"}
+
+@api_router.delete("/admin/merch/items/{item_id}")
+async def delete_merch_item(item_id: str, user: User = Depends(require_admin)):
+    await db.merch_items.delete_one({"item_id": item_id})
+    return {"status": "deleted"}
+
+# =============================================================================
 # STRIPE SETTINGS (Admin)
 # =============================================================================
 
