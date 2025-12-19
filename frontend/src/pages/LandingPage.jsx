@@ -38,11 +38,11 @@ const Navbar = () => {
         </Link>
         
         <div className="hidden md:flex items-center gap-8">
-          <a href="#about" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-about">About</a>
-          <Link to="/menu" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-menu">Menu</Link>
-          <Link to="/merch" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-merch">Merch</Link>
-          <a href="#testimonials" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-testimonials">Reviews</a>
-          <a href="#location" className="text-slate-300 hover:text-white transition-colors" data-testid="nav-location">Location</a>
+          <a href="#about" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-about">About</a>
+          <Link to="/menu" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-menu">Menu</Link>
+          <Link to="/merch" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-merch">Merch</Link>
+          <a href="#testimonials" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-testimonials">Reviews</a>
+          <a href="#location" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-location">Location</a>
         </div>
 
         <div className="hidden md:block">
@@ -68,11 +68,11 @@ const Navbar = () => {
           className="md:hidden glass border-t border-white/5 px-6 py-4"
         >
           <div className="flex flex-col gap-4">
-            <a href="#about" className="text-slate-300 hover:text-white transition-colors py-2">About</a>
-            <Link to="/menu" className="text-slate-300 hover:text-white transition-colors py-2">Menu</Link>
-            <Link to="/merch" className="text-slate-300 hover:text-white transition-colors py-2">Merch Shop</Link>
-            <a href="#testimonials" className="text-slate-300 hover:text-white transition-colors py-2">Reviews</a>
-            <a href="#location" className="text-slate-300 hover:text-white transition-colors py-2">Location</a>
+            <a href="#about" className="text-white/70 hover:text-white transition-colors py-2 text-lg">About</a>
+            <Link to="/menu" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Menu</Link>
+            <Link to="/merch" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Merch Shop</Link>
+            <a href="#testimonials" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Reviews</a>
+            <a href="#location" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Location</a>
             <Link to="/order">
               <Button className="btn-primary w-full mt-2" data-testid="mobile-order-btn">Order Online</Button>
             </Link>
@@ -182,7 +182,7 @@ const HeroSection = ({ settings }) => {
           <motion.div 
             animate={{ y: [0, 10, 0] }} 
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="text-slate-400"
+            className="text-white/50"
           >
             <ChevronDown size={32} />
           </motion.div>
@@ -195,7 +195,7 @@ const HeroSection = ({ settings }) => {
 // About Section
 const AboutSection = ({ settings }) => {
   return (
-    <section id="about" className="py-24 px-6 bg-slate-950 noise-overlay">
+    <section id="about" className="py-24 px-6 bg-[#0A0A0A] noise-overlay">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial="hidden"
@@ -225,15 +225,15 @@ const AboutSection = ({ settings }) => {
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">
               {settings?.about_title || "Mom's Kitchen, Your Table"}
             </h2>
-            <p className="text-slate-300 text-lg leading-relaxed">
+            <p className="text-white/80 text-lg leading-relaxed">
               {settings?.about_content || "Started in a small kitchen with big dreams, The Tamale Man has been serving up home-style Mexican comfort food for over 25 years. No fancy stuff here - just real food, big portions, and flavors that remind you of mom's cooking."}
             </p>
-            <p className="text-slate-400 leading-relaxed">
+            <p className="text-white/60 leading-relaxed text-lg">
               Our Super Dooper Dooper Tamale isn't just a menu item - it's a legend. Packed with seasoned meat, wrapped in love, and big enough to make you say "WOW!" Every tamale, every plate of beans and rice, every scoop of guac is made fresh daily.
             </p>
             <div className="pt-4">
               <p className="text-white font-display text-xl italic">— {settings?.chef_name || "The Tamale Man"}</p>
-              <p className="text-slate-400 text-sm">Founder & Head Cook</p>
+              <p className="text-white/50 text-base">Founder & Head Cook</p>
             </div>
           </motion.div>
         </motion.div>
