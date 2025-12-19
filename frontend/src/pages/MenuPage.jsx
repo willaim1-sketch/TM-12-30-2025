@@ -392,15 +392,15 @@ const MenuPage = () => {
     toast.success(`${item.name}${toppingsText} added to cart`);
   };
 
-  const updateQuantity = (itemId, delta) => {
-    const existingItem = cart.find(i => i.item_id === itemId);
+  const updateQuantity = (cartItemId, delta) => {
+    const existingItem = cart.find(i => (i.cart_item_id || i.item_id) === cartItemId);
     let newCart;
     
     if (existingItem && existingItem.quantity + delta <= 0) {
-      newCart = cart.filter(i => i.item_id !== itemId);
+      newCart = cart.filter(i => (i.cart_item_id || i.item_id) !== cartItemId);
     } else if (existingItem) {
       newCart = cart.map(i => 
-        i.item_id === itemId 
+        (i.cart_item_id || i.item_id) === cartItemId 
           ? { ...i, quantity: i.quantity + delta }
           : i
       );
@@ -413,7 +413,8 @@ const MenuPage = () => {
   };
 
   const getCartQuantity = (itemId) => {
-    const item = cart.find(i => i.item_id === itemId);
+    // Only count items without toppings for the simple quantity display
+    const item = cart.find(i => i.item_id === itemId && (!i.toppings || i.toppings.length === 0));
     return item ? item.quantity : 0;
   };
 
