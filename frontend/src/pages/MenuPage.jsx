@@ -351,28 +351,45 @@ const MenuPage = () => {
     ? items.filter(item => item.category_id === activeCategory)
     : items;
 
-  const addToCart = (item) => {
-    const existingItem = cart.find(i => i.item_id === item.item_id);
+  const addToCart = (item, selectedToppings = []) => {
+    // Calculate total price including toppings
+    const toppingsTotal = selectedToppings.reduce((sum, t) => sum + (t.price || 0), 0);
+    const totalPrice = item.price + toppingsTotal;
+    
+    // Create unique cart ID based on item + toppings combination
+    const toppingsKey = selectedToppings.map(t => t.name).sort().join(',');
+    const cartItemId = selectedToppings.length > 0 
+      ? `${item.item_id}_${toppingsKey}` 
+      : item.item_id;
+    
+    const existingItem = cart.find(i => i.cart_item_id === cartItemId || (i.item_id === item.item_id && !i.toppings?.length && !selectedToppings.length));
     let newCart;
     
-    if (existingItem) {
+    if (existingItem && existingItem.cart_item_id === cartItemId) {
       newCart = cart.map(i => 
-        i.item_id === item.item_id 
+        i.cart_item_id === cartItemId 
           ? { ...i, quantity: i.quantity + 1 }
           : i
       );
     } else {
       newCart = [...cart, { 
+        cart_item_id: cartItemId,
         item_id: item.item_id, 
         name: item.name, 
-        price: item.price, 
+        base_price: item.price,
+        price: totalPrice,
+        toppings: selectedToppings,
         quantity: 1 
       }];
     }
     
     setCart(newCart);
     localStorage.setItem("tamaleCart", JSON.stringify(newCart));
-    toast.success(`${item.name} added to cart`);
+    
+    const toppingsText = selectedToppings.length > 0 
+      ? ` with ${selectedToppings.map(t => t.name).join(', ')}`
+      : '';
+    toast.success(`${item.name}${toppingsText} added to cart`);
   };
 
   const updateQuantity = (itemId, delta) => {
