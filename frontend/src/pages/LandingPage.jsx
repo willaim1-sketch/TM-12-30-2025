@@ -605,28 +605,28 @@ const FAQSection = ({ faqs }) => {
 // Footer
 const Footer = ({ settings }) => {
   return (
-    <footer className="bg-slate-900 border-t border-slate-800 py-16 px-6">
+    <footer className="bg-[#1A1A1A] border-t border-white/10 py-16 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-2">
             <h3 className="text-2xl font-display font-bold text-white mb-4">The Tamale Man</h3>
-            <p className="text-slate-400 mb-6 max-w-md">
+            <p className="text-white/60 mb-6 max-w-md text-lg">
               Home-style fast food tamales made with love. Big portions, bold flavors, and the legendary Super Dooper Dooper Tamale!
             </p>
             <div className="flex gap-4">
               {settings?.facebook_url && (
-                <a href={settings.facebook_url} className="text-slate-400 hover:text-red-500 transition-colors" data-testid="footer-facebook">
+                <a href={settings.facebook_url} className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-facebook">
                   <Facebook size={24} />
                 </a>
               )}
               {settings?.instagram_url && (
-                <a href={settings.instagram_url} className="text-slate-400 hover:text-red-500 transition-colors" data-testid="footer-instagram">
+                <a href={settings.instagram_url} className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-instagram">
                   <Instagram size={24} />
                 </a>
               )}
               {settings?.twitter_url && (
-                <a href={settings.twitter_url} className="text-slate-400 hover:text-red-500 transition-colors" data-testid="footer-twitter">
+                <a href={settings.twitter_url} className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-twitter">
                   <Twitter size={24} />
                 </a>
               )}
@@ -637,12 +637,12 @@ const Footer = ({ settings }) => {
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><Link to="/menu" className="text-slate-400 hover:text-red-500 transition-colors">Menu</Link></li>
-              <li><Link to="/order" className="text-slate-400 hover:text-red-500 transition-colors">Order Online</Link></li>
-              <li><Link to="/merch" className="text-slate-400 hover:text-red-500 transition-colors">Merch Shop</Link></li>
-              <li><Link to="/blog" className="text-slate-400 hover:text-red-500 transition-colors">Blog</Link></li>
-              <li><a href="#about" className="text-slate-400 hover:text-red-500 transition-colors">About Us</a></li>
-              <li><Link to="/admin/login" className="text-slate-400 hover:text-red-500 transition-colors" data-testid="footer-admin-login">Admin Login</Link></li>
+              <li><Link to="/menu" className="text-white/60 hover:text-red-500 transition-colors">Menu</Link></li>
+              <li><Link to="/order" className="text-white/60 hover:text-red-500 transition-colors">Order Online</Link></li>
+              <li><Link to="/merch" className="text-white/60 hover:text-red-500 transition-colors">Merch Shop</Link></li>
+              <li><Link to="/blog" className="text-white/60 hover:text-red-500 transition-colors">Blog</Link></li>
+              <li><a href="#about" className="text-white/60 hover:text-red-500 transition-colors">About Us</a></li>
+              <li><Link to="/admin/login" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-admin-login">Admin Login</Link></li>
             </ul>
           </div>
 
