@@ -95,7 +95,7 @@ const HeroSection = ({ settings }) => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 gradient-overlay"></div>
-        <div className="absolute inset-0 bg-slate-950/60"></div>
+        <div className="absolute inset-0 bg-black/60"></div>
       </div>
 
       {/* Content */}
@@ -104,13 +104,13 @@ const HeroSection = ({ settings }) => {
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
-          className="space-y-6"
+          className="space-y-8"
         >
-          <motion.p variants={fadeInUp} className="text-red-500 uppercase tracking-[0.3em] text-sm font-semibold">
+          <motion.p variants={fadeInUp} className="text-red-500 uppercase tracking-[0.3em] text-base md:text-lg font-bold">
             Home-Style Fast Food Since 1998
           </motion.p>
           
-          <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-white leading-tight">
+          <motion.h1 variants={fadeInUp} className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-white leading-tight">
             {settings?.hero_title || "Big, Bold"}<br />
             <span className="text-red-500 italic">Tamales</span>
           </motion.h1>
@@ -118,17 +118,17 @@ const HeroSection = ({ settings }) => {
           {/* Silhouette Section - The Legend */}
           <motion.div 
             variants={fadeInUp}
-            className="flex flex-col items-center py-6"
+            className="flex flex-col items-center py-8"
           >
             <div className="relative">
               {/* Silhouette figure */}
-              <div className="w-32 h-40 relative">
+              <div className="w-40 h-48 relative">
                 <svg viewBox="0 0 100 140" className="w-full h-full drop-shadow-2xl">
-                  {/* Chef silhouette with tamale */}
+                  {/* Chef silhouette with tamale - using dark grays instead of blue */}
                   <defs>
                     <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#1e293b" />
-                      <stop offset="100%" stopColor="#0f172a" />
+                      <stop offset="0%" stopColor="#333333" />
+                      <stop offset="100%" stopColor="#1a1a1a" />
                     </linearGradient>
                   </defs>
                   {/* Head */}
@@ -140,9 +140,9 @@ const HeroSection = ({ settings }) => {
                   {/* Arms holding tamale */}
                   <path d="M25 50 Q10 55 15 75 L35 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
                   <path d="M75 50 Q90 55 85 75 L65 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
-                  {/* Giant Tamale */}
+                  {/* Giant Tamale - Red and cream/white */}
                   <ellipse cx="50" cy="85" rx="25" ry="12" fill="#DC2626" />
-                  <ellipse cx="50" cy="85" rx="20" ry="8" fill="#fbbf24" />
+                  <ellipse cx="50" cy="85" rx="20" ry="8" fill="#FEF3C7" />
                   {/* Legs */}
                   <rect x="35" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
                   <rect x="53" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
