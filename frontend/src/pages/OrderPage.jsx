@@ -49,9 +49,9 @@ const OrderPage = () => {
     localStorage.setItem("tamaleCart", JSON.stringify(newCart));
   };
 
-  const updateQuantity = (itemId, delta) => {
+  const updateQuantity = (cartItemId, delta) => {
     const newCart = cart.map(item => {
-      if (item.item_id === itemId) {
+      if ((item.cart_item_id || item.item_id) === cartItemId) {
         const newQuantity = item.quantity + delta;
         return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
       }
@@ -61,8 +61,8 @@ const OrderPage = () => {
     updateCart(newCart);
   };
 
-  const removeItem = (itemId) => {
-    const newCart = cart.filter(item => item.item_id !== itemId);
+  const removeItem = (cartItemId) => {
+    const newCart = cart.filter(item => (item.cart_item_id || item.item_id) !== cartItemId);
     updateCart(newCart);
   };
 
