@@ -574,6 +574,86 @@ const SettingsManager = () => {
           </div>
         </TabsContent>
 
+        {/* NOTIFICATIONS TAB */}
+        <TabsContent value="notifications">
+          <div className="card-dark p-6 space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-2">Order Notifications</h3>
+              <p className="text-white/60">Configure email addresses that will receive notifications when new orders come in.</p>
+            </div>
+            
+            <Alert className="bg-red-950/30 border-red-800/50">
+              <Mail size={16} className="text-red-400" />
+              <AlertDescription className="text-white/70">
+                All listed emails will receive order notifications via SendGrid when a customer completes payment.
+              </AlertDescription>
+            </Alert>
+            
+            {/* Add new email */}
+            <div className="flex gap-3">
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="Enter email address..."
+                className="input-dark flex-1"
+                onKeyPress={(e) => e.key === "Enter" && addNotificationEmail()}
+              />
+              <Button onClick={addNotificationEmail} className="btn-primary">
+                <Plus size={18} className="mr-2" />
+                Add Email
+              </Button>
+            </div>
+            
+            {/* Email list */}
+            <div className="space-y-2">
+              <Label className="text-white/70">Notification Recipients ({(settings.notification_emails || []).length})</Label>
+              {(settings.notification_emails || []).length === 0 ? (
+                <div className="p-6 bg-[#2A2A2A] rounded-lg text-center">
+                  <Mail size={32} className="mx-auto mb-2 text-white/30" />
+                  <p className="text-white/50">No notification emails configured</p>
+                  <p className="text-white/40 text-sm">Add emails above to receive order notifications</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(settings.notification_emails || []).map((email, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-[#2A2A2A] rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Mail size={16} className="text-red-500" />
+                        <span className="text-white">{email}</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => removeNotificationEmail(email)}
+                        className="text-white/50 hover:text-red-500 hover:bg-red-500/10"
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="border-t border-white/10 pt-6">
+              <h4 className="text-white font-medium mb-3">SendGrid Configuration</h4>
+              <p className="text-white/50 text-sm mb-4">
+                Emails are sent using SendGrid. Make sure SENDGRID_API_KEY is configured in your environment.
+              </p>
+              <div className="p-4 bg-[#2A2A2A] rounded-lg">
+                <Label className="text-white/70">Sender Email</Label>
+                <p className="text-white/60 text-sm mt-1">
+                  Notifications are sent from: <span className="text-red-400">{settings.email || "noreply@thetamaleman.com"}</span>
+                </p>
+                <p className="text-white/50 text-xs mt-2">
+                  To change the sender email, update the "Email" field in the Contact tab.
+                </p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
         <TabsContent value="hours">
           <div className="card-dark p-6">
             <h3 className="text-white font-semibold mb-6">Opening Hours</h3>
