@@ -254,9 +254,9 @@ const OrderPage = () => {
                       <SelectTrigger className="input-dark" data-testid="select-date">
                         <SelectValue placeholder="Select date" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900 border-slate-800">
+                      <SelectContent className="bg-[#1A1A1A] border-white/10">
                         {getAvailableDates().map((date) => (
-                          <SelectItem key={date} value={date} className="text-white hover:bg-slate-800">
+                          <SelectItem key={date} value={date} className="text-white hover:bg-[#2A2A2A]">
                             {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                           </SelectItem>
                         ))}
@@ -270,9 +270,9 @@ const OrderPage = () => {
                       <SelectTrigger className="input-dark" data-testid="select-time">
                         <SelectValue placeholder="Select time" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900 border-slate-800">
+                      <SelectContent className="bg-[#1A1A1A] border-white/10">
                         {timeSlots.map((time) => (
-                          <SelectItem key={time} value={time} className="text-white hover:bg-slate-800">
+                          <SelectItem key={time} value={time} className="text-white hover:bg-[#2A2A2A]">
                             {time}
                           </SelectItem>
                         ))}
@@ -322,7 +322,7 @@ const OrderPage = () => {
               
               <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto">
                 {cart.map((item) => (
-                  <div key={item.item_id} className="flex items-center gap-4 py-4 border-b border-slate-800">
+                  <div key={item.item_id} className="flex items-center gap-4 py-4 border-b border-white/10">
                     <div className="flex-1">
                       <h4 className="text-white font-semibold">{item.name}</h4>
                       <p className="text-white/60 text-sm">${item.price.toFixed(2)} each</p>
@@ -332,7 +332,7 @@ const OrderPage = () => {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.item_id, -1)}
-                        className="p-1 bg-slate-800 rounded hover:bg-slate-700 transition-colors"
+                        className="p-1 bg-[#2A2A2A] rounded hover:bg-[#3A3A3A] transition-colors"
                         data-testid={`qty-minus-${item.item_id}`}
                       >
                         <Minus size={14} className="text-white" />
@@ -341,7 +341,7 @@ const OrderPage = () => {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.item_id, 1)}
-                        className="p-1 bg-slate-800 rounded hover:bg-slate-700 transition-colors"
+                        className="p-1 bg-[#2A2A2A] rounded hover:bg-[#3A3A3A] transition-colors"
                         data-testid={`qty-plus-${item.item_id}`}
                       >
                         <Plus size={14} className="text-white" />
@@ -365,7 +365,7 @@ const OrderPage = () => {
               </div>
 
               {/* Totals */}
-              <div className="space-y-3 pt-4 border-t border-slate-800">
+              <div className="space-y-3 pt-4 border-t border-white/10">
                 <div className="flex justify-between text-white/60">
                   <span>Subtotal</span>
                   <span>${subtotal.toFixed(2)}</span>
@@ -374,7 +374,7 @@ const OrderPage = () => {
                   <span>Tax (8.25%)</span>
                   <span>${tax.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-xl font-bold text-white pt-3 border-t border-slate-800">
+                <div className="flex justify-between text-xl font-bold text-white pt-3 border-t border-white/10">
                   <span>Total</span>
                   <span className="text-red-500">${total.toFixed(2)}</span>
                 </div>
