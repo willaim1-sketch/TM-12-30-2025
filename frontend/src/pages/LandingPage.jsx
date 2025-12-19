@@ -534,6 +534,7 @@ const Footer = ({ settings }) => {
               <li><Link to="/order" className="text-slate-400 hover:text-red-500 transition-colors">Order Online</Link></li>
               <li><Link to="/blog" className="text-slate-400 hover:text-red-500 transition-colors">Blog</Link></li>
               <li><a href="#about" className="text-slate-400 hover:text-red-500 transition-colors">About Us</a></li>
+              <li><Link to="/admin/login" className="text-slate-400 hover:text-red-500 transition-colors" data-testid="footer-admin-login">Admin Login</Link></li>
             </ul>
           </div>
 
