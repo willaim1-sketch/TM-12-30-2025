@@ -286,6 +286,50 @@ const SettingsManager = () => {
           </div>
         </TabsContent>
 
+        {/* LOGOS TAB */}
+        <TabsContent value="logos">
+          <div className="card-dark p-6 space-y-8">
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-4">Brand Logos</h3>
+              <p className="text-white/60 mb-6">Upload your restaurant logos. These will appear across all pages.</p>
+            </div>
+            
+            <ImageUploader
+              label="Header Logo (Navigation Bar)"
+              value={settings.header_logo}
+              onChange={(val) => updateSettings("header_logo", val)}
+              width={200}
+              height={60}
+              description="Displayed in the top navigation bar on all pages. Horizontal logo works best."
+            />
+            
+            <ImageUploader
+              label="Footer Logo (Large)"
+              value={settings.footer_logo}
+              onChange={(val) => updateSettings("footer_logo", val)}
+              width={250}
+              height={150}
+              description="Large logo for the footer (takes 1/3 of footer width). Can be square or stacked vertical."
+            />
+            
+            <ImageUploader
+              label="Favicon (Browser Tab Icon)"
+              value={settings.favicon}
+              onChange={(val) => updateSettings("favicon", val)}
+              width={64}
+              height={64}
+              description="Small icon shown in browser tabs. Square image required."
+            />
+            
+            <Alert className="bg-[#2A2A2A] border-white/10">
+              <Info size={16} className="text-red-500" />
+              <AlertDescription className="text-white/70">
+                <strong>Tip:</strong> Use PNG format with transparent background for best results. After uploading, click "Save Changes" to apply.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </TabsContent>
+
         <TabsContent value="hero">
           <div className="card-dark p-6 space-y-6">
             <div>
