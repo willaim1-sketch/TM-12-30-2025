@@ -74,7 +74,7 @@ const DashboardHome = () => {
 
   const statCards = [
     { label: "Total Orders", value: stats.orders, icon: ShoppingCart, color: "text-green-500" },
-    { label: "Menu Items", value: stats.menuItems, icon: UtensilsCrossed, color: "text-blue-500" },
+    { label: "Menu Items", value: stats.menuItems, icon: UtensilsCrossed, color: "text-red-400" },
     { label: "Unread Messages", value: stats.contacts, icon: MessageSquare, color: "text-yellow-500" },
     { label: "Testimonials", value: stats.testimonials, icon: Star, color: "text-red-500" },
   ];
@@ -105,15 +105,15 @@ const DashboardHome = () => {
         <div className="card-dark p-6">
           <h2 className="text-xl font-display font-bold text-white mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            <Link to="/admin/menu" className="block p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+            <Link to="/admin/menu" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
               <p className="text-white font-semibold">Manage Menu</p>
               <p className="text-white/60 text-sm">Add or edit menu items</p>
             </Link>
-            <Link to="/admin/orders" className="block p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+            <Link to="/admin/orders" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
               <p className="text-white font-semibold">View Orders</p>
               <p className="text-white/60 text-sm">Check recent orders</p>
             </Link>
-            <Link to="/admin/settings" className="block p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+            <Link to="/admin/settings" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
               <p className="text-white font-semibold">Site Settings</p>
               <p className="text-white/60 text-sm">Update content and design</p>
             </Link>
@@ -122,7 +122,7 @@ const DashboardHome = () => {
 
         <div className="card-dark p-6">
           <h2 className="text-xl font-display font-bold text-white mb-4">Getting Started</h2>
-          <div className="space-y-4 text-slate-300">
+          <div className="space-y-4 text-white/80">
             <p>Welcome to your restaurant admin dashboard! Here you can:</p>
             <ul className="list-disc list-inside space-y-2 text-white/60">
               <li>Manage your menu items and categories</li>
@@ -197,7 +197,7 @@ const AdminDashboard = () => {
                       flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
                       ${isActive(item.path, item.exact)
                         ? 'bg-red-600 text-white'
-                        : 'text-white/60 hover:bg-slate-800 hover:text-white'
+                        : 'text-white/60 hover:bg-[#2A2A2A] hover:text-white'
                       }
                     `}
                     data-testid={`nav-${item.label.toLowerCase()}`}
@@ -216,7 +216,7 @@ const AdminDashboard = () => {
               {user?.picture ? (
                 <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full" />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white">
+                <div className="w-10 h-10 rounded-full bg-[#2A2A2A] flex items-center justify-center text-white">
                   {user?.name?.charAt(0) || 'A'}
                 </div>
               )}
