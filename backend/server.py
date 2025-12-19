@@ -909,6 +909,26 @@ async def generate_image(data: dict, user: User = Depends(require_admin)):
         raise HTTPException(status_code=500, detail="No image was generated")
 
 # =============================================================================
+# PAGE BUILDER
+# =============================================================================
+
+@api_router.get("/admin/page-builder/{page_id}")
+async def get_page_content(page_id: str, user: User = Depends(require_admin)):
+    page = await db.page_content.find_one({"page_id": page_id}, {"_id": 0})
+    if not page:
+        return {"page_id": page_id, "sections": []}
+    return page
+
+@api_router.put("/admin/page-builder/{page_id}")
+async def update_page_content(page_id: str, data: dict, user: User = Depends(require_admin)):
+    await db.page_content.update_one(
+        {"page_id": page_id},
+        {"$set": {"page_id": page_id, "sections": data.get("sections", []), "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    return {"status": "updated"}
+
+# =============================================================================
 # MERCH STORE
 # =============================================================================
 
