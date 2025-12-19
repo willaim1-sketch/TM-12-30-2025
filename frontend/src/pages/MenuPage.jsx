@@ -224,7 +224,7 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
           </p>
 
           {/* Add to Cart */}
-          <div className="flex gap-4 pt-4 border-t border-slate-800">
+          <div className="flex gap-4 pt-4 border-t border-white/10">
             {cartQuantity > 0 ? (
               <div className="flex items-center gap-4 flex-1">
                 <button
@@ -357,18 +357,18 @@ const MenuPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-white text-xl">Loading menu...</div>
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-white text-2xl">Loading menu...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors" data-testid="menu-back-btn">
+          <Link to="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-lg" data-testid="menu-back-btn">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
@@ -388,10 +388,10 @@ const MenuPage = () => {
             <button
               key={category.category_id}
               onClick={() => setActiveCategory(category.category_id)}
-              className={`px-6 py-3 rounded-md whitespace-nowrap transition-all duration-300 ${
+              className={`px-6 py-3 rounded-md whitespace-nowrap transition-all duration-300 text-lg ${
                 activeCategory === category.category_id
                   ? "bg-red-600 text-white"
-                  : "bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800"
+                  : "bg-[#1A1A1A] text-white/60 hover:bg-[#2A2A2A] hover:text-white border border-white/10"
               }`}
               data-testid={`category-tab-${category.category_id}`}
             >
