@@ -649,7 +649,7 @@ const Footer = ({ settings }) => {
           {/* Contact */}
           <div>
             <h4 className="text-white font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-slate-400">
+            <ul className="space-y-2 text-white/60">
               <li>{settings?.address || "123 Main Street, Austin, TX"}</li>
               <li>{settings?.phone || "(512) 555-0123"}</li>
               <li>{settings?.email || "hello@thetamaleman.com"}</li>
@@ -657,7 +657,7 @@ const Footer = ({ settings }) => {
           </div>
         </div>
 
-        <div className="border-t border-slate-800 pt-8 text-center text-slate-500 text-sm">
+        <div className="border-t border-white/10 pt-8 text-center text-white/50 text-base">
           <p>&copy; {new Date().getFullYear()} The Tamale Man. All rights reserved.</p>
         </div>
       </div>
@@ -699,14 +699,14 @@ const LandingPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       <Navbar />
       <HeroSection settings={settings} />
       <AboutSection settings={settings} />
