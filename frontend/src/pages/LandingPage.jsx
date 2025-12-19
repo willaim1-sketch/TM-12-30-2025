@@ -33,8 +33,16 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "glass border-b border-white/5" : "bg-transparent"}`}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
-          <span className="text-2xl font-display font-bold text-white">The Tamale Man</span>
+        <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
+          {settings?.header_logo ? (
+            <img 
+              src={settings.header_logo} 
+              alt={settings?.site_name || "The Tamale Man"} 
+              className="h-10 md:h-12 w-auto object-contain"
+            />
+          ) : (
+            <span className="text-2xl font-display font-bold text-white">{settings?.site_name || "The Tamale Man"}</span>
+          )}
         </Link>
         
         <div className="hidden md:flex items-center gap-8">
