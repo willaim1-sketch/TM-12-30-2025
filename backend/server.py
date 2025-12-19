@@ -659,7 +659,7 @@ async def get_order_status(session_id: str):
     }
 
 @api_router.post("/webhook/stripe")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(request: Request, background_tasks: BackgroundTasks):
     from emergentintegrations.payments.stripe.checkout import StripeCheckout
     
     body = await request.body()
@@ -682,6 +682,11 @@ async def stripe_webhook(request: Request):
                 {"payment_session_id": webhook_response.session_id},
                 {"$set": {"payment_status": "paid", "status": "confirmed"}}
             )
+            
+            # Send order notification emails
+            order = await db.orders.find_one({"payment_session_id": webhook_response.session_id}, {"_id": 0})
+            if order:
+                background_tasks.add_task(send_order_notification_emails, order)
         
         return {"status": "success"}
     except Exception as e:
