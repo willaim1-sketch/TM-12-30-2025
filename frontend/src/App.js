@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 // Pages
 import LandingPage from "./pages/LandingPage";
 import MenuPage from "./pages/MenuPage";
+import MerchPage from "./pages/MerchPage";
 import OrderPage from "./pages/OrderPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import BlogPage from "./pages/BlogPage";
