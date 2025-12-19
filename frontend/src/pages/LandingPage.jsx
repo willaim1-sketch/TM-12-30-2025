@@ -615,12 +615,21 @@ const Footer = ({ settings }) => {
   return (
     <footer className="bg-[#1A1A1A] border-t border-white/10 py-16 px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <h3 className="text-2xl font-display font-bold text-white mb-4">The Tamale Man</h3>
-            <p className="text-white/60 mb-6 max-w-md text-lg">
-              Home-style fast food tamales made with love. Big portions, bold flavors, and the legendary Super Dooper Dooper Tamale!
+        <div className="grid md:grid-cols-3 gap-12 mb-12">
+          {/* Brand & Logo - Takes 1/3 of footer */}
+          <div>
+            {settings?.footer_logo ? (
+              <img 
+                src={settings.footer_logo} 
+                alt={settings?.site_name || "The Tamale Man"} 
+                className="max-w-full h-auto max-h-36 object-contain mb-6"
+                style={{ maxWidth: "250px" }}
+              />
+            ) : (
+              <h3 className="text-3xl font-display font-bold text-white mb-4">{settings?.site_name || "The Tamale Man"}</h3>
+            )}
+            <p className="text-white/60 mb-6 text-lg">
+              Home-style fast food tamales made with love. Big portions, bold flavors!
             </p>
             <div className="flex gap-4">
               {settings?.facebook_url && (
@@ -643,21 +652,21 @@ const Footer = ({ settings }) => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><Link to="/menu" className="text-white/60 hover:text-red-500 transition-colors">Menu</Link></li>
-              <li><Link to="/order" className="text-white/60 hover:text-red-500 transition-colors">Order Online</Link></li>
-              <li><Link to="/merch" className="text-white/60 hover:text-red-500 transition-colors">Merch Shop</Link></li>
-              <li><Link to="/blog" className="text-white/60 hover:text-red-500 transition-colors">Blog</Link></li>
-              <li><a href="#about" className="text-white/60 hover:text-red-500 transition-colors">About Us</a></li>
-              <li><Link to="/admin/login" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-admin-login">Admin Login</Link></li>
+            <h4 className="text-white font-semibold mb-4 text-lg">Quick Links</h4>
+            <ul className="space-y-3">
+              <li><Link to="/menu" className="text-white/60 hover:text-red-500 transition-colors text-lg">Menu</Link></li>
+              <li><Link to="/order" className="text-white/60 hover:text-red-500 transition-colors text-lg">Order Online</Link></li>
+              <li><Link to="/merch" className="text-white/60 hover:text-red-500 transition-colors text-lg">Merch Shop</Link></li>
+              <li><Link to="/blog" className="text-white/60 hover:text-red-500 transition-colors text-lg">Blog</Link></li>
+              <li><a href="#about" className="text-white/60 hover:text-red-500 transition-colors text-lg">About Us</a></li>
+              <li><Link to="/admin/login" className="text-white/60 hover:text-red-500 transition-colors text-lg" data-testid="footer-admin-login">Admin Login</Link></li>
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-white/60">
+            <h4 className="text-white font-semibold mb-4 text-lg">Contact Us</h4>
+            <ul className="space-y-3 text-white/60 text-lg">
               <li>{settings?.address || "123 Main Street, Austin, TX"}</li>
               <li>{settings?.phone || "(512) 555-0123"}</li>
               <li>{settings?.email || "hello@thetamaleman.com"}</li>
@@ -666,7 +675,7 @@ const Footer = ({ settings }) => {
         </div>
 
         <div className="border-t border-white/10 pt-8 text-center text-white/50 text-base">
-          <p>&copy; {new Date().getFullYear()} The Tamale Man. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {settings?.site_name || "The Tamale Man"}. All rights reserved.</p>
         </div>
       </div>
     </footer>
