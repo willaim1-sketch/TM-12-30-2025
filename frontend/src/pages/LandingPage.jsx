@@ -151,10 +151,10 @@ const HeroSection = ({ settings }) => {
               {/* Glow effect */}
               <div className="absolute inset-0 bg-red-600/20 blur-3xl rounded-full"></div>
             </div>
-            <p className="text-slate-400 text-sm mt-4 italic">The Legend Behind the Tamale</p>
+            <p className="text-white/60 text-lg mt-4 italic font-semibold">The Legend Behind the Tamale</p>
           </motion.div>
           
-          <motion.p variants={fadeInUp} className="text-slate-300 text-lg max-w-2xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-white/80 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
             {settings?.hero_subtitle || "Just like Mom makes! Big portions, bold flavors, and the famous Super Dooper Dooper Tamale that put us on the map."}
           </motion.p>
           
