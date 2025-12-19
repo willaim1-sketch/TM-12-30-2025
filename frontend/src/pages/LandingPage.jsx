@@ -245,7 +245,7 @@ const AboutSection = ({ settings }) => {
 // Featured Menu Section
 const FeaturedMenuSection = ({ items }) => {
   return (
-    <section className="py-24 px-6 bg-slate-900">
+    <section className="py-24 px-6 bg-[#1A1A1A]">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial="hidden"
@@ -287,7 +287,7 @@ const FeaturedMenuSection = ({ items }) => {
                   <h3 className="text-xl font-display font-bold text-white">{item.name}</h3>
                   <span className="text-red-500 font-bold text-lg">${item.price.toFixed(2)}</span>
                 </div>
-                <p className="text-slate-400 text-sm line-clamp-2">{item.description}</p>
+                <p className="text-white/60 text-base line-clamp-2">{item.description}</p>
               </div>
             </motion.div>
           ))}
@@ -313,7 +313,7 @@ const FeaturedMenuSection = ({ items }) => {
 // Merch Promo Section
 const MerchPromoSection = () => {
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-red-900/30 to-slate-950">
+    <section className="py-20 px-6 bg-gradient-to-br from-red-900/40 to-[#0A0A0A]">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial="hidden"
@@ -330,7 +330,7 @@ const MerchPromoSection = () => {
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">
               Get Your <span className="text-red-500">Merch!</span>
             </h2>
-            <p className="text-slate-300 text-lg">
+            <p className="text-white/80 text-lg">
               Show your love for The Tamale Man! T-shirts, cups, souvenirs, and gear featuring our famous Super Dooper Dooper Tamale. Perfect gifts or just to flex your tamale pride!
             </p>
             <Link to="/merch">
@@ -344,28 +344,28 @@ const MerchPromoSection = () => {
           {/* Merch Preview */}
           <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-4">
             <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
                 <div className="text-6xl">👕</div>
               </div>
               <p className="text-white font-semibold">T-Shirts</p>
               <p className="text-red-500 font-bold">From $24.99</p>
             </div>
             <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
                 <div className="text-6xl">🥤</div>
               </div>
               <p className="text-white font-semibold">Cups & Mugs</p>
               <p className="text-red-500 font-bold">From $14.99</p>
             </div>
             <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
                 <div className="text-6xl">🧢</div>
               </div>
               <p className="text-white font-semibold">Hats</p>
               <p className="text-red-500 font-bold">From $19.99</p>
             </div>
             <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-slate-800 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
                 <div className="text-6xl">🎁</div>
               </div>
               <p className="text-white font-semibold">Souvenirs</p>
@@ -389,7 +389,7 @@ const OrderCTASection = () => {
           alt="Service"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-slate-950/80"></div>
+        <div className="absolute inset-0 bg-[#0A0A0A]/80"></div>
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
