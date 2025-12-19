@@ -224,11 +224,11 @@ const MerchPage = () => {
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors" data-testid="merch-back-btn">
+          <Link to="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-lg" data-testid="merch-back-btn">
             <ArrowLeft size={20} />
             <span>Back</span>
           </Link>
@@ -243,7 +243,7 @@ const MerchPage = () => {
       </header>
 
       {/* Hero Banner */}
-      <section className="bg-gradient-to-br from-red-900/40 to-slate-950 py-16 px-6">
+      <section className="bg-gradient-to-br from-red-900/40 to-[#0A0A0A] py-16 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -253,10 +253,10 @@ const MerchPage = () => {
             <h1 className="text-4xl lg:text-5xl font-display font-bold text-white">
               Rep The <span className="text-red-500">Tamale Man</span>
             </h1>
-            <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+            <p className="text-white/80 text-lg max-w-2xl mx-auto">
               T-shirts, cups, souvenirs & more! Show off your love for the Super Dooper Dooper Tamale.
             </p>
-            <div className="flex items-center justify-center gap-2 text-slate-400 text-sm">
+            <div className="flex items-center justify-center gap-2 text-white/60 text-base">
               <Truck size={16} />
               <span>Free shipping on orders over $50</span>
             </div>
@@ -274,7 +274,7 @@ const MerchPage = () => {
               className={`px-6 py-3 rounded-md whitespace-nowrap transition-all duration-300 ${
                 activeCategory === category.id
                   ? "bg-red-600 text-white"
-                  : "bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800"
+                  : "bg-[#1A1A1A] text-white/60 hover:bg-[#2A2A2A] hover:text-white border border-white/10"
               }`}
               data-testid={`merch-category-${category.id}`}
             >
@@ -320,7 +320,7 @@ const MerchPage = () => {
                     {item.name}
                   </h3>
                   <p className="text-red-500 font-bold text-xl mb-2">${item.price.toFixed(2)}</p>
-                  <p className="text-slate-400 text-sm mb-4 line-clamp-2">{item.description}</p>
+                  <p className="text-white/60 text-base mb-4 line-clamp-2">{item.description}</p>
                   
                   {/* Size Selector */}
                   {item.sizes.length > 1 && (
