@@ -267,6 +267,7 @@ const AdminDashboard = () => {
           <Routes>
             <Route path="/" element={<DashboardHome />} />
             <Route path="/menu/*" element={<MenuManager />} />
+            <Route path="/merch/*" element={<MerchManager />} />
             <Route path="/orders/*" element={<OrderManager />} />
             <Route path="/contacts/*" element={<ContactManager />} />
             <Route path="/testimonials/*" element={<TestimonialManager />} />
