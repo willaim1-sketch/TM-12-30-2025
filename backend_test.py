@@ -420,6 +420,10 @@ class TamaleManAPITester:
         items_success, items = self.test_menu_items()
         self.test_featured_items()
         
+        # Test NEW FEATURES: Menu rating system
+        rating_success, rated_item_id = self.test_menu_item_rating()
+        self.test_menu_item_ratings_retrieval(rated_item_id)
+        
         # Test content endpoints
         self.test_testimonials()
         self.test_faq()
@@ -430,6 +434,9 @@ class TamaleManAPITester:
         # Test database and validation
         self.test_seed_endpoint()
         self.test_order_creation_validation()
+        
+        # Test NEW FEATURES: Admin endpoints (auth required)
+        self.test_stripe_settings_endpoints()
         
         # Print summary
         print("=" * 60)
