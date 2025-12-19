@@ -332,7 +332,7 @@ const MerchPage = () => {
                         <SelectTrigger className="input-dark" data-testid={`size-select-${item.item_id}`}>
                           <SelectValue placeholder="Select size" />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-900 border-slate-800">
+                        <SelectContent className="bg-[#1A1A1A] border-white/10">
                           {item.sizes.map((size) => (
                             <SelectItem key={size} value={size} className="text-white">
                               {size}
@@ -349,7 +349,7 @@ const MerchPage = () => {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => updateQuantity(`${item.item_id}_${selectedSize}`, -1)}
-                          className="p-2 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors"
+                          className="p-2 bg-[#2A2A2A] rounded-md hover:bg-[#3A3A3A] transition-colors"
                           data-testid={`merch-remove-${item.item_id}`}
                         >
                           <Minus size={16} className="text-white" />
@@ -357,7 +357,7 @@ const MerchPage = () => {
                         <span className="text-white font-semibold w-6 text-center">{quantity}</span>
                         <button
                           onClick={() => addToCart(item)}
-                          className="p-2 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors"
+                          className="p-2 bg-[#2A2A2A] rounded-md hover:bg-[#3A3A3A] transition-colors"
                           data-testid={`merch-add-${item.item_id}`}
                         >
                           <Plus size={16} className="text-white" />
@@ -390,13 +390,13 @@ const MerchPage = () => {
                 <div key={item.cart_id} className="flex justify-between items-center text-sm">
                   <div className="flex-1">
                     <p className="text-white truncate">{item.name}</p>
-                    <p className="text-slate-400 text-xs">{item.size} × {item.quantity}</p>
+                    <p className="text-white/60 text-sm">{item.size} × {item.quantity}</p>
                   </div>
                   <p className="text-red-500 font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between items-center pt-3 border-t border-slate-800 mb-4">
+            <div className="flex justify-between items-center pt-3 border-t border-white/10 mb-4">
               <span className="text-white font-semibold">Total</span>
               <span className="text-red-500 font-bold text-lg">${cartTotal.toFixed(2)}</span>
             </div>
