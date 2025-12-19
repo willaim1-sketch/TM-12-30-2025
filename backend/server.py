@@ -1225,6 +1225,43 @@ async def get_menu_item_ratings(item_id: str):
     }
 
 # =============================================================================
+# FILE UPLOAD
+# =============================================================================
+
+from fastapi import File, UploadFile
+import shutil
+
+UPLOAD_DIR = Path("/app/backend/uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+@api_router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload an image file and return its URL"""
+    try:
+        # Validate file type
+        allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"]
+        if file.content_type not in allowed_types:
+            raise HTTPException(status_code=400, detail="Invalid file type. Only images allowed.")
+        
+        # Generate unique filename
+        file_ext = file.filename.split(".")[-1] if "." in file.filename else "png"
+        unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
+        file_path = UPLOAD_DIR / unique_filename
+        
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Return URL (served via static files)
+        return {"url": f"/api/uploads/{unique_filename}", "filename": unique_filename}
+    except Exception as e:
+        logger.error(f"Upload error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to upload file")
+
+# Serve uploaded files
+from fastapi.staticfiles import StaticFiles
+
+# =============================================================================
 # SEED DATA
 # =============================================================================
 
