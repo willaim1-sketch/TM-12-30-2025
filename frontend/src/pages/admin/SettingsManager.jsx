@@ -1,23 +1,41 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Save, Plus, Trash2 } from "lucide-react";
+import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Image dimension guide component
+const ImageGuide = ({ label, width, height, description }) => (
+  <div className="flex items-start gap-2 p-3 bg-slate-800/50 rounded-lg text-sm">
+    <Info size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+    <div>
+      <span className="text-slate-300 font-medium">{label}</span>
+      <p className="text-slate-400 text-xs mt-1">
+        Recommended: <span className="text-red-400 font-mono">{width} x {height}px</span>
+      </p>
+      {description && <p className="text-slate-500 text-xs mt-1">{description}</p>}
+    </div>
+  </div>
+);
+
 const SettingsManager = () => {
   const [settings, setSettings] = useState(null);
+  const [stripeSettings, setStripeSettings] = useState({ stripe_api_key: "", stripe_webhook_secret: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showStripeKey, setShowStripeKey] = useState(false);
 
   useEffect(() => {
     fetchSettings();
+    fetchStripeSettings();
   }, []);
 
   const fetchSettings = async () => {
@@ -31,6 +49,15 @@ const SettingsManager = () => {
     }
   };
 
+  const fetchStripeSettings = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/stripe-settings`, { withCredentials: true });
+      setStripeSettings(response.data);
+    } catch (error) {
+      // Settings may not exist yet
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -38,6 +65,18 @@ const SettingsManager = () => {
       toast.success("Settings saved successfully");
     } catch (error) {
       toast.error("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveStripe = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API}/admin/stripe-settings`, stripeSettings, { withCredentials: true });
+      toast.success("Stripe settings saved successfully");
+    } catch (error) {
+      toast.error("Failed to save Stripe settings");
     } finally {
       setSaving(false);
     }
@@ -68,13 +107,18 @@ const SettingsManager = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-slate-900 border border-slate-800">
+        <TabsList className="bg-slate-900 border border-slate-800 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="general" className="data-[state=active]:bg-red-600">General</TabsTrigger>
           <TabsTrigger value="hero" className="data-[state=active]:bg-red-600">Hero Section</TabsTrigger>
           <TabsTrigger value="about" className="data-[state=active]:bg-red-600">About</TabsTrigger>
+          <TabsTrigger value="images" className="data-[state=active]:bg-red-600">All Images</TabsTrigger>
           <TabsTrigger value="contact" className="data-[state=active]:bg-red-600">Contact</TabsTrigger>
           <TabsTrigger value="hours" className="data-[state=active]:bg-red-600">Hours</TabsTrigger>
           <TabsTrigger value="design" className="data-[state=active]:bg-red-600">Design</TabsTrigger>
+          <TabsTrigger value="stripe" className="data-[state=active]:bg-red-600">
+            <CreditCard size={16} className="mr-1" />
+            Payments
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -139,16 +183,27 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Hero Image URL</Label>
+              <Label className="text-slate-300">Hero Background Image</Label>
+              <ImageGuide 
+                label="Hero Background" 
+                width="1920" 
+                height="1080" 
+                description="Full-width background. Use high-quality restaurant interior or signature dish photo."
+              />
               <Input
                 value={settings.hero_image || ""}
                 onChange={(e) => updateSettings("hero_image", e.target.value)}
-                className="input-dark mt-1"
+                className="input-dark mt-2"
                 placeholder="https://..."
                 data-testid="setting-hero-image"
               />
               {settings.hero_image && (
-                <img src={settings.hero_image} alt="Hero preview" className="mt-4 w-full h-48 object-cover rounded-lg" />
+                <div className="mt-4 relative">
+                  <img src={settings.hero_image} alt="Hero preview" className="w-full h-48 object-cover rounded-lg" />
+                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    1920 x 1080px recommended
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -184,14 +239,92 @@ const SettingsManager = () => {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Chef Image URL</Label>
+              <Label className="text-slate-300">Chef Image</Label>
+              <ImageGuide 
+                label="Chef/Team Photo" 
+                width="800" 
+                height="1000" 
+                description="Portrait orientation. Show chef cooking or team in kitchen."
+              />
               <Input
                 value={settings.chef_image || ""}
                 onChange={(e) => updateSettings("chef_image", e.target.value)}
-                className="input-dark mt-1"
+                className="input-dark mt-2"
                 placeholder="https://..."
                 data-testid="setting-chef-image"
               />
+              {settings.chef_image && (
+                <div className="mt-4 relative w-48">
+                  <img src={settings.chef_image} alt="Chef preview" className="w-full h-60 object-cover rounded-lg" />
+                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    800 x 1000px
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="images">
+          <div className="card-dark p-6">
+            <h3 className="text-white font-semibold mb-6 flex items-center gap-2">
+              <Image size={20} className="text-red-500" />
+              Image Dimension Guide
+            </h3>
+            
+            <Alert className="bg-slate-800 border-slate-700 mb-6">
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <AlertDescription className="text-slate-300">
+                For best results, use images that match the recommended dimensions. Larger images will be cropped to fit.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="text-white font-medium">Homepage Images</h4>
+                <ImageGuide label="Hero Background" width="1920" height="1080" description="Main banner image" />
+                <ImageGuide label="Chef/About Photo" width="800" height="1000" description="Portrait, shows in About section" />
+                <ImageGuide label="Order CTA Background" width="1920" height="600" description="Call-to-action section" />
+                <ImageGuide label="Location Photo" width="800" height="600" description="Restaurant exterior or interior" />
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="text-white font-medium">Menu & Content Images</h4>
+                <ImageGuide label="Menu Item Photo" width="600" height="450" description="4:3 ratio, food photography" />
+                <ImageGuide label="Blog Featured Image" width="1200" height="630" description="Social share optimized" />
+                <ImageGuide label="Social OG Image" width="1200" height="630" description="Facebook/Twitter preview" />
+                <ImageGuide label="Logo/Favicon" width="512" height="512" description="Square, PNG with transparency" />
+              </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-slate-800 rounded-lg">
+              <h4 className="text-white font-medium mb-3">Quick Image URLs</h4>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-slate-400 text-sm">Hero Image</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      value={settings.hero_image || ""}
+                      onChange={(e) => updateSettings("hero_image", e.target.value)}
+                      className="input-dark flex-1"
+                      placeholder="https://..."
+                    />
+                    <Button onClick={handleSave} size="sm" className="btn-primary">Update</Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-sm">Chef Image</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      value={settings.chef_image || ""}
+                      onChange={(e) => updateSettings("chef_image", e.target.value)}
+                      className="input-dark flex-1"
+                      placeholder="https://..."
+                    />
+                    <Button onClick={handleSave} size="sm" className="btn-primary">Update</Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </TabsContent>
@@ -223,6 +356,16 @@ const SettingsManager = () => {
                 onChange={(e) => updateSettings("email", e.target.value)}
                 className="input-dark mt-1"
                 data-testid="setting-email"
+              />
+            </div>
+            <div>
+              <Label className="text-slate-300">Google Maps Embed URL</Label>
+              <Input
+                value={settings.google_maps_embed || ""}
+                onChange={(e) => updateSettings("google_maps_embed", e.target.value)}
+                className="input-dark mt-1"
+                placeholder="https://www.google.com/maps/embed?..."
+                data-testid="setting-maps"
               />
             </div>
             <div className="border-t border-slate-800 pt-6">
@@ -360,6 +503,94 @@ const SettingsManager = () => {
                 className="input-dark mt-1"
                 data-testid="setting-font-body"
               />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="stripe">
+          <div className="card-dark p-6 space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <CreditCard className="text-red-500" size={24} />
+              <div>
+                <h3 className="text-white font-semibold text-lg">Stripe Payment Settings</h3>
+                <p className="text-slate-400 text-sm">Configure your Stripe account to receive payments</p>
+              </div>
+            </div>
+
+            <Alert className="bg-blue-950/50 border-blue-800">
+              <AlertCircle className="h-4 w-4 text-blue-400" />
+              <AlertDescription className="text-blue-200">
+                Get your API keys from{" "}
+                <a 
+                  href="https://dashboard.stripe.com/apikeys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline hover:text-blue-300"
+                >
+                  Stripe Dashboard → Developers → API Keys
+                </a>
+              </AlertDescription>
+            </Alert>
+
+            <div>
+              <Label className="text-slate-300">Stripe Secret Key</Label>
+              <p className="text-slate-500 text-xs mb-2">Starts with sk_live_ (production) or sk_test_ (testing)</p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showStripeKey ? "text" : "password"}
+                    value={stripeSettings.stripe_api_key || ""}
+                    onChange={(e) => setStripeSettings(prev => ({ ...prev, stripe_api_key: e.target.value }))}
+                    className="input-dark pr-10"
+                    placeholder="sk_live_..."
+                    data-testid="stripe-api-key-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowStripeKey(!showStripeKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    {showStripeKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-slate-300">Webhook Secret (Optional)</Label>
+              <p className="text-slate-500 text-xs mb-2">For receiving payment notifications. Starts with whsec_</p>
+              <Input
+                type="password"
+                value={stripeSettings.stripe_webhook_secret || ""}
+                onChange={(e) => setStripeSettings(prev => ({ ...prev, stripe_webhook_secret: e.target.value }))}
+                className="input-dark"
+                placeholder="whsec_..."
+                data-testid="stripe-webhook-input"
+              />
+            </div>
+
+            <div className="pt-4 border-t border-slate-800">
+              <Button 
+                onClick={handleSaveStripe} 
+                disabled={saving} 
+                className="btn-primary"
+                data-testid="save-stripe-btn"
+              >
+                <Save size={18} className="mr-2" />
+                {saving ? "Saving..." : "Save Stripe Settings"}
+              </Button>
+            </div>
+
+            <div className="mt-6 p-4 bg-slate-800 rounded-lg">
+              <h4 className="text-white font-medium mb-2">Payment Status</h4>
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${stripeSettings.stripe_api_key ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                <span className="text-slate-300 text-sm">
+                  {stripeSettings.stripe_api_key 
+                    ? "Stripe is configured and ready to receive payments" 
+                    : "Add your Stripe API key to start receiving payments"}
+                </span>
+              </div>
             </div>
           </div>
         </TabsContent>
