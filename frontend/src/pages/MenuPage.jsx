@@ -59,14 +59,14 @@ const ShareModal = ({ item, isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 max-w-md">
+      <DialogContent className="bg-[#1A1A1A] border-white/10 max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white">Share {item.name}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           {/* Item Preview */}
-          <div className="flex gap-4 p-4 bg-slate-800 rounded-lg">
+          <div className="flex gap-4 p-4 bg-[#2A2A2A] rounded-lg">
             <img 
               src={item.image_url || "https://images.unsplash.com/photo-1582170090097-b251ddbbf7f3?w=100"} 
               alt={item.name}
@@ -75,7 +75,7 @@ const ShareModal = ({ item, isOpen, onClose }) => {
             <div>
               <h4 className="text-white font-semibold">{item.name}</h4>
               <p className="text-red-500 font-bold">${item.price?.toFixed(2)}</p>
-              <p className="text-slate-400 text-sm line-clamp-2">{item.description}</p>
+              <p className="text-white/60 text-base line-clamp-2">{item.description}</p>
             </div>
           </div>
 
@@ -83,28 +83,28 @@ const ShareModal = ({ item, isOpen, onClose }) => {
           <div className="grid grid-cols-3 gap-3">
             <button
               onClick={shareToFacebook}
-              className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-lg hover:bg-blue-600/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 bg-[#2A2A2A] rounded-lg hover:bg-red-600/20 transition-colors"
               data-testid="share-facebook"
             >
-              <Facebook className="text-blue-500" size={24} />
-              <span className="text-slate-300 text-sm">Facebook</span>
+              <Facebook className="text-red-500" size={24} />
+              <span className="text-white/80 text-base">Facebook</span>
             </button>
             <button
               onClick={shareToTwitter}
-              className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-lg hover:bg-sky-600/20 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 bg-[#2A2A2A] rounded-lg hover:bg-red-600/20 transition-colors"
               data-testid="share-twitter"
             >
-              <Twitter className="text-sky-500" size={24} />
-              <span className="text-slate-300 text-sm">Twitter</span>
+              <Twitter className="text-red-400" size={24} />
+              <span className="text-white/80 text-base">Twitter</span>
             </button>
             {navigator.share && (
               <button
                 onClick={shareNative}
-                className="flex flex-col items-center gap-2 p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
+                className="flex flex-col items-center gap-2 p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors"
                 data-testid="share-native"
               >
-                <Share2 className="text-slate-400" size={24} />
-                <span className="text-slate-300 text-sm">More</span>
+                <Share2 className="text-white/60" size={24} />
+                <span className="text-white/80 text-base">More</span>
               </button>
             )}
           </div>
@@ -115,7 +115,7 @@ const ShareModal = ({ item, isOpen, onClose }) => {
               type="text"
               value={shareUrl}
               readOnly
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 text-sm"
+              className="flex-1 bg-[#2A2A2A] border border-white/20 rounded-lg px-3 py-2 text-white/80 text-base"
             />
             <Button onClick={handleCopy} className="btn-primary" data-testid="copy-link-btn">
               {copied ? <Check size={18} /> : <Copy size={18} />}
