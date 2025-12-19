@@ -517,15 +517,15 @@ const SettingsManager = () => {
               </div>
             </div>
 
-            <Alert className="bg-blue-950/50 border-blue-800">
-              <AlertCircle className="h-4 w-4 text-blue-400" />
-              <AlertDescription className="text-blue-200">
+            <Alert className="bg-red-950/50 border-red-800">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertDescription className="text-red-200">
                 Get your API keys from{" "}
                 <a 
                   href="https://dashboard.stripe.com/apikeys" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-400 underline hover:text-blue-300"
+                  className="text-red-400 underline hover:text-red-300"
                 >
                   Stripe Dashboard → Developers → API Keys
                 </a>

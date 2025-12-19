@@ -149,7 +149,7 @@ const MediaManager = () => {
                     onClick={() => copyUrl(item.url)}
                     variant="outline"
                     size="sm"
-                    className="bg-[#2A2A2A] border-slate-600 text-white"
+                    className="bg-[#2A2A2A] border-white/20 text-white"
                     data-testid={`copy-url-${item.media_id}`}
                   >
                     <Copy size={14} />

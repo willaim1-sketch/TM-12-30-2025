@@ -152,7 +152,7 @@ const OrderSuccessPage = () => {
           </div>
 
           {/* Order Items */}
-          <div className="border-t border-slate-800 pt-6">
+          <div className="border-t border-white/10 pt-6">
             <h3 className="text-lg font-semibold text-white mb-4">Order Items</h3>
             <div className="space-y-3">
               {order?.items?.map((item, idx) => (
@@ -163,7 +163,7 @@ const OrderSuccessPage = () => {
               ))}
             </div>
             
-            <div className="border-t border-slate-800 mt-4 pt-4 space-y-2">
+            <div className="border-t border-white/10 mt-4 pt-4 space-y-2">
               <div className="flex justify-between text-white/60">
                 <span>Subtotal</span>
                 <span>${order?.subtotal?.toFixed(2)}</span>
@@ -180,7 +180,7 @@ const OrderSuccessPage = () => {
           </div>
 
           {/* Order ID */}
-          <div className="mt-6 pt-6 border-t border-slate-800 text-center">
+          <div className="mt-6 pt-6 border-t border-white/10 text-center">
             <p className="text-white/60 text-sm">Order ID</p>
             <p className="text-white font-mono text-lg">{order?.order_id}</p>
           </div>
