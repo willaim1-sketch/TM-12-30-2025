@@ -4,14 +4,15 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { 
   LayoutDashboard, UtensilsCrossed, ShoppingCart, MessageSquare, 
-  Settings, Image, FileText, HelpCircle, Search, LogOut, Menu, X,
-  Star, Globe
+  Settings, Image, FileText, HelpCircle, LogOut, Menu, X,
+  Star, Globe, ShoppingBag
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { AuthContext } from "../../App";
 
 // Admin Pages
 import MenuManager from "./MenuManager";
+import MerchManager from "./MerchManager";
 import OrderManager from "./OrderManager";
 import ContactManager from "./ContactManager";
 import SettingsManager from "./SettingsManager";
@@ -26,6 +27,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const sidebarItems = [
   { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
   { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu" },
+  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop" },
   { path: "/admin/orders", icon: ShoppingCart, label: "Orders" },
   { path: "/admin/contacts", icon: MessageSquare, label: "Messages" },
   { path: "/admin/testimonials", icon: Star, label: "Testimonials" },
