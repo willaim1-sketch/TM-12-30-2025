@@ -32,6 +32,127 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 # =============================================================================
+# EMAIL NOTIFICATION HELPER (SendGrid)
+# =============================================================================
+
+async def send_order_notification_emails(order: dict):
+    """Send order notification emails to all configured notification emails"""
+    try:
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail, To
+        
+        # Get SendGrid API key from env
+        sendgrid_api_key = os.environ.get("SENDGRID_API_KEY")
+        if not sendgrid_api_key:
+            logger.warning("SendGrid API key not configured, skipping email notification")
+            return False
+        
+        # Get notification emails from settings
+        settings = await db.site_settings.find_one({"settings_id": "main"}, {"_id": 0})
+        notification_emails = settings.get("notification_emails", []) if settings else []
+        
+        # Also include the main email if no notification emails are set
+        if not notification_emails and settings:
+            notification_emails = [settings.get("email", "")]
+        
+        notification_emails = [e for e in notification_emails if e]  # Filter empty
+        
+        if not notification_emails:
+            logger.warning("No notification emails configured")
+            return False
+        
+        # Build order items HTML
+        items_html = ""
+        for item in order.get("items", []):
+            toppings_text = ""
+            if item.get("toppings"):
+                toppings_text = f"<br><small style='color:#666;'>+ {', '.join(t.get('name', '') for t in item['toppings'])}</small>"
+            items_html += f"""
+            <tr>
+                <td style="padding:10px; border-bottom:1px solid #eee;">{item.get('name', 'Item')}{toppings_text}</td>
+                <td style="padding:10px; border-bottom:1px solid #eee; text-align:center;">{item.get('quantity', 1)}</td>
+                <td style="padding:10px; border-bottom:1px solid #eee; text-align:right;">${item.get('price', 0):.2f}</td>
+            </tr>
+            """
+        
+        # Email content
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #DC2626; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin:0;">🌽 New Order Received!</h1>
+            </div>
+            
+            <div style="padding: 20px; background: #f9f9f9;">
+                <h2 style="color:#333; border-bottom: 2px solid #DC2626; padding-bottom: 10px;">Order #{order.get('order_id', 'N/A')}</h2>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h3 style="margin-top:0; color:#DC2626;">Customer Details</h3>
+                    <p><strong>Name:</strong> {order.get('customer_name', 'N/A')}</p>
+                    <p><strong>Email:</strong> {order.get('customer_email', 'N/A')}</p>
+                    <p><strong>Phone:</strong> {order.get('customer_phone', 'N/A')}</p>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h3 style="margin-top:0; color:#DC2626;">Pickup Details</h3>
+                    <p><strong>Date:</strong> {order.get('pickup_date', 'N/A')}</p>
+                    <p><strong>Time:</strong> {order.get('pickup_time', 'N/A')}</p>
+                    {f"<p><strong>Comments:</strong> {order.get('comments')}</p>" if order.get('comments') else ""}
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px;">
+                    <h3 style="margin-top:0; color:#DC2626;">Order Items</h3>
+                    <table style="width:100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background:#f0f0f0;">
+                                <th style="padding:10px; text-align:left;">Item</th>
+                                <th style="padding:10px; text-align:center;">Qty</th>
+                                <th style="padding:10px; text-align:right;">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items_html}
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #DC2626;">
+                        <p style="text-align:right;"><strong>Subtotal:</strong> ${order.get('subtotal', 0):.2f}</p>
+                        <p style="text-align:right;"><strong>Tax (8.25%):</strong> ${order.get('tax', 0):.2f}</p>
+                        <p style="text-align:right; font-size: 18px; color:#DC2626;"><strong>Total:</strong> ${order.get('total', 0):.2f}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #333; color: white; padding: 15px; text-align: center;">
+                <p style="margin:0;">The Tamale Man - Order Notification</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Send to all notification emails
+        sg = SendGridAPIClient(sendgrid_api_key)
+        sender_email = settings.get("email", "noreply@thetamaleman.com") if settings else "noreply@thetamaleman.com"
+        
+        for email in notification_emails:
+            try:
+                message = Mail(
+                    from_email=sender_email,
+                    to_emails=email,
+                    subject=f"🌽 New Order #{order.get('order_id', 'N/A')} - ${order.get('total', 0):.2f}",
+                    html_content=html_content
+                )
+                response = sg.send(message)
+                logger.info(f"Order notification sent to {email}, status: {response.status_code}")
+            except Exception as e:
+                logger.error(f"Failed to send email to {email}: {e}")
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error sending order notifications: {e}")
+        return False
+
+# =============================================================================
 # MODELS
 # =============================================================================
 
