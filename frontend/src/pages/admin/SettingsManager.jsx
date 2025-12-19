@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle } from "lucide-react";
+import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -26,12 +26,107 @@ const ImageGuide = ({ label, width, height, description }) => (
   </div>
 );
 
+// Logo/Image upload component
+const ImageUploader = ({ label, value, onChange, width, height, description }) => {
+  const [uploading, setUploading] = useState(false);
+  
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large. Max size is 5MB");
+      return;
+    }
+    
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await axios.post(`${API}/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true
+      });
+      
+      onChange(response.data.url);
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+  
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-white/70">{label}</Label>
+        <span className="text-white/50 text-xs font-mono">{width} × {height}px</span>
+      </div>
+      
+      <div className="flex gap-4 items-start">
+        {/* Preview */}
+        <div 
+          className="border-2 border-dashed border-white/20 rounded-lg flex items-center justify-center bg-[#2A2A2A] overflow-hidden"
+          style={{ width: Math.min(width, 200), height: Math.min(height, 100) }}
+        >
+          {value ? (
+            <img src={value} alt={label} className="w-full h-full object-contain" />
+          ) : (
+            <Image size={32} className="text-white/30" />
+          )}
+        </div>
+        
+        {/* Upload controls */}
+        <div className="flex-1 space-y-2">
+          <div className="flex gap-2">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <div className={`inline-flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] hover:bg-[#3A3A3A] rounded-lg text-white/70 text-sm transition-colors ${uploading ? 'opacity-50' : ''}`}>
+                <Upload size={16} />
+                {uploading ? "Uploading..." : "Upload"}
+              </div>
+            </label>
+            {value && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onChange("")}
+                className="text-red-400 border-red-400/30 hover:bg-red-500/10"
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+          
+          <Input
+            value={value || ""}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Or paste image URL..."
+            className="input-dark text-sm"
+          />
+          
+          {description && <p className="text-white/50 text-xs">{description}</p>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SettingsManager = () => {
   const [settings, setSettings] = useState(null);
   const [stripeSettings, setStripeSettings] = useState({ stripe_api_key: "", stripe_webhook_secret: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showStripeKey, setShowStripeKey] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
 
   useEffect(() => {
     fetchSettings();
