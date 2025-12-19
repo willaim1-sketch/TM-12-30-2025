@@ -187,6 +187,27 @@ const SettingsManager = () => {
     updateSettings("opening_hours", newHours);
   };
 
+  // Notification emails management
+  const addNotificationEmail = () => {
+    if (!newEmail || !newEmail.includes("@")) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    const emails = settings.notification_emails || [];
+    if (emails.includes(newEmail)) {
+      toast.error("Email already added");
+      return;
+    }
+    updateSettings("notification_emails", [...emails, newEmail]);
+    setNewEmail("");
+    toast.success("Email added");
+  };
+
+  const removeNotificationEmail = (email) => {
+    const emails = (settings.notification_emails || []).filter(e => e !== email);
+    updateSettings("notification_emails", emails);
+  };
+
   if (loading || !settings) {
     return <div className="text-white">Loading settings...</div>;
   }
@@ -204,10 +225,18 @@ const SettingsManager = () => {
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="bg-[#1A1A1A] border border-white/10 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="general" className="data-[state=active]:bg-red-600">General</TabsTrigger>
+          <TabsTrigger value="logos" className="data-[state=active]:bg-red-600">
+            <Image size={16} className="mr-1" />
+            Logos
+          </TabsTrigger>
           <TabsTrigger value="hero" className="data-[state=active]:bg-red-600">Hero Section</TabsTrigger>
           <TabsTrigger value="about" className="data-[state=active]:bg-red-600">About</TabsTrigger>
           <TabsTrigger value="images" className="data-[state=active]:bg-red-600">All Images</TabsTrigger>
           <TabsTrigger value="contact" className="data-[state=active]:bg-red-600">Contact</TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-red-600">
+            <Mail size={16} className="mr-1" />
+            Notifications
+          </TabsTrigger>
           <TabsTrigger value="hours" className="data-[state=active]:bg-red-600">Hours</TabsTrigger>
           <TabsTrigger value="design" className="data-[state=active]:bg-red-600">Design</TabsTrigger>
           <TabsTrigger value="stripe" className="data-[state=active]:bg-red-600">
