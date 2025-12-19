@@ -322,16 +322,21 @@ const OrderPage = () => {
               
               <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto">
                 {cart.map((item) => (
-                  <div key={item.item_id} className="flex items-center gap-4 py-4 border-b border-white/10">
+                  <div key={item.cart_item_id || item.item_id} className="flex items-center gap-4 py-4 border-b border-white/10">
                     <div className="flex-1">
                       <h4 className="text-white font-semibold">{item.name}</h4>
+                      {item.toppings && item.toppings.length > 0 && (
+                        <p className="text-red-400 text-sm">
+                          + {item.toppings.map(t => t.name).join(', ')}
+                        </p>
+                      )}
                       <p className="text-white/60 text-sm">${item.price.toFixed(2)} each</p>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.item_id, -1)}
+                        onClick={() => updateQuantity(item.cart_item_id || item.item_id, -1)}
                         className="p-1 bg-[#2A2A2A] rounded hover:bg-[#3A3A3A] transition-colors"
                         data-testid={`qty-minus-${item.item_id}`}
                       >
@@ -340,7 +345,7 @@ const OrderPage = () => {
                       <span className="text-white w-6 text-center">{item.quantity}</span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.item_id, 1)}
+                        onClick={() => updateQuantity(item.cart_item_id || item.item_id, 1)}
                         className="p-1 bg-[#2A2A2A] rounded hover:bg-[#3A3A3A] transition-colors"
                         data-testid={`qty-plus-${item.item_id}`}
                       >
@@ -354,7 +359,7 @@ const OrderPage = () => {
                     
                     <button
                       type="button"
-                      onClick={() => removeItem(item.item_id)}
+                      onClick={() => removeItem(item.cart_item_id || item.item_id)}
                       className="text-white/60 hover:text-red-500 transition-colors"
                       data-testid={`remove-item-${item.item_id}`}
                     >
