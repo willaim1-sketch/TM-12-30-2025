@@ -31,7 +31,7 @@ const BlogPostPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -39,14 +39,14 @@ const BlogPostPage = () => {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
           <h2 className="text-3xl font-display font-bold text-white mb-4">Post Not Found</h2>
-          <p className="text-slate-400 mb-8">The blog post you're looking for doesn't exist.</p>
+          <p className="text-white/60 mb-8">The blog post you're looking for doesn't exist.</p>
           <Link to="/blog">
             <Button className="btn-primary" data-testid="back-to-blog-btn">Back to Blog</Button>
           </Link>
@@ -56,11 +56,11 @@ const BlogPostPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/blog" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors" data-testid="post-back-btn">
+          <Link to="/blog" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors" data-testid="post-back-btn">
             <ArrowLeft size={20} />
             <span>Back to Blog</span>
           </Link>
@@ -91,7 +91,7 @@ const BlogPostPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center gap-6 text-slate-400 text-sm mb-6"
+          className="flex items-center gap-6 text-white/60 text-sm mb-6"
         >
           <div className="flex items-center gap-2">
             <Calendar size={16} />
@@ -127,7 +127,7 @@ const BlogPostPage = () => {
           className="prose prose-invert prose-lg max-w-none"
         >
           <div 
-            className="text-slate-300 leading-relaxed space-y-6"
+            className="text-white/80 leading-relaxed space-y-6"
             dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
           />
         </motion.div>
@@ -137,7 +137,7 @@ const BlogPostPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-12 pt-8 border-t border-slate-800"
+          className="mt-12 pt-8 border-t border-white/10"
         >
           <Link to="/blog">
             <Button variant="outline" className="btn-secondary" data-testid="post-back-blog-btn">
@@ -149,12 +149,12 @@ const BlogPostPage = () => {
       </article>
 
       {/* Footer CTA */}
-      <section className="py-16 px-6 bg-slate-900 border-t border-slate-800">
+      <section className="py-16 px-6 bg-[#1A1A1A] border-t border-white/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-display font-bold text-white mb-4">
             Ready to Try Our Tamales?
           </h2>
-          <p className="text-slate-400 mb-8">
+          <p className="text-white/60 mb-8">
             Order online and experience authentic gourmet flavors!
           </p>
           <Link to="/order">
