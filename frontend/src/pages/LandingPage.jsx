@@ -478,7 +478,7 @@ const TestimonialsSection = ({ testimonials }) => {
 // Location Section
 const LocationSection = ({ settings }) => {
   return (
-    <section id="location" className="py-24 px-6 bg-slate-900">
+    <section id="location" className="py-24 px-6 bg-[#1A1A1A]">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial="hidden"
@@ -515,7 +515,7 @@ const LocationSection = ({ settings }) => {
                 <Mail className="text-red-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <p className="text-white font-semibold mb-1">Email</p>
-                  <p className="text-slate-400">{settings?.email || "hello@thetamaleman.com"}</p>
+                  <p className="text-white/60">{settings?.email || "hello@thetamaleman.com"}</p>
                 </div>
               </div>
 
@@ -523,7 +523,7 @@ const LocationSection = ({ settings }) => {
                 <Clock className="text-red-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <p className="text-white font-semibold mb-1">Hours</p>
-                  <div className="text-slate-400 space-y-1">
+                  <div className="text-white/60 space-y-1">
                     {settings?.opening_hours?.map((hour, idx) => (
                       <p key={idx}>
                         {hour.day}: {hour.is_closed ? "Closed" : `${hour.open_time} - ${hour.close_time}`}
@@ -557,7 +557,7 @@ const LocationSection = ({ settings }) => {
 // FAQ Section
 const FAQSection = ({ faqs }) => {
   return (
-    <section id="faq" className="py-24 px-6 bg-slate-950 noise-overlay">
+    <section id="faq" className="py-24 px-6 bg-[#0A0A0A] noise-overlay">
       <div className="max-w-3xl mx-auto">
         <motion.div 
           initial="hidden"
@@ -585,12 +585,12 @@ const FAQSection = ({ faqs }) => {
               <AccordionItem 
                 key={faq.faq_id} 
                 value={faq.faq_id}
-                className="card-dark px-6 border-slate-800"
+                className="card-dark px-6 border-white/10"
               >
                 <AccordionTrigger className="text-white hover:text-red-500 text-left py-4" data-testid={`faq-${faq.faq_id}`}>
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-slate-400 pb-4">
+                <AccordionContent className="text-white/60 pb-4 text-lg">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
