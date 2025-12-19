@@ -229,14 +229,14 @@ const ItemDetailModal = ({ item, isOpen, onClose, onAddToCart, cartQuantity, onU
               <div className="flex items-center gap-4 flex-1">
                 <button
                   onClick={() => onUpdateQuantity(item.item_id, -1)}
-                  className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
+                  className="p-3 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors"
                 >
                   <Minus size={20} className="text-white" />
                 </button>
                 <span className="text-white font-semibold text-xl w-12 text-center">{cartQuantity}</span>
                 <button
                   onClick={() => onUpdateQuantity(item.item_id, 1)}
-                  className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
+                  className="p-3 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors"
                 >
                   <Plus size={20} className="text-white" />
                 </button>
@@ -457,7 +457,7 @@ const MenuPage = () => {
                     <span className="text-red-500 font-bold text-lg">${item.price.toFixed(2)}</span>
                   </div>
                   
-                  <p className="text-slate-400 text-sm mb-3 line-clamp-2">{item.description}</p>
+                  <p className="text-white/60 text-base mb-3 line-clamp-2">{item.description}</p>
                   
                   {/* Rating */}
                   <div className="mb-4">
@@ -467,10 +467,10 @@ const MenuPage = () => {
                   {/* Toppings */}
                   {item.toppings && item.toppings.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-slate-500 text-xs uppercase tracking-wider mb-1">Add-ons</p>
+                      <p className="text-white/50 text-sm uppercase tracking-wider mb-1">Add-ons</p>
                       <div className="flex flex-wrap gap-2">
                         {item.toppings.slice(0, 2).map((topping, idx) => (
-                          <span key={idx} className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">
+                          <span key={idx} className="text-sm text-white/60 bg-[#2A2A2A] px-2 py-1 rounded">
                             {topping.name} +${topping.price?.toFixed(2)}
                           </span>
                         ))}
@@ -485,7 +485,7 @@ const MenuPage = () => {
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => updateQuantity(item.item_id, -1)}
-                            className="p-2 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors"
+                            className="p-2 bg-[#2A2A2A] rounded-md hover:bg-[#3A3A3A] transition-colors"
                             data-testid={`remove-${item.item_id}`}
                           >
                             <Minus size={18} className="text-white" />
@@ -493,7 +493,7 @@ const MenuPage = () => {
                           <span className="text-white font-semibold w-8 text-center">{quantity}</span>
                           <button
                             onClick={() => addToCart(item)}
-                            className="p-2 bg-slate-800 rounded-md hover:bg-slate-700 transition-colors"
+                            className="p-2 bg-[#2A2A2A] rounded-md hover:bg-[#3A3A3A] transition-colors"
                             data-testid={`add-${item.item_id}`}
                           >
                             <Plus size={18} className="text-white" />
@@ -501,7 +501,7 @@ const MenuPage = () => {
                         </div>
                         <button
                           onClick={() => setShareItem(item)}
-                          className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                          className="p-2 text-white/60 hover:text-red-500 transition-colors"
                         >
                           <Share2 size={18} />
                         </button>
