@@ -282,6 +282,129 @@ class TamaleManAPITester:
             self.log_test("Order Validation", False, str(e))
             return False
 
+    def test_menu_item_rating(self):
+        """Test menu item rating functionality"""
+        try:
+            # First get a menu item to rate
+            items_response = requests.get(f"{self.api_url}/menu/items", timeout=10)
+            if items_response.status_code != 200:
+                self.log_test("Menu Item Rating", False, "Could not fetch menu items for rating test")
+                return False
+            
+            items = items_response.json()
+            if not items:
+                self.log_test("Menu Item Rating", False, "No menu items available for rating test")
+                return False
+            
+            test_item = items[0]
+            item_id = test_item["item_id"]
+            
+            # Test rating submission
+            rating_data = {
+                "rating": 5,
+                "customer_name": "Test Customer"
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/menu/items/{item_id}/rate",
+                json=rating_data,
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                if "average_rating" in data and "rating_count" in data:
+                    details += f", Average: {data['average_rating']}, Count: {data['rating_count']}"
+                else:
+                    success = False
+                    details += ", Missing rating response fields"
+            else:
+                try:
+                    error_data = response.json()
+                    details += f", Error: {error_data}"
+                except:
+                    details += f", Response: {response.text[:100]}"
+                    
+            self.log_test("Menu Item Rating", success, details)
+            return success, item_id if success else None
+        except Exception as e:
+            self.log_test("Menu Item Rating", False, str(e))
+            return False, None
+
+    def test_menu_item_ratings_retrieval(self, item_id=None):
+        """Test retrieving ratings for a menu item"""
+        try:
+            if not item_id:
+                # Get first menu item if no item_id provided
+                items_response = requests.get(f"{self.api_url}/menu/items", timeout=10)
+                if items_response.status_code == 200:
+                    items = items_response.json()
+                    if items:
+                        item_id = items[0]["item_id"]
+                    else:
+                        self.log_test("Menu Item Ratings Retrieval", False, "No menu items available")
+                        return False
+                else:
+                    self.log_test("Menu Item Ratings Retrieval", False, "Could not fetch menu items")
+                    return False
+            
+            response = requests.get(f"{self.api_url}/menu/items/{item_id}/ratings", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                if "ratings" in data and "average_rating" in data and "rating_count" in data:
+                    details += f", Found {len(data['ratings'])} ratings, Avg: {data['average_rating']}, Count: {data['rating_count']}"
+                else:
+                    success = False
+                    details += ", Missing expected fields in ratings response"
+            else:
+                try:
+                    error_data = response.json()
+                    details += f", Error: {error_data}"
+                except:
+                    details += f", Response: {response.text[:100]}"
+                    
+            self.log_test("Menu Item Ratings Retrieval", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Menu Item Ratings Retrieval", False, str(e))
+            return False
+
+    def test_stripe_settings_endpoints(self):
+        """Test Stripe settings endpoints (admin auth required)"""
+        try:
+            # Test GET stripe settings (should require auth)
+            response = requests.get(f"{self.api_url}/admin/stripe-settings", timeout=10)
+            
+            # Should return 401 (unauthorized) since we don't have admin auth
+            success = response.status_code == 401
+            details = f"Status: {response.status_code} (expected 401 for unauthenticated request)"
+            
+            if response.status_code == 200:
+                # If somehow we got through, check response structure
+                data = response.json()
+                if "stripe_api_key" in data:
+                    details += ", Endpoint accessible (unexpected - should require auth)"
+                    success = False
+                else:
+                    details += ", Response missing expected fields"
+                    success = False
+            elif response.status_code != 401:
+                details += f", Unexpected status code for protected endpoint"
+                success = False
+                
+            self.log_test("Stripe Settings (Auth Required)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Stripe Settings (Auth Required)", False, str(e))
+            return False
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Tamale Man API Tests...")
