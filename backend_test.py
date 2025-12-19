@@ -558,6 +558,11 @@ class TamaleManAPITester:
         rating_success, rated_item_id = self.test_menu_item_rating()
         self.test_menu_item_ratings_retrieval(rated_item_id)
         
+        # Test NEW FEATURES: Merch endpoints
+        merch_success, merch_items = self.test_merch_items_endpoint()
+        self.test_merch_categories_filter()
+        self.test_merch_item_detail()
+        
         # Test content endpoints
         self.test_testimonials()
         self.test_faq()
@@ -570,6 +575,7 @@ class TamaleManAPITester:
         self.test_order_creation_validation()
         
         # Test NEW FEATURES: Admin endpoints (auth required)
+        self.test_admin_merch_endpoints()
         self.test_stripe_settings_endpoints()
         
         # Print summary
