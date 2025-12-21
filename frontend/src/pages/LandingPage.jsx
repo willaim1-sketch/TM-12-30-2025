@@ -740,12 +740,12 @@ const LandingPage = () => {
     <div className="min-h-screen bg-[#0A0A0A]">
       <Navbar settings={settings} />
       
-      {/* Page Builder Sections - Shown at TOP if any exist */}
-      {pageBuilderSections.length > 0 && (
-        <PageRenderer sections={pageBuilderSections} settings={settings} />
+      {/* TOP Sections from Page Builder */}
+      {sectionsTop.length > 0 && (
+        <PageRenderer sections={sectionsTop} settings={settings} />
       )}
       
-      {/* Default sections - Always show for now (until user has full page built) */}
+      {/* Default Page Content */}
       <HeroSection settings={settings} />
       <AboutSection settings={settings} />
       <FeaturedMenuSection items={featuredItems} />
@@ -754,6 +754,11 @@ const LandingPage = () => {
       <TestimonialsSection testimonials={testimonials} />
       <LocationSection settings={settings} />
       <FAQSection faqs={faqs} />
+      
+      {/* BOTTOM Sections from Page Builder (above footer) */}
+      {sectionsBottom.length > 0 && (
+        <PageRenderer sections={sectionsBottom} settings={settings} />
+      )}
       
       <Footer settings={settings} />
     </div>
