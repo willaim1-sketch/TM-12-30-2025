@@ -1432,6 +1432,19 @@ async def seed_database():
     settings_dict["opening_hours"] = [oh.model_dump() if hasattr(oh, 'model_dump') else oh for oh in settings_dict["opening_hours"]]
     await db.site_settings.insert_one(settings_dict)
     
+    # Seed default merch items
+    merch_items = [
+        {"item_id": "merch_tshirt_black", "name": "Super Dooper Dooper T-Shirt - Black", "description": "Classic black tee featuring our legendary Super Dooper Dooper Tamale design. 100% cotton, pre-shrunk.", "price": 24.99, "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": True},
+        {"item_id": "merch_tshirt_red", "name": "The Tamale Man Logo Tee - Red", "description": "Show your tamale pride with our signature red logo tee. Soft, comfortable, and ready to flex.", "price": 24.99, "image_url": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": True},
+        {"item_id": "merch_hoodie", "name": "Tamale Man Hoodie", "description": "Stay cozy with our premium hoodie. Features the Super Dooper Dooper Tamale on the back.", "price": 49.99, "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": False},
+        {"item_id": "merch_cap", "name": "Tamale Man Dad Cap", "description": "Classic dad cap with embroidered Tamale Man logo. Adjustable strap, one size fits most.", "price": 19.99, "image_url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400", "category": "accessories", "sizes": ["One Size"], "is_featured": True},
+        {"item_id": "merch_mug", "name": "Super Dooper Coffee Mug", "description": "Start your morning right with our 12oz ceramic mug. Dishwasher and microwave safe.", "price": 14.99, "image_url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400", "category": "drinkware", "sizes": ["12oz"], "is_featured": True},
+        {"item_id": "merch_tumbler", "name": "Tamale Man Tumbler", "description": "20oz insulated tumbler keeps drinks hot or cold for hours. Perfect for on-the-go!", "price": 29.99, "image_url": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400", "category": "drinkware", "sizes": ["20oz"], "is_featured": False},
+        {"item_id": "merch_apron", "name": "Chef's Apron", "description": "Cook like a pro with our branded apron. Adjustable neck strap, two front pockets.", "price": 22.99, "image_url": "https://images.unsplash.com/photo-1591634616938-1dfa7ee2e617?w=400", "category": "accessories", "sizes": ["One Size"], "is_featured": False},
+        {"item_id": "merch_ornament", "name": "Tamale Ornament Set", "description": "Festive set of 3 tamale-shaped ornaments. Perfect for the holidays!", "price": 16.99, "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400", "category": "souvenirs", "sizes": ["Set of 3"], "is_featured": False},
+    ]
+    await db.merch_items.insert_many(merch_items)
+    
     # Seed default page SEO
     page_seo_items = [
         {"page_id": "seo_home", "page_slug": "home", "meta_title": "The Tamale Man - Authentic Gourmet Tamales", "meta_description": "Experience the finest handcrafted tamales in town. Made with love, served with pride.", "keywords": ["tamales", "mexican food", "gourmet", "authentic"]},
