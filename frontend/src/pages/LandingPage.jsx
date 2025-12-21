@@ -724,7 +724,7 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
-      <Navbar />
+      <Navbar settings={settings} />
       <HeroSection settings={settings} />
       <AboutSection settings={settings} />
       <FeaturedMenuSection items={featuredItems} />
