@@ -621,8 +621,8 @@ const LocationSection = ({ settings }) => {
                 alt="Restaurant location"
                 className="w-full h-full object-cover"
               />
-            />
-          </motion.div>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
