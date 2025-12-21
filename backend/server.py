@@ -508,11 +508,20 @@ async def get_testimonials(featured: Optional[bool] = None):
 @api_router.get("/settings")
 async def get_site_settings():
     settings = await db.site_settings.find_one({"settings_id": "main_settings"}, {"_id": 0})
+    
+    # Create default settings with all fields
+    default_settings = SiteSettings()
+    default_dict = default_settings.model_dump()
+    
     if not settings:
-        default_settings = SiteSettings()
-        settings_dict = default_settings.model_dump()
-        await db.site_settings.insert_one(settings_dict)
-        return settings_dict
+        await db.site_settings.insert_one(default_dict)
+        return default_dict
+    
+    # Merge existing settings with defaults to ensure new fields exist
+    for key, value in default_dict.items():
+        if key not in settings:
+            settings[key] = value
+    
     return settings
 
 # FAQ (Public)
