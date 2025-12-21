@@ -203,12 +203,16 @@ class MenuCategoryCreate(BaseModel):
     description: Optional[str] = ""
     display_order: int = 0
 
+class ToppingItem(BaseModel):
+    name: str
+    price: float = 0.0
+
 class OrderItem(BaseModel):
     item_id: str
     name: str
     price: float
     quantity: int
-    toppings: List[str] = []
+    toppings: List[ToppingItem] = []
     meat_choice: Optional[str] = None
 
 class Order(BaseModel):
