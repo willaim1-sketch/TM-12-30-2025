@@ -262,6 +262,7 @@ const SettingsManager = () => {
             Logos
           </TabsTrigger>
           <TabsTrigger value="hero" className="data-[state=active]:bg-red-600">Hero Section</TabsTrigger>
+          <TabsTrigger value="merch_promo" className="data-[state=active]:bg-red-600">Merch Promo</TabsTrigger>
           <TabsTrigger value="about" className="data-[state=active]:bg-red-600">About</TabsTrigger>
           <TabsTrigger value="images" className="data-[state=active]:bg-red-600">All Images</TabsTrigger>
           <TabsTrigger value="contact" className="data-[state=active]:bg-red-600">Contact</TabsTrigger>
