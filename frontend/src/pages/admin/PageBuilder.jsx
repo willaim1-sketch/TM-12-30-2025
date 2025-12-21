@@ -141,13 +141,41 @@ const SectionEditor = ({ section, onUpdate, onDelete, onDuplicate }) => {
               </div>
             </div>
             <div>
-              <Label className="text-white">Background Image URL</Label>
-              <Input
-                value={localContent.backgroundImage || ""}
-                onChange={(e) => handleContentChange("backgroundImage", e.target.value)}
-                className="input-dark mt-1"
-                placeholder="https://..."
-              />
+              <Label className="text-white">Background Image</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="cursor-pointer flex-shrink-0">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      try {
+                        const response = await axios.post(`${API}/upload`, formData, {
+                          headers: { "Content-Type": "multipart/form-data" }
+                        });
+                        handleContentChange("backgroundImage", response.data.url);
+                        toast.success("Background uploaded!");
+                      } catch (err) {
+                        toast.error("Upload failed");
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <div className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2">
+                    <Image size={18} />
+                    Upload
+                  </div>
+                </label>
+                <Input
+                  value={localContent.backgroundImage || ""}
+                  onChange={(e) => handleContentChange("backgroundImage", e.target.value)}
+                  className="input-dark flex-1"
+                  placeholder="Or paste image URL..."
+                />
+              </div>
               <p className="text-white/50 text-sm mt-1">Recommended: 1920 x 1080px</p>
             </div>
             <div>
