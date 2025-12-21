@@ -105,11 +105,14 @@
 user_problem_statement: |
   Build a modern restaurant website for "The Tamale Man" with admin dashboard.
   Latest requirements:
-  - UI Overhaul: Change color scheme to strict Red & White (no blue), increase all font sizes
-  - Page Builder: Full Divi-like page builder with drag-drop, sections, inline editing
+  - Stripe checkout integration for payments
+  - Multiple email notifications for orders (SendGrid)
+  - Logo upload for header (200x60) and footer (250x150)
+  - Image dimension guides in admin settings
+  - Page Builder (Divi-like) for editing pages
   
 frontend:
-  - task: "Red & White Theme - Landing Page"
+  - task: "Logo support in Header and Footer"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/pages/LandingPage.jsx"
@@ -119,70 +122,46 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Replaced all slate/blue colors with red/white theme across landing page"
+        comment: "Updated Navbar and Footer to show logos from settings. Header logo 200x60, Footer logo 250x150 (1/3 width)"
 
-  - task: "Red & White Theme - Menu Page"
+  - task: "Admin Settings - Logos Tab"
     implemented: true
     working: "NA"
+    file: "/app/frontend/src/pages/admin/SettingsManager.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Logos tab with ImageUploader components for header_logo, footer_logo, and favicon"
+
+  - task: "Admin Settings - Notifications Tab"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/admin/SettingsManager.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Notifications tab for managing multiple order notification emails"
+
+  - task: "Add-ons/Toppings Selection"
+    implemented: true
+    working: true
     file: "/app/frontend/src/pages/MenuPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
+      - working: true
         agent: "main"
-        comment: "Updated MenuPage with red/white theme, increased font sizes"
-
-  - task: "Red & White Theme - Merch Page"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/MerchPage.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Updated MerchPage with red/white theme"
-
-  - task: "Red & White Theme - Admin Dashboard"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/admin/AdminDashboard.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Updated all admin pages with red/white theme"
-
-  - task: "Page Builder - Drag-Drop Section Editor"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/admin/PageBuilder.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Full Divi-style page builder with framer-motion drag-drop, section types (hero, text, image, gallery, cta, spacer, divider), content editing"
-
-  - task: "Increased Font Sizes"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/index.css"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Updated base font size to 18px (20px on large screens), increased heading sizes, added text utilities"
+        comment: "Fixed add-ons to be selectable with checkboxes, price breakdown, cart integration"
 
 backend:
-  - task: "Page Builder API Endpoints"
+  - task: "Multiple notification emails support"
     implemented: true
     working: "NA"
     file: "/app/backend/server.py"
@@ -192,23 +171,47 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "GET/PUT /api/admin/page-builder/{page_id} endpoints for saving page content"
+        comment: "Added notification_emails field to settings, SendGrid email helper, sends to all emails on order payment"
+
+  - task: "File Upload Endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /api/upload endpoint for logo/image uploads, serves from /api/uploads/"
+
+  - task: "Stripe Checkout Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "previous"
+        comment: "Already integrated - creates Stripe checkout session and handles webhook"
 
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 4
+  test_sequence: 5
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Red & White Theme - Landing Page"
-    - "Red & White Theme - Menu Page"
-    - "Page Builder - Drag-Drop Section Editor"
+    - "Admin Settings - Logos Tab"
+    - "Admin Settings - Notifications Tab"
+    - "File Upload Endpoint"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Completed UI overhaul to Red & White theme across all pages. Removed all slate/blue colors. Increased font sizes in index.css. Page Builder already existed with full functionality. Ready for frontend testing."
+    message: "Implemented logo upload for header/footer, multiple notification emails, file upload endpoint. Stripe checkout was already working. Ready for testing."
