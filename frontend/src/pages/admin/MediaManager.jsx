@@ -427,6 +427,7 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
 const SiteImagesManager = ({ settings, onUpdateSetting, onSelectFromLibrary }) => {
   const siteImages = [
     { key: 'hero_image', label: 'Hero Background', dim: IMAGE_DIMENSIONS.hero, current: settings?.hero_image },
+    { key: 'mascot_image', label: 'Mascot/Silhouette', dim: { width: 400, height: 500, label: 'Mascot', description: 'PNG with transparent background recommended' }, current: settings?.mascot_image },
     { key: 'chef_image', label: 'Chef/About Image', dim: IMAGE_DIMENSIONS.chef, current: settings?.chef_image },
     { key: 'header_logo', label: 'Header Logo', dim: IMAGE_DIMENSIONS.header_logo, current: settings?.header_logo },
     { key: 'footer_logo', label: 'Footer Logo', dim: IMAGE_DIMENSIONS.footer_logo, current: settings?.footer_logo },
