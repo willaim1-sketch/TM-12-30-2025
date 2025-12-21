@@ -539,6 +539,170 @@ class TamaleManAPITester:
             self.log_test("Stripe Settings (Auth Required)", False, str(e))
             return False
 
+    def test_upload_endpoint(self):
+        """Test file upload endpoint"""
+        try:
+            # Create a simple test image file (1x1 pixel PNG)
+            import io
+            import base64
+            
+            # Minimal PNG data (1x1 transparent pixel)
+            png_data = base64.b64decode(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU8'
+                'AAABJRU5ErkJggg=='
+            )
+            
+            files = {'file': ('test.png', io.BytesIO(png_data), 'image/png')}
+            
+            response = requests.post(
+                f"{self.api_url}/upload",
+                files=files,
+                timeout=15
+            )
+            
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                if "url" in data and "filename" in data:
+                    details += f", Upload successful: {data['filename']}"
+                    # Verify the URL format
+                    if "/api/uploads/" in data["url"]:
+                        details += ", URL format correct"
+                    else:
+                        success = False
+                        details += ", URL format incorrect"
+                else:
+                    success = False
+                    details += ", Missing url or filename in response"
+            else:
+                try:
+                    error_data = response.json()
+                    details += f", Error: {error_data}"
+                except:
+                    details += f", Response: {response.text[:100]}"
+                    
+            self.log_test("File Upload Endpoint", success, details)
+            return success
+        except Exception as e:
+            self.log_test("File Upload Endpoint", False, str(e))
+            return False
+
+    def test_notification_emails_in_settings(self):
+        """Test that notification_emails field exists in site settings"""
+        try:
+            response = requests.get(f"{self.api_url}/settings", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                if "notification_emails" in data:
+                    emails = data["notification_emails"]
+                    if isinstance(emails, list):
+                        details += f", notification_emails field present (list with {len(emails)} emails)"
+                    else:
+                        success = False
+                        details += ", notification_emails field exists but is not a list"
+                else:
+                    success = False
+                    details += ", notification_emails field missing from settings"
+                    
+            self.log_test("Notification Emails in Settings", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Notification Emails in Settings", False, str(e))
+            return False
+
+    def test_logo_fields_in_settings(self):
+        """Test that logo fields exist in site settings"""
+        try:
+            response = requests.get(f"{self.api_url}/settings", timeout=10)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                logo_fields = ["header_logo", "footer_logo", "favicon"]
+                missing_fields = [field for field in logo_fields if field not in data]
+                
+                if not missing_fields:
+                    details += f", All logo fields present: {logo_fields}"
+                    # Check if any logos are set
+                    set_logos = [field for field in logo_fields if data.get(field)]
+                    details += f", Set logos: {set_logos if set_logos else 'none'}"
+                else:
+                    success = False
+                    details += f", Missing logo fields: {missing_fields}"
+                    
+            self.log_test("Logo Fields in Settings", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Logo Fields in Settings", False, str(e))
+            return False
+
+    def test_order_creation_with_toppings(self):
+        """Test order creation with add-ons/toppings"""
+        try:
+            # Create a test order with toppings
+            order_data = {
+                "customer_name": "Test Customer",
+                "customer_email": "test@example.com",
+                "customer_phone": "555-123-4567",
+                "pickup_date": "2024-12-20",
+                "pickup_time": "12:00 PM",
+                "items": [
+                    {
+                        "item_id": "item_pork",
+                        "name": "Pork Carnitas Tamale",
+                        "price": 5.49,  # Base price + toppings
+                        "quantity": 1,
+                        "toppings": [
+                            {"name": "Extra Salsa", "price": 0.5}
+                        ]
+                    }
+                ]
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/orders/create",
+                json=order_data,
+                headers={'Content-Type': 'application/json', 'Origin': 'https://tamale-design.preview.emergentagent.com'},
+                timeout=15
+            )
+            
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                required_fields = ["order_id", "checkout_url", "session_id"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    details += f", Order created with Stripe checkout: {data['order_id']}"
+                    # Check if checkout URL is valid
+                    if "stripe.com" in data.get("checkout_url", ""):
+                        details += ", Stripe checkout URL generated"
+                    else:
+                        details += ", Warning: checkout URL may not be valid Stripe URL"
+                else:
+                    success = False
+                    details += f", Missing fields: {missing_fields}"
+            else:
+                try:
+                    error_data = response.json()
+                    details += f", Error: {error_data}"
+                except:
+                    details += f", Response: {response.text[:200]}"
+                    
+            self.log_test("Order Creation with Toppings", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Order Creation with Toppings", False, str(e))
+            return False
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Tamale Man API Tests...")
