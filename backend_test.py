@@ -703,6 +703,94 @@ class TamaleManAPITester:
             self.log_test("Order Creation with Toppings", False, str(e))
             return False
 
+    def test_page_builder_get_endpoint(self):
+        """Test Page Builder GET endpoint (should require auth)"""
+        try:
+            # Test GET page content (should require auth)
+            response = requests.get(f"{self.api_url}/admin/page-builder/home", timeout=10)
+            
+            # Should return 401 (unauthorized) since we don't have admin auth
+            success = response.status_code == 401
+            details = f"Status: {response.status_code} (expected 401 for unauthenticated request)"
+            
+            if response.status_code == 200:
+                details += ", Page Builder endpoint accessible without auth (security issue)"
+                success = False
+            elif response.status_code != 401:
+                details += f", Unexpected status code for protected endpoint"
+                success = False
+                
+            self.log_test("Page Builder GET (Auth Required)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Page Builder GET (Auth Required)", False, str(e))
+            return False
+
+    def test_page_builder_put_endpoint(self):
+        """Test Page Builder PUT endpoint (should require auth)"""
+        try:
+            # Test PUT page content (should require auth)
+            test_data = {
+                "sections": [
+                    {
+                        "id": "section_test",
+                        "type": "hero",
+                        "visible": True,
+                        "content": {
+                            "title": "Test Hero",
+                            "subtitle": "Test subtitle"
+                        }
+                    }
+                ]
+            }
+            
+            response = requests.put(
+                f"{self.api_url}/admin/page-builder/home",
+                json=test_data,
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            
+            # Should return 401 (unauthorized) since we don't have admin auth
+            success = response.status_code == 401
+            details = f"Status: {response.status_code} (expected 401 for unauthenticated request)"
+            
+            if response.status_code == 200:
+                details += ", Page Builder PUT endpoint accessible without auth (security issue)"
+                success = False
+            elif response.status_code != 401:
+                details += f", Unexpected status code for protected endpoint"
+                success = False
+                
+            self.log_test("Page Builder PUT (Auth Required)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Page Builder PUT (Auth Required)", False, str(e))
+            return False
+
+    def test_upload_endpoint_exists(self):
+        """Test that upload endpoint exists and responds correctly"""
+        try:
+            # Test with no file (should return error but endpoint should exist)
+            response = requests.post(f"{self.api_url}/upload", timeout=10)
+            
+            # Should return 422 (validation error) for missing file, not 404
+            success = response.status_code in [400, 422]
+            details = f"Status: {response.status_code} (expected 400/422 for missing file)"
+            
+            if response.status_code == 404:
+                success = False
+                details += ", Upload endpoint not found"
+            elif response.status_code == 200:
+                success = False
+                details += ", Upload endpoint accepts empty request (should require file)"
+                
+            self.log_test("Upload Endpoint Exists", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Upload Endpoint Exists", False, str(e))
+            return False
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Tamale Man API Tests...")
