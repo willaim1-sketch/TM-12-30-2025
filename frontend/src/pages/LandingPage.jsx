@@ -147,9 +147,12 @@ const HeroSection = ({ settings }) => {
           </motion.p>
           
           <motion.h1 variants={fadeInUp} className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-white leading-tight">
-            {settings?.hero_title || "Big, Bold"}<br />
-            <span className="text-red-500 italic">Tamales</span>
+            <span className="text-white">{settings?.hero_title || "Big, Bold Tamales"}</span>
           </motion.h1>
+          
+          <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-white/80 max-w-2xl mt-4">
+            {settings?.hero_subtitle || "Crafted with passion, served with pride"}
+          </motion.p>
 
           {/* Silhouette Section - The Legend */}
           <motion.div 
