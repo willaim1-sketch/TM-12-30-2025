@@ -784,7 +784,9 @@ const PageBuilder = () => {
             className="bg-[#1A1A1A] rounded-2xl p-8 max-w-4xl w-full max-h-[80vh] overflow-y-auto"
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-white text-3xl font-bold">Add Section</h2>
+              <h2 className="text-white text-3xl font-bold">
+                Add Section to {addPosition === "top" ? "⬆️ TOP" : "⬇️ BOTTOM"}
+              </h2>
               <button
                 onClick={() => setShowAddSection(false)}
                 className="p-2 hover:bg-white/10 rounded-lg"
