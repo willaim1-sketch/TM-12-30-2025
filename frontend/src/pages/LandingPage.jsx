@@ -31,6 +31,9 @@ const Navbar = ({ settings }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Get custom nav items from settings
+  const customNavItems = (settings?.nav_menu || []).filter(item => item.visible !== false);
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "glass border-b border-white/5" : "bg-transparent"}`}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -52,6 +55,18 @@ const Navbar = ({ settings }) => {
           <Link to="/merch" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-merch">Merch</Link>
           <a href="#testimonials" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-testimonials">Reviews</a>
           <a href="#location" className="text-white/70 hover:text-white transition-colors text-lg" data-testid="nav-location">Location</a>
+          {/* Custom nav items from settings */}
+          {customNavItems.map((item) => (
+            item.url.startsWith('http') ? (
+              <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors text-lg">
+                {item.label}
+              </a>
+            ) : (
+              <Link key={item.id} to={item.url} className="text-white/70 hover:text-white transition-colors text-lg">
+                {item.label}
+              </Link>
+            )
+          ))}
         </div>
 
         <div className="hidden md:block">
@@ -82,6 +97,18 @@ const Navbar = ({ settings }) => {
             <Link to="/merch" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Merch Shop</Link>
             <a href="#testimonials" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Reviews</a>
             <a href="#location" className="text-white/70 hover:text-white transition-colors py-2 text-lg">Location</a>
+            {/* Custom nav items for mobile */}
+            {customNavItems.map((item) => (
+              item.url.startsWith('http') ? (
+                <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white transition-colors py-2 text-lg">
+                  {item.label}
+                </a>
+              ) : (
+                <Link key={item.id} to={item.url} className="text-white/70 hover:text-white transition-colors py-2 text-lg">
+                  {item.label}
+                </Link>
+              )
+            ))}
             <Link to="/order">
               <Button className="btn-primary w-full mt-2" data-testid="mobile-order-btn">Order Online</Button>
             </Link>
