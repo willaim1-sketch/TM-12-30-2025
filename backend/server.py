@@ -395,7 +395,11 @@ class MediaItem(BaseModel):
     filename: str
     url: str
     file_type: str
+    file_size: Optional[int] = None
     alt_text: Optional[str] = None
+    category: str = "other"  # homepage, menu, merch, branding, locations, other
+    width: Optional[int] = None
+    height: Optional[int] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class FAQItem(BaseModel):
