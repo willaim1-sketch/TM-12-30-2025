@@ -586,8 +586,11 @@ const PageBuilder = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await axios.put(`${API}/admin/page-builder/${activePage}`, { sections }, { withCredentials: true });
-      toast.success("Page saved successfully!");
+      await axios.put(`${API}/admin/page-builder/${activePage}`, { 
+        sections_top: sectionsTop,
+        sections_bottom: sectionsBottom
+      }, { withCredentials: true });
+      toast.success("Page saved & published!");
     } catch (error) {
       toast.error("Failed to save page");
     } finally {
@@ -602,36 +605,59 @@ const PageBuilder = () => {
       visible: true,
       content: defaultSectionContent[type] || {}
     };
-    setSections([...sections, newSection]);
+    if (addPosition === "top") {
+      setSectionsTop([...sectionsTop, newSection]);
+    } else {
+      setSectionsBottom([...sectionsBottom, newSection]);
+    }
     setShowAddSection(false);
-    toast.success(`${sectionTypes.find(s => s.id === type)?.name} added`);
+    toast.success(`${sectionTypes.find(s => s.id === type)?.name} added to ${addPosition === "top" ? "TOP" : "BOTTOM"}`);
   };
 
-  const updateSection = (updatedSection) => {
-    setSections(sections.map(s => s.id === updatedSection.id ? updatedSection : s));
+  const updateSection = (updatedSection, position) => {
+    if (position === "top") {
+      setSectionsTop(sectionsTop.map(s => s.id === updatedSection.id ? updatedSection : s));
+    } else {
+      setSectionsBottom(sectionsBottom.map(s => s.id === updatedSection.id ? updatedSection : s));
+    }
   };
 
-  const deleteSection = (sectionId) => {
+  const deleteSection = (sectionId, position) => {
     if (!window.confirm("Delete this section?")) return;
-    setSections(sections.filter(s => s.id !== sectionId));
+    if (position === "top") {
+      setSectionsTop(sectionsTop.filter(s => s.id !== sectionId));
+    } else {
+      setSectionsBottom(sectionsBottom.filter(s => s.id !== sectionId));
+    }
     toast.success("Section deleted");
   };
 
-  const duplicateSection = (section) => {
+  const duplicateSection = (section, position) => {
     const newSection = {
       ...section,
       id: `section_${Date.now()}`,
       content: { ...section.content }
     };
-    const index = sections.findIndex(s => s.id === section.id);
-    const newSections = [...sections];
-    newSections.splice(index + 1, 0, newSection);
-    setSections(newSections);
+    if (position === "top") {
+      const index = sectionsTop.findIndex(s => s.id === section.id);
+      const newSections = [...sectionsTop];
+      newSections.splice(index + 1, 0, newSection);
+      setSectionsTop(newSections);
+    } else {
+      const index = sectionsBottom.findIndex(s => s.id === section.id);
+      const newSections = [...sectionsBottom];
+      newSections.splice(index + 1, 0, newSection);
+      setSectionsBottom(newSections);
+    }
     toast.success("Section duplicated");
   };
 
-  const handleReorder = (newOrder) => {
-    setSections(newOrder);
+  const handleReorderTop = (newOrder) => {
+    setSectionsTop(newOrder);
+  };
+
+  const handleReorderBottom = (newOrder) => {
+    setSectionsBottom(newOrder);
   };
 
   return (
