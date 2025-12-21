@@ -315,6 +315,7 @@ class SiteSettings(BaseModel):
     merch_cups_image: Optional[str] = None
     merch_hats_image: Optional[str] = None
     merch_souvenirs_image: Optional[str] = None
+    mascot_image: Optional[str] = None  # Custom image to replace the default silhouette
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
@@ -350,6 +351,7 @@ class SiteSettingsUpdate(BaseModel):
     merch_cups_image: Optional[str] = None
     merch_hats_image: Optional[str] = None
     merch_souvenirs_image: Optional[str] = None
+    mascot_image: Optional[str] = None  # Custom image to replace the default silhouette
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
