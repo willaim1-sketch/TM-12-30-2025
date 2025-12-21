@@ -549,15 +549,17 @@ const SectionEditor = ({ section, onUpdate, onDelete, onDuplicate }) => {
 // Main Page Builder Component
 const PageBuilder = () => {
   const [pages, setPages] = useState([
-    { id: "home", name: "Homepage", sections: [] },
-    { id: "menu", name: "Menu Page", sections: [] },
-    { id: "about", name: "About Page", sections: [] }
+    { id: "home", name: "Homepage" },
+    { id: "menu", name: "Menu Page" },
+    { id: "about", name: "About Page" }
   ]);
   const [activePage, setActivePage] = useState("home");
-  const [sections, setSections] = useState([]);
+  const [sectionsTop, setSectionsTop] = useState([]);
+  const [sectionsBottom, setSectionsBottom] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
+  const [addPosition, setAddPosition] = useState("top"); // "top" or "bottom"
 
   useEffect(() => {
     fetchPageContent();
@@ -566,14 +568,16 @@ const PageBuilder = () => {
   const fetchPageContent = async () => {
     try {
       const response = await axios.get(`${API}/admin/page-builder/${activePage}`, { withCredentials: true });
-      if (response.data && response.data.sections) {
-        setSections(response.data.sections);
+      if (response.data) {
+        setSectionsTop(response.data.sections_top || response.data.sections || []);
+        setSectionsBottom(response.data.sections_bottom || []);
       } else {
-        setSections([]);
+        setSectionsTop([]);
+        setSectionsBottom([]);
       }
     } catch (error) {
-      // Page content may not exist yet
-      setSections([]);
+      setSectionsTop([]);
+      setSectionsBottom([]);
     } finally {
       setLoading(false);
     }
