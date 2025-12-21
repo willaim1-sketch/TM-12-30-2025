@@ -20,7 +20,7 @@ const staggerContainer = {
 };
 
 // Navbar Component
-const Navbar = () => {
+const Navbar = ({ settings }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
