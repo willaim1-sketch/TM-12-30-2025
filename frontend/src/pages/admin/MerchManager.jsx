@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Plus, Edit, Trash2, Save, ShoppingBag } from "lucide-react";
+import { Plus, Edit, Trash2, Save, ShoppingBag, Upload, Image } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
