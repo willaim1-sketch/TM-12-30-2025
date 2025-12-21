@@ -528,6 +528,16 @@ const TestimonialsSection = ({ testimonials }) => {
 
 // Location Section
 const LocationSection = ({ settings }) => {
+  // Helper to format time (24h to 12h)
+  const formatTime = (time) => {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const h = parseInt(hours);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 || 12;
+    return `${h12}:${minutes} ${ampm}`;
+  };
+
   return (
     <section id="location" className="py-24 px-6 bg-[#1A1A1A]">
       <div className="max-w-7xl mx-auto">
@@ -536,67 +546,81 @@ const LocationSection = ({ settings }) => {
           whileInView="visible"
           viewport={{ once: true }}
           variants={staggerContainer}
-          className="grid lg:grid-cols-2 gap-16"
         >
-          {/* Info */}
-          <motion.div variants={fadeInUp} className="space-y-8">
-            <div>
-              <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold mb-4">Come Visit</p>
-              <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">Find Us Here</h2>
-            </div>
+          <div className="text-center mb-12">
+            <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold mb-4">Come Visit</p>
+            <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">Find Us Here</h2>
+          </div>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <MapPin className="text-red-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <p className="text-white font-semibold mb-1">Address</p>
-                  <p className="text-white/60">{settings?.address || "123 Main Street, Austin, TX"}</p>
-                </div>
+          {/* Opening Hours Block - Cute Card */}
+          <motion.div variants={fadeInUp} className="mb-12">
+            <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-8 max-w-3xl mx-auto shadow-2xl">
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <Clock className="text-white" size={28} />
+                <h3 className="text-2xl font-display font-bold text-white">Opening Hours</h3>
               </div>
-
-              <div className="flex items-start gap-4">
-                <Phone className="text-red-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <p className="text-white font-semibold mb-1">Phone</p>
-                  <p className="text-white/60">{settings?.phone || "(512) 555-0123"}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <Mail className="text-red-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <p className="text-white font-semibold mb-1">Email</p>
-                  <p className="text-white/60">{settings?.email || "hello@thetamaleman.com"}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <Clock className="text-red-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <p className="text-white font-semibold mb-1">Hours</p>
-                  <div className="text-white/60 space-y-1">
-                    {settings?.opening_hours?.map((hour, idx) => (
-                      <p key={idx}>
-                        {hour.day}: {hour.is_closed ? "Closed" : `${hour.open_time} - ${hour.close_time}`}
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {(settings?.opening_hours || []).slice(0, 7).map((hour, idx) => (
+                  <div key={idx} className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
+                    <p className="text-white/80 text-sm font-medium mb-1">{hour.day?.slice(0, 3)}</p>
+                    {hour.is_closed ? (
+                      <p className="text-white/60 text-sm">Closed</p>
+                    ) : (
+                      <p className="text-white font-bold text-lg">
+                        {formatTime(hour.open_time)}<br/>
+                        <span className="text-white/70 text-sm">to</span><br/>
+                        {formatTime(hour.close_time)}
                       </p>
-                    )) || (
-                      <>
-                        <p>Mon-Sat: 10:00 AM - 8:00 PM</p>
-                        <p>Sunday: 11:00 AM - 6:00 PM</p>
-                      </>
                     )}
                   </div>
-                </div>
+                ))}
               </div>
+              
+              {(!settings?.opening_hours || settings.opening_hours.length === 0) && (
+                <div className="text-center text-white/80">
+                  <p className="text-lg">Mon - Sat: 10:00 AM - 8:00 PM</p>
+                  <p className="text-lg">Sunday: 11:00 AM - 6:00 PM</p>
+                </div>
+              )}
             </div>
           </motion.div>
 
-          {/* Map placeholder */}
-          <motion.div variants={fadeInUp} className="h-[400px] lg:h-auto rounded-lg overflow-hidden">
-            <img 
-              src="https://images.unsplash.com/photo-1744928869793-3908b4649ad6?w=800"
-              alt="Restaurant location"
-              className="w-full h-full object-cover"
+          <div className="grid lg:grid-cols-2 gap-16">
+            {/* Contact Info */}
+            <motion.div variants={fadeInUp} className="space-y-6">
+              <div className="flex items-start gap-4 p-4 bg-[#2A2A2A] rounded-xl">
+                <MapPin className="text-red-500 mt-1 flex-shrink-0" size={24} />
+                <div>
+                  <p className="text-white font-semibold mb-1 text-lg">Address</p>
+                  <p className="text-white/70 text-lg">{settings?.address || "123 Main Street, Austin, TX"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 p-4 bg-[#2A2A2A] rounded-xl">
+                <Phone className="text-red-500 mt-1 flex-shrink-0" size={24} />
+                <div>
+                  <p className="text-white font-semibold mb-1 text-lg">Phone</p>
+                  <p className="text-white/70 text-lg">{settings?.phone || "(512) 555-0123"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 p-4 bg-[#2A2A2A] rounded-xl">
+                <Mail className="text-red-500 mt-1 flex-shrink-0" size={24} />
+                <div>
+                  <p className="text-white font-semibold mb-1 text-lg">Email</p>
+                  <p className="text-white/70 text-lg">{settings?.email || "hello@thetamaleman.com"}</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Map placeholder */}
+            <motion.div variants={fadeInUp} className="h-[350px] lg:h-auto rounded-2xl overflow-hidden shadow-xl">
+              <img 
+                src="https://images.unsplash.com/photo-1744928869793-3908b4649ad6?w=800"
+                alt="Restaurant location"
+                className="w-full h-full object-cover"
+              />
             />
           </motion.div>
         </motion.div>
