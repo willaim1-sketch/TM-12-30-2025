@@ -318,6 +318,102 @@ const SettingsManager = () => {
           </div>
         </TabsContent>
 
+        {/* NAVIGATION TAB */}
+        <TabsContent value="navigation">
+          <div className="card-dark p-6 space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-2">Navigation Menu</h3>
+              <p className="text-white/60">Add, remove, and reorder menu items. These will appear in the navigation bar.</p>
+            </div>
+            
+            {/* Add new menu item */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-[#2A2A2A] rounded-lg">
+              <div>
+                <Label className="text-white/70">Label</Label>
+                <Input
+                  value={newNavItem.label}
+                  onChange={(e) => setNewNavItem({ ...newNavItem, label: e.target.value })}
+                  placeholder="e.g., Catering"
+                  className="input-dark mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-white/70">URL</Label>
+                <Input
+                  value={newNavItem.url}
+                  onChange={(e) => setNewNavItem({ ...newNavItem, url: e.target.value })}
+                  placeholder="e.g., /catering or https://..."
+                  className="input-dark mt-1"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button onClick={addNavItem} className="btn-primary w-full">
+                  <Plus size={18} className="mr-2" />
+                  Add Menu Item
+                </Button>
+              </div>
+            </div>
+            
+            {/* Default menu items info */}
+            <div className="p-4 bg-[#1A1A1A] rounded-lg border border-white/10">
+              <p className="text-white/60 text-sm mb-2">📌 <strong className="text-white">Default items</strong> (always shown):</p>
+              <div className="flex flex-wrap gap-2">
+                {["About", "Menu", "Merch", "Reviews", "Location"].map(item => (
+                  <span key={item} className="px-3 py-1 bg-[#2A2A2A] rounded text-white/70 text-sm">{item}</span>
+                ))}
+              </div>
+            </div>
+            
+            {/* Custom menu items */}
+            <div>
+              <Label className="text-white/70 mb-3 block">Custom Menu Items ({(settings.nav_menu || []).length})</Label>
+              {(settings.nav_menu || []).length === 0 ? (
+                <div className="p-6 bg-[#2A2A2A] rounded-lg text-center">
+                  <p className="text-white/50">No custom menu items. Add items above.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {(settings.nav_menu || []).map((item) => (
+                    <div key={item.id} className="flex items-center gap-4 p-3 bg-[#2A2A2A] rounded-lg">
+                      <div className="flex-1">
+                        <Input
+                          value={item.label}
+                          onChange={(e) => updateNavItem(item.id, "label", e.target.value)}
+                          className="input-dark"
+                          placeholder="Label"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Input
+                          value={item.url}
+                          onChange={(e) => updateNavItem(item.id, "url", e.target.value)}
+                          className="input-dark"
+                          placeholder="URL"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={item.visible !== false}
+                          onCheckedChange={(checked) => updateNavItem(item.id, "visible", checked)}
+                        />
+                        <span className="text-white/50 text-sm w-16">{item.visible !== false ? "Visible" : "Hidden"}</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => removeNavItem(item.id)}
+                        className="text-white/50 hover:text-red-500 hover:bg-red-500/10"
+                      >
+                        <X size={18} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
         {/* LOGOS TAB */}
         <TabsContent value="logos">
           <div className="card-dark p-6 space-y-8">
