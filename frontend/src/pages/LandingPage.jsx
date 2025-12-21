@@ -689,6 +689,7 @@ const LandingPage = () => {
   const [featuredItems, setFeaturedItems] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [pageBuilderSections, setPageBuilderSections] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -705,6 +706,17 @@ const LandingPage = () => {
         setFeaturedItems(itemsRes.data);
         setTestimonials(testimonialsRes.data);
         setFaqs(faqsRes.data);
+        
+        // Try to fetch Page Builder sections for homepage
+        try {
+          const pageRes = await axios.get(`${API}/page-content/home`);
+          if (pageRes.data && pageRes.data.sections) {
+            setPageBuilderSections(pageRes.data.sections);
+          }
+        } catch (e) {
+          // Page builder content may not exist yet, that's okay
+          console.log("No page builder content found for homepage");
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
