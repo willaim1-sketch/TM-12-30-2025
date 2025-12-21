@@ -22,6 +22,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 // Image dimension recommendations
 const IMAGE_DIMENSIONS = {
   hero: { width: 1920, height: 1080, label: "Hero Background", description: "Main homepage banner" },
+  mascot: { width: 400, height: 500, label: "Mascot/Silhouette", description: "PNG with transparent background" },
   menu_item: { width: 600, height: 450, label: "Menu Item", description: "Food photography" },
   merch_item: { width: 600, height: 600, label: "Merch Product", description: "Product photos" },
   merch_promo: { width: 400, height: 400, label: "Merch Promo", description: "Category thumbnails" },
