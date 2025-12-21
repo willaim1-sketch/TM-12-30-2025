@@ -1045,12 +1045,31 @@ async def add_media_item(data: dict, user: User = Depends(require_admin)):
         filename=data.get("filename", ""),
         url=data.get("url", ""),
         file_type=data.get("file_type", "image"),
-        alt_text=data.get("alt_text")
+        file_size=data.get("file_size"),
+        alt_text=data.get("alt_text"),
+        category=data.get("category", "other"),
+        width=data.get("width"),
+        height=data.get("height")
     )
     media_dict = media_item.model_dump()
     media_dict["created_at"] = media_dict["created_at"].isoformat()
     await db.media_library.insert_one(media_dict)
     return media_dict
+
+@api_router.put("/admin/media/{media_id}")
+async def update_media_item(media_id: str, data: dict, user: User = Depends(require_admin)):
+    update_data = {}
+    allowed_fields = ["filename", "alt_text", "category"]
+    for field in allowed_fields:
+        if field in data:
+            update_data[field] = data[field]
+    
+    if update_data:
+        await db.media_library.update_one(
+            {"media_id": media_id},
+            {"$set": update_data}
+        )
+    return {"status": "updated"}
 
 @api_router.delete("/admin/media/{media_id}")
 async def delete_media_item(media_id: str, user: User = Depends(require_admin)):
