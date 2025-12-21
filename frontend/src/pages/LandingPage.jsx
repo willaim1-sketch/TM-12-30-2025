@@ -791,7 +791,7 @@ const LandingPage = () => {
       <HeroSection settings={settings} />
       <AboutSection settings={settings} />
       <FeaturedMenuSection items={featuredItems} />
-      <MerchPromoSection />
+      <MerchPromoSection settings={settings} />
       <OrderCTASection />
       <TestimonialsSection testimonials={testimonials} />
       <LocationSection settings={settings} />
