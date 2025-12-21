@@ -1089,7 +1089,13 @@ async def get_page_content(page_id: str, user: User = Depends(require_admin)):
 async def update_page_content(page_id: str, data: dict, user: User = Depends(require_admin)):
     await db.page_content.update_one(
         {"page_id": page_id},
-        {"$set": {"page_id": page_id, "sections": data.get("sections", []), "updated_at": datetime.now(timezone.utc).isoformat()}},
+        {"$set": {
+            "page_id": page_id, 
+            "sections_top": data.get("sections_top", []),
+            "sections_bottom": data.get("sections_bottom", []),
+            "sections": data.get("sections", []),  # Keep for backward compatibility
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }},
         upsert=True
     )
     return {"status": "updated"}
