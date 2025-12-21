@@ -350,7 +350,34 @@ const FeaturedMenuSection = ({ items }) => {
 };
 
 // Merch Promo Section
-const MerchPromoSection = () => {
+const MerchPromoSection = ({ settings }) => {
+  const merchItems = [
+    { 
+      name: "T-Shirts", 
+      price: "From $24.99", 
+      emoji: "👕",
+      image: settings?.merch_tshirt_image 
+    },
+    { 
+      name: "Cups & Mugs", 
+      price: "From $14.99", 
+      emoji: "🥤",
+      image: settings?.merch_cups_image 
+    },
+    { 
+      name: "Hats", 
+      price: "From $19.99", 
+      emoji: "🧢",
+      image: settings?.merch_hats_image 
+    },
+    { 
+      name: "Souvenirs", 
+      price: "From $9.99", 
+      emoji: "🎁",
+      image: settings?.merch_souvenirs_image 
+    }
+  ];
+
   return (
     <section className="py-20 px-6 bg-gradient-to-br from-red-900/40 to-[#0A0A0A]">
       <div className="max-w-7xl mx-auto">
@@ -382,34 +409,19 @@ const MerchPromoSection = () => {
 
           {/* Merch Preview */}
           <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-4">
-            <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                <div className="text-6xl">👕</div>
+            {merchItems.map((item, idx) => (
+              <div key={idx} className="card-dark p-4 text-center">
+                <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-6xl">{item.emoji}</div>
+                  )}
+                </div>
+                <p className="text-white font-semibold">{item.name}</p>
+                <p className="text-red-500 font-bold">{item.price}</p>
               </div>
-              <p className="text-white font-semibold">T-Shirts</p>
-              <p className="text-red-500 font-bold">From $24.99</p>
-            </div>
-            <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                <div className="text-6xl">🥤</div>
-              </div>
-              <p className="text-white font-semibold">Cups & Mugs</p>
-              <p className="text-red-500 font-bold">From $14.99</p>
-            </div>
-            <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                <div className="text-6xl">🧢</div>
-              </div>
-              <p className="text-white font-semibold">Hats</p>
-              <p className="text-red-500 font-bold">From $19.99</p>
-            </div>
-            <div className="card-dark p-4 text-center">
-              <div className="aspect-square bg-[#2A2A2A] rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                <div className="text-6xl">🎁</div>
-              </div>
-              <p className="text-white font-semibold">Souvenirs</p>
-              <p className="text-red-500 font-bold">From $9.99</p>
-            </div>
+            ))}
           </motion.div>
         </motion.div>
       </div>
