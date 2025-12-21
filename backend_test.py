@@ -742,6 +742,12 @@ class TamaleManAPITester:
         self.test_admin_merch_endpoints()
         self.test_stripe_settings_endpoints()
         
+        # Test NEW FEATURES from review request
+        self.test_upload_endpoint()
+        self.test_notification_emails_in_settings()
+        self.test_logo_fields_in_settings()
+        self.test_order_creation_with_toppings()
+        
         # Print summary
         print("=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
