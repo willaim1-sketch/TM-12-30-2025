@@ -1059,6 +1059,16 @@ async def generate_image(data: dict, user: User = Depends(require_admin)):
 # PAGE BUILDER
 # =============================================================================
 
+# Public endpoint to get page content (for rendering on frontend)
+@api_router.get("/page-content/{page_id}")
+async def get_public_page_content(page_id: str):
+    """Public endpoint to fetch page builder content for rendering"""
+    page = await db.page_content.find_one({"page_id": page_id}, {"_id": 0})
+    if not page:
+        return {"page_id": page_id, "sections": []}
+    return page
+
+# Admin endpoint to get page content
 @api_router.get("/admin/page-builder/{page_id}")
 async def get_page_content(page_id: str, user: User = Depends(require_admin)):
     page = await db.page_content.find_one({"page_id": page_id}, {"_id": 0})
