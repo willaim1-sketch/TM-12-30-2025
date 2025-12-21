@@ -840,43 +840,94 @@ const SettingsManager = () => {
 
         <TabsContent value="hours">
           <div className="card-dark p-6">
-            <h3 className="text-white font-semibold mb-6">Opening Hours</h3>
-            <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white">Opening Hours</h3>
+                <p className="text-white/60 text-sm">Set your business hours for each day of the week</p>
+              </div>
+            </div>
+            
+            {/* Initialize days if empty */}
+            {(!settings.opening_hours || settings.opening_hours.length === 0) && (
+              <div className="text-center p-6 bg-[#2A2A2A] rounded-lg mb-6">
+                <p className="text-white/60 mb-4">No hours configured yet</p>
+                <Button 
+                  onClick={() => {
+                    const defaultHours = [
+                      { day: "Monday", open_time: "10:00", close_time: "20:00", is_closed: false },
+                      { day: "Tuesday", open_time: "10:00", close_time: "20:00", is_closed: false },
+                      { day: "Wednesday", open_time: "10:00", close_time: "20:00", is_closed: false },
+                      { day: "Thursday", open_time: "10:00", close_time: "20:00", is_closed: false },
+                      { day: "Friday", open_time: "10:00", close_time: "21:00", is_closed: false },
+                      { day: "Saturday", open_time: "10:00", close_time: "21:00", is_closed: false },
+                      { day: "Sunday", open_time: "11:00", close_time: "18:00", is_closed: false },
+                    ];
+                    updateSettings("opening_hours", defaultHours);
+                    toast.success("Default hours added - customize as needed!");
+                  }}
+                  className="btn-primary"
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Default Hours
+                </Button>
+              </div>
+            )}
+            
+            <div className="space-y-3">
               {(settings.opening_hours || []).map((hour, index) => (
-                <div key={hour.day} className="flex items-center gap-4 p-4 bg-[#2A2A2A] rounded-lg">
-                  <span className="w-28 text-white font-semibold">{hour.day}</span>
-                  <div className="flex items-center gap-2">
+                <div key={hour.day} className="flex items-center gap-4 p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#333] transition-colors">
+                  <span className="w-28 text-white font-semibold text-lg">{hour.day}</span>
+                  
+                  <div className="flex items-center gap-3">
                     <Switch
                       checked={!hour.is_closed}
                       onCheckedChange={(checked) => updateOpeningHours(index, "is_closed", !checked)}
                       data-testid={`hours-toggle-${hour.day}`}
                     />
-                    <span className="text-white/60 text-sm w-16">
+                    <span className={`text-sm w-16 font-medium ${hour.is_closed ? 'text-red-400' : 'text-green-400'}`}>
                       {hour.is_closed ? "Closed" : "Open"}
                     </span>
                   </div>
+                  
                   {!hour.is_closed && (
-                    <>
-                      <Input
-                        type="time"
-                        value={hour.open_time || ""}
-                        onChange={(e) => updateOpeningHours(index, "open_time", e.target.value)}
-                        className="input-dark w-32"
-                        data-testid={`hours-open-${hour.day}`}
-                      />
-                      <span className="text-white/60">to</span>
-                      <Input
-                        type="time"
-                        value={hour.close_time || ""}
-                        onChange={(e) => updateOpeningHours(index, "close_time", e.target.value)}
-                        className="input-dark w-32"
-                        data-testid={`hours-close-${hour.day}`}
-                      />
-                    </>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-white/50 text-sm">From</Label>
+                        <Input
+                          type="time"
+                          value={hour.open_time || ""}
+                          onChange={(e) => updateOpeningHours(index, "open_time", e.target.value)}
+                          className="input-dark w-32"
+                          data-testid={`hours-open-${hour.day}`}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-white/50 text-sm">To</Label>
+                        <Input
+                          type="time"
+                          value={hour.close_time || ""}
+                          onChange={(e) => updateOpeningHours(index, "close_time", e.target.value)}
+                          className="input-dark w-32"
+                          data-testid={`hours-close-${hour.day}`}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {hour.is_closed && (
+                    <span className="text-white/40 italic flex-1">Not open on {hour.day}</span>
                   )}
                 </div>
               ))}
             </div>
+            
+            {settings.opening_hours && settings.opening_hours.length > 0 && (
+              <div className="mt-6 p-4 bg-[#1A1A1A] rounded-lg border border-white/10">
+                <p className="text-white/60 text-sm">
+                  💡 <strong className="text-white">Tip:</strong> Toggle the switch to mark days as closed. Hours are displayed in the Location section on your homepage.
+                </p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
