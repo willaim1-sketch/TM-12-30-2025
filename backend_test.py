@@ -836,6 +836,11 @@ class TamaleManAPITester:
         self.test_logo_fields_in_settings()
         self.test_order_creation_with_toppings()
         
+        # Test PAGE BUILDER ENDPOINTS
+        self.test_page_builder_get_endpoint()
+        self.test_page_builder_put_endpoint()
+        self.test_upload_endpoint_exists()
+        
         # Print summary
         print("=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
