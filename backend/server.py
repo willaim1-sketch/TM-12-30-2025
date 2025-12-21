@@ -278,6 +278,13 @@ class OpeningHours(BaseModel):
     close_time: str
     is_closed: bool = False
 
+class NavMenuItem(BaseModel):
+    id: str = Field(default_factory=lambda: f"nav_{uuid.uuid4().hex[:8]}")
+    label: str
+    url: str
+    is_external: bool = False
+    visible: bool = True
+
 class SiteSettings(BaseModel):
     settings_id: str = "main_settings"
     site_name: str = "The Tamale Man"
@@ -298,10 +305,11 @@ class SiteSettings(BaseModel):
     address: str = "123 Main Street, Austin, TX"
     phone: str = "(512) 555-0123"
     email: str = "hello@thetamaleman.com"
-    notification_emails: List[str] = []  # Multiple emails for order notifications
-    header_logo: Optional[str] = None  # 200x60px
-    footer_logo: Optional[str] = None  # 250x150px (bigger for footer)
-    favicon: Optional[str] = None  # 64x64px
+    notification_emails: List[str] = []
+    header_logo: Optional[str] = None
+    footer_logo: Optional[str] = None
+    favicon: Optional[str] = None
+    nav_menu: List[NavMenuItem] = []  # Custom navigation menu items
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
