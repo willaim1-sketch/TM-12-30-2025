@@ -208,6 +208,37 @@ const SettingsManager = () => {
     updateSettings("notification_emails", emails);
   };
 
+  // Navigation menu management
+  const [newNavItem, setNewNavItem] = useState({ label: "", url: "" });
+  
+  const addNavItem = () => {
+    if (!newNavItem.label || !newNavItem.url) {
+      toast.error("Please enter both label and URL");
+      return;
+    }
+    const items = settings.nav_menu || [];
+    updateSettings("nav_menu", [...items, { 
+      id: `nav_${Date.now()}`,
+      label: newNavItem.label, 
+      url: newNavItem.url,
+      visible: true
+    }]);
+    setNewNavItem({ label: "", url: "" });
+    toast.success("Menu item added");
+  };
+
+  const removeNavItem = (id) => {
+    const items = (settings.nav_menu || []).filter(i => i.id !== id);
+    updateSettings("nav_menu", items);
+  };
+
+  const updateNavItem = (id, field, value) => {
+    const items = (settings.nav_menu || []).map(i => 
+      i.id === id ? { ...i, [field]: value } : i
+    );
+    updateSettings("nav_menu", items);
+  };
+
   if (loading || !settings) {
     return <div className="text-white">Loading settings...</div>;
   }
@@ -225,6 +256,7 @@ const SettingsManager = () => {
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="bg-[#1A1A1A] border border-white/10 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="general" className="data-[state=active]:bg-red-600">General</TabsTrigger>
+          <TabsTrigger value="navigation" className="data-[state=active]:bg-red-600">Navigation</TabsTrigger>
           <TabsTrigger value="logos" className="data-[state=active]:bg-red-600">
             <Image size={16} className="mr-1" />
             Logos
