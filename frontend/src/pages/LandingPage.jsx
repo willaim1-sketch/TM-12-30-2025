@@ -154,38 +154,46 @@ const HeroSection = ({ settings }) => {
             {settings?.hero_subtitle || "Crafted with passion, served with pride"}
           </motion.p>
 
-          {/* Silhouette Section - The Legend */}
+          {/* Silhouette/Mascot Section - The Legend */}
           <motion.div 
             variants={fadeInUp}
             className="flex flex-col items-center py-8"
           >
             <div className="relative">
-              {/* Silhouette figure */}
+              {/* Custom mascot image or default silhouette */}
               <div className="w-40 h-48 relative">
-                <svg viewBox="0 0 100 140" className="w-full h-full drop-shadow-2xl">
-                  {/* Chef silhouette with tamale - using dark grays instead of blue */}
-                  <defs>
-                    <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#333333" />
-                      <stop offset="100%" stopColor="#1a1a1a" />
-                    </linearGradient>
-                  </defs>
-                  {/* Head */}
-                  <ellipse cx="50" cy="20" rx="18" ry="20" fill="url(#silhouetteGrad)" />
-                  {/* Chef hat */}
-                  <path d="M30 15 Q30 0 50 0 Q70 0 70 15 L68 20 L32 20 Z" fill="url(#silhouetteGrad)" />
-                  {/* Body */}
-                  <path d="M30 40 Q25 45 25 60 L25 100 Q25 110 35 115 L65 115 Q75 110 75 100 L75 60 Q75 45 70 40 Z" fill="url(#silhouetteGrad)" />
-                  {/* Arms holding tamale */}
-                  <path d="M25 50 Q10 55 15 75 L35 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
-                  <path d="M75 50 Q90 55 85 75 L65 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
-                  {/* Giant Tamale - Red and cream/white */}
-                  <ellipse cx="50" cy="85" rx="25" ry="12" fill="#DC2626" />
-                  <ellipse cx="50" cy="85" rx="20" ry="8" fill="#FEF3C7" />
-                  {/* Legs */}
-                  <rect x="35" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
-                  <rect x="53" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
-                </svg>
+                {settings?.mascot_image ? (
+                  <img 
+                    src={settings.mascot_image} 
+                    alt="The Tamale Man" 
+                    className="w-full h-full object-contain drop-shadow-2xl"
+                  />
+                ) : (
+                  <svg viewBox="0 0 100 140" className="w-full h-full drop-shadow-2xl">
+                    {/* Chef silhouette with tamale - using dark grays instead of blue */}
+                    <defs>
+                      <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#333333" />
+                        <stop offset="100%" stopColor="#1a1a1a" />
+                      </linearGradient>
+                    </defs>
+                    {/* Head */}
+                    <ellipse cx="50" cy="20" rx="18" ry="20" fill="url(#silhouetteGrad)" />
+                    {/* Chef hat */}
+                    <path d="M30 15 Q30 0 50 0 Q70 0 70 15 L68 20 L32 20 Z" fill="url(#silhouetteGrad)" />
+                    {/* Body */}
+                    <path d="M30 40 Q25 45 25 60 L25 100 Q25 110 35 115 L65 115 Q75 110 75 100 L75 60 Q75 45 70 40 Z" fill="url(#silhouetteGrad)" />
+                    {/* Arms holding tamale */}
+                    <path d="M25 50 Q10 55 15 75 L35 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
+                    <path d="M75 50 Q90 55 85 75 L65 85" fill="url(#silhouetteGrad)" stroke="url(#silhouetteGrad)" strokeWidth="8" />
+                    {/* Giant Tamale - Red and cream/white */}
+                    <ellipse cx="50" cy="85" rx="25" ry="12" fill="#DC2626" />
+                    <ellipse cx="50" cy="85" rx="20" ry="8" fill="#FEF3C7" />
+                    {/* Legs */}
+                    <rect x="35" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
+                    <rect x="53" y="115" width="12" height="25" fill="url(#silhouetteGrad)" />
+                  </svg>
+                )}
               </div>
               {/* Glow effect */}
               <div className="absolute inset-0 bg-red-600/20 blur-3xl rounded-full"></div>
