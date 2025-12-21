@@ -339,6 +339,7 @@ class SiteSettingsUpdate(BaseModel):
     header_logo: Optional[str] = None
     footer_logo: Optional[str] = None
     favicon: Optional[str] = None
+    nav_menu: Optional[List[NavMenuItem]] = None
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
