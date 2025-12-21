@@ -238,16 +238,45 @@ const SectionEditor = ({ section, onUpdate, onDelete, onDuplicate }) => {
         return (
           <div className="space-y-4">
             <div>
-              <Label className="text-white text-lg">Image URL</Label>
-              <Input
-                value={localContent.src || ""}
-                onChange={(e) => handleContentChange("src", e.target.value)}
-                className="input-dark mt-1"
-                placeholder="https://..."
-              />
+              <Label className="text-white text-lg">Image</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="cursor-pointer flex-shrink-0">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      try {
+                        const response = await axios.post(`${API}/upload`, formData, {
+                          headers: { "Content-Type": "multipart/form-data" }
+                        });
+                        handleContentChange("src", response.data.url);
+                        toast.success("Image uploaded!");
+                      } catch (err) {
+                        toast.error("Upload failed");
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <div className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2">
+                    <Image size={18} />
+                    Upload Image
+                  </div>
+                </label>
+                <Input
+                  value={localContent.src || ""}
+                  onChange={(e) => handleContentChange("src", e.target.value)}
+                  className="input-dark flex-1"
+                  placeholder="Or paste image URL..."
+                />
+              </div>
               {localContent.src && (
                 <img src={localContent.src} alt="Preview" className="mt-4 w-full h-48 object-cover rounded-lg" />
               )}
+              <p className="text-white/50 text-sm mt-2">Recommended size: 1200 x 800px</p>
             </div>
             <div>
               <Label className="text-white">Alt Text (for SEO)</Label>
