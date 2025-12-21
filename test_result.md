@@ -103,65 +103,24 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Build a modern restaurant website for "The Tamale Man" with admin dashboard.
-  Latest requirements:
-  - Stripe checkout integration for payments
-  - Multiple email notifications for orders (SendGrid)
-  - Logo upload for header (200x60) and footer (250x150)
-  - Image dimension guides in admin settings
-  - Page Builder (Divi-like) for editing pages
+  Test the Page Builder feature specifically - make sure adding sections works, drag-drop reordering, 
+  and content editing. Also verify image upload functionality exists for admin use.
   
 frontend:
-  - task: "Logo support in Header and Footer"
+  - task: "Page Builder - Add Sections"
     implemented: true
     working: "NA"
-    file: "/app/frontend/src/pages/LandingPage.jsx"
+    file: "/app/frontend/src/pages/admin/PageBuilder.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Updated Navbar and Footer to show logos from settings. Header logo 200x60, Footer logo 250x150 (1/3 width)"
-
-  - task: "Admin Settings - Logos Tab"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/admin/SettingsManager.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added Logos tab with ImageUploader components for header_logo, footer_logo, and favicon"
-
-  - task: "Admin Settings - Notifications Tab"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/admin/SettingsManager.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added Notifications tab for managing multiple order notification emails"
-
-  - task: "Add-ons/Toppings Selection"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/MenuPage.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Fixed add-ons to be selectable with checkboxes, price breakdown, cart integration"
+        comment: "Page Builder has 15 section types, drag-drop reorder, section editor with content fields"
 
 backend:
-  - task: "Multiple notification emails support"
+  - task: "Page Builder API"
     implemented: true
     working: "NA"
     file: "/app/backend/server.py"
@@ -171,21 +130,9 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added notification_emails field to settings, SendGrid email helper, sends to all emails on order payment"
+        comment: "GET/PUT /api/admin/page-builder/{page_id} endpoints exist"
 
-  - task: "File Upload Endpoint"
-    implemented: true
-    working: "NA"
-    file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added /api/upload endpoint for logo/image uploads, serves from /api/uploads/"
-
-  - task: "Stripe Checkout Integration"
+  - task: "File Upload API"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -194,24 +141,24 @@ backend:
     needs_retesting: false
     status_history:
       - working: true
-        agent: "previous"
-        comment: "Already integrated - creates Stripe checkout session and handles webhook"
+        agent: "testing"
+        comment: "POST /api/upload accepts images and returns URLs"
 
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 5
+  test_sequence: 6
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Admin Settings - Logos Tab"
-    - "Admin Settings - Notifications Tab"
-    - "File Upload Endpoint"
+    - "Page Builder - Add Sections"
+    - "Page Builder - Edit Section Content"
+    - "Page Builder - Drag Drop Reorder"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Implemented logo upload for header/footer, multiple notification emails, file upload endpoint. Stripe checkout was already working. Ready for testing."
+    message: "Please test the Page Builder thoroughly after admin login. Test: 1) Navigate to Page Builder, 2) Add different section types (Hero, Text, Image, CTA), 3) Edit section content, 4) Reorder sections via drag-drop, 5) Save page and verify persistence."
