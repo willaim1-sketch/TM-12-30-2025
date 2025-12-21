@@ -309,7 +309,12 @@ class SiteSettings(BaseModel):
     header_logo: Optional[str] = None
     footer_logo: Optional[str] = None
     favicon: Optional[str] = None
-    nav_menu: List[NavMenuItem] = []  # Custom navigation menu items
+    nav_menu: List[NavMenuItem] = []
+    # Merch promo images (landing page)
+    merch_tshirt_image: Optional[str] = None
+    merch_cups_image: Optional[str] = None
+    merch_hats_image: Optional[str] = None
+    merch_souvenirs_image: Optional[str] = None
     google_maps_embed: Optional[str] = None
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
