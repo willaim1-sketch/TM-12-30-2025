@@ -663,10 +663,10 @@ const PageBuilder = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-4xl font-display font-bold text-white">Page Builder</h1>
-          <p className="text-white/60 mt-1 text-lg">Drag, drop, and customize your pages. Sections appear at the TOP of the page.</p>
+          <p className="text-white/60 mt-1 text-lg">Add sections to TOP or BOTTOM of your page</p>
         </div>
         <div className="flex gap-4">
           <Button
@@ -684,17 +684,8 @@ const PageBuilder = () => {
         </div>
       </div>
 
-      {/* Info Banner */}
-      <div className="bg-red-600/20 border border-red-600/50 rounded-xl p-4 mb-6 flex items-start gap-3">
-        <div className="text-red-500 mt-0.5">💡</div>
-        <div>
-          <p className="text-white font-medium">How it works:</p>
-          <p className="text-white/70 text-sm">Sections you add here will appear at the TOP of the homepage, above the default content. After saving, click "Preview Live Site" to see your changes!</p>
-        </div>
-      </div>
-
       {/* Page Selector */}
-      <div className="flex gap-4 mb-8">
+      <div className="flex gap-4 mb-6">
         {pages.map((page) => (
           <button
             key={page.id}
@@ -710,27 +701,32 @@ const PageBuilder = () => {
         ))}
       </div>
 
-      {/* Sections List */}
-      <div className="space-y-4 mb-8">
-        {sections.length === 0 ? (
-          <div className="card-dark p-12 text-center">
-            <Layout className="mx-auto mb-4 text-white/40" size={64} />
-            <h3 className="text-white text-2xl font-bold mb-2">No sections yet</h3>
-            <p className="text-white/60 text-lg mb-6">Start building your page by adding sections</p>
-            <Button onClick={() => setShowAddSection(true)} className="btn-primary">
-              <Plus size={20} className="mr-2" />
-              Add First Section
-            </Button>
+      {/* TOP SECTIONS */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            ⬆️ TOP Sections
+            <span className="text-sm font-normal text-white/50">(appears above default content)</span>
+          </h2>
+          <Button onClick={() => { setAddPosition("top"); setShowAddSection(true); }} className="btn-primary">
+            <Plus size={18} className="mr-2" />
+            Add to Top
+          </Button>
+        </div>
+        
+        {sectionsTop.length === 0 ? (
+          <div className="card-dark p-8 text-center border-2 border-dashed border-white/20">
+            <p className="text-white/50">No sections at top. Click "Add to Top" to add sections that appear before the default page content.</p>
           </div>
         ) : (
-          <Reorder.Group values={sections} onReorder={handleReorder} className="space-y-4">
-            {sections.map((section) => (
+          <Reorder.Group values={sectionsTop} onReorder={handleReorderTop} className="space-y-4">
+            {sectionsTop.map((section) => (
               <Reorder.Item key={section.id} value={section}>
                 <SectionEditor
                   section={section}
-                  onUpdate={updateSection}
-                  onDelete={deleteSection}
-                  onDuplicate={duplicateSection}
+                  onUpdate={(s) => updateSection(s, "top")}
+                  onDelete={(id) => deleteSection(id, "top")}
+                  onDuplicate={(s) => duplicateSection(s, "top")}
                 />
               </Reorder.Item>
             ))}
@@ -738,17 +734,46 @@ const PageBuilder = () => {
         )}
       </div>
 
-      {/* Add Section Button */}
-      {sections.length > 0 && (
-        <Button
-          onClick={() => setShowAddSection(true)}
-          variant="outline"
-          className="w-full btn-secondary py-6 text-xl"
-        >
-          <Plus size={24} className="mr-2" />
-          Add Section
-        </Button>
-      )}
+      {/* DEFAULT CONTENT INDICATOR */}
+      <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-6 mb-8">
+        <div className="text-center">
+          <p className="text-white/70 text-lg">📄 <strong>Default Page Content</strong></p>
+          <p className="text-white/50 text-sm">Hero, About, Menu, Testimonials, Location, FAQ sections appear here</p>
+        </div>
+      </div>
+
+      {/* BOTTOM SECTIONS */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            ⬇️ BOTTOM Sections
+            <span className="text-sm font-normal text-white/50">(appears above footer)</span>
+          </h2>
+          <Button onClick={() => { setAddPosition("bottom"); setShowAddSection(true); }} className="btn-primary">
+            <Plus size={18} className="mr-2" />
+            Add to Bottom
+          </Button>
+        </div>
+        
+        {sectionsBottom.length === 0 ? (
+          <div className="card-dark p-8 text-center border-2 border-dashed border-white/20">
+            <p className="text-white/50">No sections at bottom. Click "Add to Bottom" to add sections that appear above the footer.</p>
+          </div>
+        ) : (
+          <Reorder.Group values={sectionsBottom} onReorder={handleReorderBottom} className="space-y-4">
+            {sectionsBottom.map((section) => (
+              <Reorder.Item key={section.id} value={section}>
+                <SectionEditor
+                  section={section}
+                  onUpdate={(s) => updateSection(s, "bottom")}
+                  onDelete={(id) => deleteSection(id, "bottom")}
+                  onDuplicate={(s) => duplicateSection(s, "bottom")}
+                />
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        )}
+      </div>
 
       {/* Add Section Modal */}
       {showAddSection && (
