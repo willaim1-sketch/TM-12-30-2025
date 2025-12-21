@@ -267,17 +267,46 @@ const MerchManager = () => {
             </div>
 
             <div>
-              <Label className="text-white/70">Image URL</Label>
-              <Input
-                value={form.image_url}
-                onChange={(e) => setForm(prev => ({ ...prev, image_url: e.target.value }))}
-                className="input-dark mt-1"
-                placeholder="https://..."
-                data-testid="merch-image-input"
-              />
+              <Label className="text-white/70">Product Image</Label>
+              <div className="flex gap-3 mt-2">
+                <label className="cursor-pointer flex-shrink-0">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      try {
+                        const response = await axios.post(`${API}/upload`, formData, {
+                          headers: { "Content-Type": "multipart/form-data" }
+                        });
+                        setForm(prev => ({ ...prev, image_url: response.data.url }));
+                        toast.success("Image uploaded!");
+                      } catch (err) {
+                        toast.error("Upload failed");
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <div className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2">
+                    <Upload size={18} />
+                    Upload
+                  </div>
+                </label>
+                <Input
+                  value={form.image_url}
+                  onChange={(e) => setForm(prev => ({ ...prev, image_url: e.target.value }))}
+                  className="input-dark flex-1"
+                  placeholder="Or paste image URL..."
+                  data-testid="merch-image-input"
+                />
+              </div>
               {form.image_url && (
-                <img src={form.image_url} alt="Preview" className="mt-4 w-full h-32 object-cover rounded-lg" />
+                <img src={form.image_url} alt="Preview" className="mt-4 w-full h-40 object-cover rounded-lg" />
               )}
+              <p className="text-white/50 text-xs mt-2">Recommended size: 600 x 600px (square)</p>
             </div>
 
             <div>
