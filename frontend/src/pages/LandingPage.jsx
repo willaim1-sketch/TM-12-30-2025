@@ -739,24 +739,20 @@ const LandingPage = () => {
     <div className="min-h-screen bg-[#0A0A0A]">
       <Navbar settings={settings} />
       
-      {/* Page Builder Sections - Shown FIRST if any exist */}
+      {/* Page Builder Sections - Shown at TOP if any exist */}
       {pageBuilderSections.length > 0 && (
         <PageRenderer sections={pageBuilderSections} settings={settings} />
       )}
       
-      {/* Default sections - Only show if NO page builder sections exist */}
-      {pageBuilderSections.length === 0 && (
-        <>
-          <HeroSection settings={settings} />
-          <AboutSection settings={settings} />
-          <FeaturedMenuSection items={featuredItems} />
-          <MerchPromoSection />
-          <OrderCTASection />
-          <TestimonialsSection testimonials={testimonials} />
-          <LocationSection settings={settings} />
-          <FAQSection faqs={faqs} />
-        </>
-      )}
+      {/* Default sections - Always show for now (until user has full page built) */}
+      <HeroSection settings={settings} />
+      <AboutSection settings={settings} />
+      <FeaturedMenuSection items={featuredItems} />
+      <MerchPromoSection />
+      <OrderCTASection />
+      <TestimonialsSection testimonials={testimonials} />
+      <LocationSection settings={settings} />
+      <FAQSection faqs={faqs} />
       
       <Footer settings={settings} />
     </div>
