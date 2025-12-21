@@ -506,6 +506,61 @@ const SettingsManager = () => {
           </div>
         </TabsContent>
 
+        {/* MERCH PROMO TAB */}
+        <TabsContent value="merch_promo">
+          <div className="card-dark p-6 space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-2">Merch Promo Section Images</h3>
+              <p className="text-white/60">Upload images for the merch preview boxes on the homepage. If no image is set, an emoji placeholder will be shown.</p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <ImageUploader
+                label="T-Shirts Image"
+                value={settings.merch_tshirt_image}
+                onChange={(val) => updateSettings("merch_tshirt_image", val)}
+                width={400}
+                height={400}
+                description="Square image for T-Shirts category"
+              />
+              
+              <ImageUploader
+                label="Cups & Mugs Image"
+                value={settings.merch_cups_image}
+                onChange={(val) => updateSettings("merch_cups_image", val)}
+                width={400}
+                height={400}
+                description="Square image for Cups & Mugs category"
+              />
+              
+              <ImageUploader
+                label="Hats Image"
+                value={settings.merch_hats_image}
+                onChange={(val) => updateSettings("merch_hats_image", val)}
+                width={400}
+                height={400}
+                description="Square image for Hats category"
+              />
+              
+              <ImageUploader
+                label="Souvenirs Image"
+                value={settings.merch_souvenirs_image}
+                onChange={(val) => updateSettings("merch_souvenirs_image", val)}
+                width={400}
+                height={400}
+                description="Square image for Souvenirs category"
+              />
+            </div>
+            
+            <Alert className="bg-[#2A2A2A] border-white/10">
+              <Info size={16} className="text-red-500" />
+              <AlertDescription className="text-white/70">
+                <strong>Tip:</strong> Use square images (400×400px) with transparent or matching backgrounds for best results. Product photos on white backgrounds work great!
+              </AlertDescription>
+            </Alert>
+          </div>
+        </TabsContent>
+
         <TabsContent value="about">
           <div className="card-dark p-6 space-y-6">
             <div>
