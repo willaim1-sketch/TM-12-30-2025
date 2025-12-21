@@ -636,7 +636,7 @@ const PageBuilder = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-display font-bold text-white">Page Builder</h1>
-          <p className="text-white/60 mt-1 text-lg">Drag, drop, and customize your pages like Divi</p>
+          <p className="text-white/60 mt-1 text-lg">Drag, drop, and customize your pages. Sections appear at the TOP of the page.</p>
         </div>
         <div className="flex gap-4">
           <Button
@@ -645,12 +645,21 @@ const PageBuilder = () => {
             className="btn-secondary"
           >
             <Eye size={20} className="mr-2" />
-            Preview Site
+            Preview Live Site
           </Button>
           <Button onClick={handleSave} disabled={saving} className="btn-primary">
             <Save size={20} className="mr-2" />
-            {saving ? "Saving..." : "Save Page"}
+            {saving ? "Saving..." : "Save & Publish"}
           </Button>
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="bg-red-600/20 border border-red-600/50 rounded-xl p-4 mb-6 flex items-start gap-3">
+        <div className="text-red-500 mt-0.5">💡</div>
+        <div>
+          <p className="text-white font-medium">How it works:</p>
+          <p className="text-white/70 text-sm">Sections you add here will appear at the TOP of the homepage, above the default content. After saving, click "Preview Live Site" to see your changes!</p>
         </div>
       </div>
 
