@@ -43,10 +43,12 @@ const Navbar = ({ settings }) => {
               src={settings.header_logo} 
               alt={settings?.site_name || "The Tamale Man"} 
               className="h-10 md:h-12 w-auto object-contain"
+              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'block'); }}
             />
-          ) : (
-            <span className="text-2xl font-display font-bold text-white">{settings?.site_name || "The Tamale Man"}</span>
-          )}
+          ) : null}
+          <span className={`text-2xl font-display font-bold text-white ${settings?.header_logo ? 'hidden' : ''}`}>
+            {settings?.site_name || "The Tamale Man"}
+          </span>
         </Link>
         
         <div className="hidden md:flex items-center gap-8">
