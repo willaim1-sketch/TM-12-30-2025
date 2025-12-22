@@ -173,11 +173,11 @@ const HeroSection = ({ settings }) => {
                   />
                 ) : null}
                 <svg viewBox="0 0 100 140" className={`w-full h-full drop-shadow-2xl ${settings?.mascot_image ? 'hidden' : ''}`}>
-                  {/* Chef silhouette with tamale - using dark grays instead of blue */}
+                  {/* Chef silhouette with tamale - using warm red/maroon tones for visibility */}
                   <defs>
                     <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#333333" />
-                      <stop offset="100%" stopColor="#1a1a1a" />
+                      <stop offset="0%" stopColor="#7f1d1d" />
+                      <stop offset="100%" stopColor="#450a0a" />
                     </linearGradient>
                   </defs>
                   {/* Head */}
