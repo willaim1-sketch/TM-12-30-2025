@@ -701,10 +701,12 @@ const Footer = ({ settings }) => {
                 alt={settings?.site_name || "The Tamale Man"} 
                 className="max-w-full h-auto max-h-36 object-contain mb-6"
                 style={{ maxWidth: "250px" }}
+                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'block'); }}
               />
-            ) : (
-              <h3 className="text-3xl font-display font-bold text-white mb-4">{settings?.site_name || "The Tamale Man"}</h3>
-            )}
+            ) : null}
+            <h3 className={`text-3xl font-display font-bold text-white mb-4 ${settings?.footer_logo ? 'hidden' : ''}`}>
+              {settings?.site_name || "The Tamale Man"}
+            </h3>
             <p className="text-white/60 mb-6 text-lg">
               Home-style fast food tamales made with love. Big portions, bold flavors!
             </p>
