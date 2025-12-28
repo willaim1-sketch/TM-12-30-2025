@@ -711,20 +711,40 @@ const Footer = ({ settings }) => {
             <p className="text-white/60 mb-6 text-lg">
               Home-style fast food tamales made with love. Big portions, bold flavors!
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {settings?.facebook_url && (
-                <a href={settings.facebook_url} className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-facebook">
+                <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-facebook">
                   <Facebook size={24} />
                 </a>
               )}
               {settings?.instagram_url && (
-                <a href={settings.instagram_url} className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-instagram">
+                <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-instagram">
                   <Instagram size={24} />
                 </a>
               )}
               {settings?.twitter_url && (
-                <a href={settings.twitter_url} className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-twitter">
+                <a href={settings.twitter_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-twitter">
                   <Twitter size={24} />
+                </a>
+              )}
+              {settings?.tiktok_url && (
+                <a href={settings.tiktok_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-tiktok">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                </a>
+              )}
+              {settings?.snapchat_url && (
+                <a href={settings.snapchat_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-snapchat">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509-.015.25-.198.449-.495.51-.45.074-.949.252-1.461.428-.233.074-.465.149-.48.152-.975.269-.765.449-.615 2.194.045.329-.015.555-.211.688-.149.104-.358.134-.553.134-.39 0-.81-.104-1.050-.134-.12-.015-.268-.03-.42-.044-.51-.045-1.139-.091-1.828.119-.074.03-.149.061-.24.105-.45.209-.975.435-1.664.435-.045 0-.089 0-.12-.015h-.121c-.689 0-1.199-.24-1.649-.435-.091-.045-.165-.074-.24-.105-.689-.21-1.319-.164-1.828-.119-.165.015-.315.029-.435.044-.24.03-.66.134-1.050.134-.195 0-.404-.029-.554-.134-.195-.134-.255-.359-.21-.688.135-1.745.359-1.925-.615-2.194-.016-.003-.248-.078-.48-.152-.511-.176-1.011-.354-1.461-.428-.297-.061-.48-.26-.494-.51-.016-.239.164-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.449-.884-.674-1.333-.809-.136-.045-.256-.09-.346-.12-.809-.329-1.228-.72-1.213-1.168 0-.36.285-.689.734-.839.151-.06.329-.089.51-.089.12 0 .299.015.449.104.375.18.734.301 1.05.301.183 0 .315-.045.389-.091l-.015-.12-.03-.51-.003-.06c-.104-1.628-.23-3.654.3-4.847C7.859 1.069 11.217.793 12.206.793"/></svg>
+                </a>
+              )}
+              {settings?.youtube_url && (
+                <a href={settings.youtube_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-youtube">
+                  <Youtube size={24} />
+                </a>
+              )}
+              {settings?.linkedin_url && (
+                <a href={settings.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-red-500 transition-colors" data-testid="footer-linkedin">
+                  <Linkedin size={24} />
                 </a>
               )}
             </div>
