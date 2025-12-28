@@ -135,6 +135,7 @@ const SettingsManager = () => {
   useEffect(() => {
     fetchSettings();
     fetchStripeSettings();
+    fetchSendgridSettings();
   }, []);
 
   const fetchSettings = async () => {
