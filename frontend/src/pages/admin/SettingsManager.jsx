@@ -722,7 +722,7 @@ const SettingsManager = () => {
             </div>
             <div className="border-t border-white/10 pt-6">
               <h3 className="text-white font-semibold mb-4">Social Media</h3>
-              <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-white/70">Facebook URL</Label>
                   <Input
@@ -744,13 +744,53 @@ const SettingsManager = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-white/70">Twitter URL</Label>
+                  <Label className="text-white/70">Twitter / X URL</Label>
                   <Input
                     value={settings.twitter_url || ""}
                     onChange={(e) => updateSettings("twitter_url", e.target.value)}
                     className="input-dark mt-1"
                     placeholder="https://twitter.com/..."
                     data-testid="setting-twitter"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70">TikTok URL</Label>
+                  <Input
+                    value={settings.tiktok_url || ""}
+                    onChange={(e) => updateSettings("tiktok_url", e.target.value)}
+                    className="input-dark mt-1"
+                    placeholder="https://tiktok.com/@..."
+                    data-testid="setting-tiktok"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70">Snapchat URL</Label>
+                  <Input
+                    value={settings.snapchat_url || ""}
+                    onChange={(e) => updateSettings("snapchat_url", e.target.value)}
+                    className="input-dark mt-1"
+                    placeholder="https://snapchat.com/add/..."
+                    data-testid="setting-snapchat"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70">YouTube URL</Label>
+                  <Input
+                    value={settings.youtube_url || ""}
+                    onChange={(e) => updateSettings("youtube_url", e.target.value)}
+                    className="input-dark mt-1"
+                    placeholder="https://youtube.com/@..."
+                    data-testid="setting-youtube"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white/70">LinkedIn URL</Label>
+                  <Input
+                    value={settings.linkedin_url || ""}
+                    onChange={(e) => updateSettings("linkedin_url", e.target.value)}
+                    className="input-dark mt-1"
+                    placeholder="https://linkedin.com/company/..."
+                    data-testid="setting-linkedin"
                   />
                 </div>
               </div>
