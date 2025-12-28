@@ -276,6 +276,10 @@ const SettingsManager = () => {
             <CreditCard size={16} className="mr-1" />
             Payments
           </TabsTrigger>
+          <TabsTrigger value="sendgrid" className="data-[state=active]:bg-red-600">
+            <Mail size={16} className="mr-1" />
+            SendGrid
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
