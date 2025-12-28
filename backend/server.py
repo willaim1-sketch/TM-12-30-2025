@@ -906,6 +906,138 @@ async def update_order(order_id: str, data: dict, user: User = Depends(require_a
         raise HTTPException(status_code=404, detail="Order not found")
     return {"status": "updated"}
 
+@api_router.post("/admin/orders/{order_id}/send-email")
+async def send_order_email(order_id: str, data: dict, user: User = Depends(require_admin)):
+    """Send order details to kitchen/chef via email"""
+    email_to = data.get("email")
+    if not email_to:
+        raise HTTPException(status_code=400, detail="Email address required")
+    
+    # Get order
+    order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Get settings for branding
+    settings = await db.site_settings.find_one({"settings_id": "main_settings"}, {"_id": 0})
+    site_name = settings.get("site_name", "The Tamale Man") if settings else "The Tamale Man"
+    
+    # Build items HTML
+    items_html = ""
+    for item in order.get("items", []):
+        toppings_str = ""
+        if item.get("toppings"):
+            toppings_str = f"<br><small style='color:#666;'>Add-ons: {', '.join([t.get('name', '') for t in item['toppings']])}</small>"
+        meat_str = f"<br><small style='color:#666;'>Meat: {item['meat_choice']}</small>" if item.get("meat_choice") else ""
+        items_html += f"""
+        <tr>
+            <td style="padding:12px;border-bottom:1px solid #eee;">{item.get('quantity', 1)}x {item.get('name', '')}{meat_str}{toppings_str}</td>
+            <td style="padding:12px;border-bottom:1px solid #eee;text-align:right;">${item.get('price', 0) * item.get('quantity', 1):.2f}</td>
+        </tr>
+        """
+    
+    # Notes section
+    notes_html = ""
+    if order.get("comments"):
+        notes_html = f"""
+        <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:8px;padding:16px;margin-top:20px;">
+            <h3 style="margin:0 0 10px 0;color:#856404;">📝 NOTES / Special Instructions</h3>
+            <p style="margin:0;color:#856404;white-space:pre-wrap;">{order.get('comments')}</p>
+        </div>
+        """
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5;">
+        <div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+            <div style="background:#DC2626;color:white;padding:20px;text-align:center;">
+                <h1 style="margin:0;font-size:24px;">🌽 {site_name}</h1>
+                <p style="margin:5px 0 0 0;opacity:0.9;">Kitchen Order</p>
+            </div>
+            
+            <div style="padding:20px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <div>
+                        <p style="margin:0;color:#666;font-size:12px;">ORDER ID</p>
+                        <p style="margin:0;font-weight:bold;font-family:monospace;">{order_id}</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <p style="margin:0;color:#666;font-size:12px;">PICKUP</p>
+                        <p style="margin:0;font-weight:bold;">{order.get('pickup_date', '')} at {order.get('pickup_time', '')}</p>
+                    </div>
+                </div>
+                
+                <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin-bottom:20px;">
+                    <h3 style="margin:0 0 10px 0;color:#333;">Customer</h3>
+                    <p style="margin:0;font-weight:bold;">{order.get('customer_name', '')}</p>
+                    <p style="margin:5px 0 0 0;color:#666;">{order.get('customer_phone', '')}</p>
+                </div>
+                
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f0f0f0;">
+                            <th style="padding:12px;text-align:left;">Item</th>
+                            <th style="padding:12px;text-align:right;">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items_html}
+                    </tbody>
+                </table>
+                
+                <div style="margin-top:20px;padding-top:20px;border-top:2px solid #eee;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="color:#666;">Subtotal</span>
+                        <span>${order.get('subtotal', 0):.2f}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="color:#666;">Tax</span>
+                        <span>${order.get('tax', 0):.2f}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:20px;font-weight:bold;padding-top:10px;border-top:1px solid #eee;">
+                        <span>TOTAL</span>
+                        <span style="color:#DC2626;">${order.get('total', 0):.2f}</span>
+                    </div>
+                </div>
+                
+                {notes_html}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Send email via SendGrid
+    try:
+        import sendgrid
+        from sendgrid.helpers.mail import Mail, Email, To, Content
+        
+        sg_api_key = os.environ.get("SENDGRID_API_KEY")
+        if not sg_api_key:
+            raise HTTPException(status_code=500, detail="SendGrid not configured")
+        
+        sg = sendgrid.SendGridAPIClient(api_key=sg_api_key)
+        
+        from_email = settings.get("email", "orders@thetamaleman.com") if settings else "orders@thetamaleman.com"
+        
+        message = Mail(
+            from_email=Email(from_email, site_name),
+            to_emails=To(email_to),
+            subject=f"🌽 Kitchen Order: {order_id} - {order.get('customer_name', '')}",
+            html_content=Content("text/html", html_content)
+        )
+        
+        sg.send(message)
+        return {"status": "sent", "email": email_to}
+        
+    except Exception as e:
+        print(f"Email send error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+
 # Contact Submissions (Admin)
 @api_router.get("/admin/contacts")
 async def get_contacts(user: User = Depends(require_admin)):
