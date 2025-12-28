@@ -6,6 +6,7 @@ import { MapPin, Phone, Mail, Clock, Star, ChevronDown, Menu, X, Facebook, Insta
 import { Button } from "../components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
 import PageRenderer from "../components/PageRenderer";
+import SEO from "../components/SEO";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
