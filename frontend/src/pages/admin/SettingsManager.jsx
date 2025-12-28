@@ -1168,6 +1168,162 @@ const SettingsManager = () => {
             </div>
           </div>
         </TabsContent>
+
+        {/* SendGrid Settings Tab */}
+        <TabsContent value="sendgrid">
+          <div className="card-dark p-6 space-y-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Mail className="text-red-500" size={24} />
+              <div>
+                <h3 className="text-white font-semibold text-lg">SendGrid Email Settings</h3>
+                <p className="text-white/60 text-sm">Configure SendGrid to send order notifications and kitchen emails</p>
+              </div>
+            </div>
+
+            {/* Status Indicator */}
+            <div className={`p-4 rounded-lg border ${
+              sendgridStatus.configured && sendgridStatus.lastTestSuccess 
+                ? 'bg-green-950/50 border-green-700' 
+                : sendgridStatus.configured 
+                  ? 'bg-yellow-950/50 border-yellow-700'
+                  : 'bg-red-950/50 border-red-700'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${
+                    sendgridStatus.configured && sendgridStatus.lastTestSuccess 
+                      ? 'bg-green-500 animate-pulse' 
+                      : sendgridStatus.configured 
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
+                  }`}></div>
+                  <div>
+                    <p className="text-white font-medium">
+                      {sendgridStatus.configured && sendgridStatus.lastTestSuccess 
+                        ? '✅ SendGrid Connected & Working' 
+                        : sendgridStatus.configured 
+                          ? '⚠️ SendGrid Configured (Not Tested)'
+                          : '❌ SendGrid Not Configured'}
+                    </p>
+                    {sendgridStatus.lastTest && (
+                      <p className="text-white/60 text-sm">
+                        Last tested: {new Date(sendgridStatus.lastTest).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleTestSendgrid} 
+                  disabled={testingSendgrid || !sendgridSettings.sendgrid_api_key}
+                  variant="outline"
+                  className="btn-secondary"
+                >
+                  {testingSendgrid ? 'Testing...' : 'Test Connection'}
+                </Button>
+              </div>
+            </div>
+
+            <Alert className="bg-blue-950/50 border-blue-800">
+              <Info className="h-4 w-4 text-blue-400" />
+              <AlertDescription className="text-blue-200">
+                Get your API key from{" "}
+                <a 
+                  href="https://app.sendgrid.com/settings/api_keys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline hover:text-blue-300"
+                >
+                  SendGrid Dashboard → Settings → API Keys
+                </a>
+                <br />
+                <span className="text-blue-300/70 text-xs">Make sure to give the key "Full Access" or at least "Mail Send" permissions</span>
+              </AlertDescription>
+            </Alert>
+
+            <div>
+              <Label className="text-white/70">SendGrid API Key</Label>
+              <p className="text-white/50 text-xs mb-2">Starts with SG.</p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showSendgridKey ? "text" : "password"}
+                    value={sendgridSettings.sendgrid_api_key || ""}
+                    onChange={(e) => setSendgridSettings(prev => ({ ...prev, sendgrid_api_key: e.target.value }))}
+                    className="input-dark pr-10"
+                    placeholder="SG.xxxxxxxx..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSendgridKey(!showSendgridKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+                  >
+                    {showSendgridKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-white/70">From Email Address</Label>
+                <p className="text-white/50 text-xs mb-2">Must be verified in SendGrid</p>
+                <Input
+                  type="email"
+                  value={sendgridSettings.from_email || ""}
+                  onChange={(e) => setSendgridSettings(prev => ({ ...prev, from_email: e.target.value }))}
+                  className="input-dark"
+                  placeholder="orders@yourrestaurant.com"
+                />
+              </div>
+              <div>
+                <Label className="text-white/70">From Name</Label>
+                <p className="text-white/50 text-xs mb-2">Display name in emails</p>
+                <Input
+                  value={sendgridSettings.from_name || ""}
+                  onChange={(e) => setSendgridSettings(prev => ({ ...prev, from_name: e.target.value }))}
+                  className="input-dark"
+                  placeholder="The Tamale Man"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/10">
+              <Button 
+                onClick={handleSaveSendgrid} 
+                disabled={saving} 
+                className="btn-primary"
+              >
+                <Save size={16} className="mr-2" />
+                {saving ? "Saving..." : "Save SendGrid Settings"}
+              </Button>
+            </div>
+
+            {/* Usage Info */}
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <h4 className="text-white font-semibold mb-4">How SendGrid is Used</h4>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-[#2A2A2A] rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">📧</span>
+                    <span className="text-white font-medium">Order Notifications</span>
+                  </div>
+                  <p className="text-white/60 text-sm">
+                    Automatically sends email to notification addresses when a new order is placed and paid.
+                  </p>
+                </div>
+                <div className="bg-[#2A2A2A] rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">👨‍🍳</span>
+                    <span className="text-white font-medium">Kitchen Orders</span>
+                  </div>
+                  <p className="text-white/60 text-sm">
+                    Send formatted order details to your kitchen/chef from the Orders page.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
