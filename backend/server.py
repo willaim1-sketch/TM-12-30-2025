@@ -920,13 +920,18 @@ async def delete_contact(submission_id: str, user: User = Depends(require_admin)
 # Site Settings (Admin)
 @api_router.put("/admin/settings")
 async def update_site_settings(data: SiteSettingsUpdate, user: User = Depends(require_admin)):
-    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    # Include all fields that are explicitly set (even empty strings to allow clearing)
+    update_data = {}
+    for k, v in data.model_dump().items():
+        if v is not None:  # Include the field if it has any value (including empty string)
+            update_data[k] = v
     
-    await db.site_settings.update_one(
-        {"settings_id": "main_settings"},
-        {"$set": update_data},
-        upsert=True
-    )
+    if update_data:
+        await db.site_settings.update_one(
+            {"settings_id": "main_settings"},
+            {"$set": update_data},
+            upsert=True
+        )
     return {"status": "updated"}
 
 # Testimonials (Admin)
