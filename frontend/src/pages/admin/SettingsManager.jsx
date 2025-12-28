@@ -123,6 +123,10 @@ const ImageUploader = ({ label, value, onChange, width, height, description }) =
 const SettingsManager = () => {
   const [settings, setSettings] = useState(null);
   const [stripeSettings, setStripeSettings] = useState({ stripe_api_key: "", stripe_webhook_secret: "" });
+  const [sendgridSettings, setSendgridSettings] = useState({ sendgrid_api_key: "", from_email: "", from_name: "" });
+  const [sendgridStatus, setSendgridStatus] = useState({ configured: false, tested: false, lastTest: null });
+  const [testingSendgrid, setTestingSendgrid] = useState(false);
+  const [showSendgridKey, setShowSendgridKey] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showStripeKey, setShowStripeKey] = useState(false);
