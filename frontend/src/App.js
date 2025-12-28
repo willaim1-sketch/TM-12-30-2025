@@ -138,16 +138,15 @@ function App() {
   }, []);
 
   return (
-    <div className="App min-h-screen bg-[#0A0A0A]">
-      <Toaster position="top-right" richColors />
-      <BrowserRouter>
-        <AppRouter />
-      </BrowserRouter>
-    </div>
+    <HelmetProvider>
+      <div className="App min-h-screen bg-[#0A0A0A]">
+        <Toaster position="top-right" richColors />
+        <BrowserRouter>
+          <AppRouter />
+        </BrowserRouter>
+      </div>
+    </HelmetProvider>
   );
 }
-
-// Need to import React for context
-import React from "react";
 
 export default App;
