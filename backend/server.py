@@ -320,6 +320,10 @@ class SiteSettings(BaseModel):
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
     twitter_url: Optional[str] = None
+    tiktok_url: Optional[str] = None
+    snapchat_url: Optional[str] = None
+    youtube_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
     opening_hours: List[OpeningHours] = []
 
 class SiteSettingsUpdate(BaseModel):
@@ -356,6 +360,10 @@ class SiteSettingsUpdate(BaseModel):
     facebook_url: Optional[str] = None
     instagram_url: Optional[str] = None
     twitter_url: Optional[str] = None
+    tiktok_url: Optional[str] = None
+    snapchat_url: Optional[str] = None
+    youtube_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
     opening_hours: Optional[List[OpeningHours]] = None
 
 class BlogPost(BaseModel):
