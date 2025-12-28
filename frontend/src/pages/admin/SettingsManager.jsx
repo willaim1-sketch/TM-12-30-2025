@@ -157,6 +157,48 @@ const SettingsManager = () => {
     }
   };
 
+  const fetchSendgridSettings = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/sendgrid-settings`, { withCredentials: true });
+      setSendgridSettings(response.data.settings || {});
+      setSendgridStatus(response.data.status || { configured: false, tested: false });
+    } catch (error) {
+      // Settings may not exist yet
+    }
+  };
+
+  const handleSaveSendgrid = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API}/admin/sendgrid-settings`, sendgridSettings, { withCredentials: true });
+      toast.success("SendGrid settings saved");
+      fetchSendgridSettings();
+    } catch (error) {
+      toast.error("Failed to save SendGrid settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTestSendgrid = async () => {
+    setTestingSendgrid(true);
+    try {
+      const response = await axios.post(`${API}/admin/sendgrid-test`, {}, { withCredentials: true });
+      if (response.data.success) {
+        toast.success("SendGrid is working! Test email sent.");
+        setSendgridStatus(prev => ({ ...prev, tested: true, lastTest: new Date().toISOString(), lastTestSuccess: true }));
+      } else {
+        toast.error(response.data.error || "SendGrid test failed");
+        setSendgridStatus(prev => ({ ...prev, tested: true, lastTest: new Date().toISOString(), lastTestSuccess: false }));
+      }
+    } catch (error) {
+      toast.error("SendGrid test failed: " + (error.response?.data?.detail || "Unknown error"));
+      setSendgridStatus(prev => ({ ...prev, tested: true, lastTest: new Date().toISOString(), lastTestSuccess: false }));
+    } finally {
+      setTestingSendgrid(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
