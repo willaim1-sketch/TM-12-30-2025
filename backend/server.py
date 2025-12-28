@@ -1022,10 +1022,13 @@ async def send_order_email(order_id: str, data: dict, user: User = Depends(requi
         
         sg = sendgrid.SendGridAPIClient(api_key=sg_api_key)
         
-        from_email = settings.get("email", "orders@thetamaleman.com") if settings else "orders@thetamaleman.com"
+        # Get SendGrid settings for from_email
+        sg_settings = await db.sendgrid_settings.find_one({"settings_id": "sendgrid"}, {"_id": 0})
+        from_email = sg_settings.get("from_email", "info@thetamaleman.xyz") if sg_settings else "info@thetamaleman.xyz"
+        from_name = sg_settings.get("from_name", site_name) if sg_settings else site_name
         
         message = Mail(
-            from_email=Email(from_email, site_name),
+            from_email=Email(from_email, from_name),
             to_emails=To(email_to),
             subject=f"🌽 Kitchen Order: {order_id} - {order.get('customer_name', '')}",
             html_content=Content("text/html", html_content)
