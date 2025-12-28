@@ -1394,6 +1394,148 @@ async def update_stripe_settings(data: dict, user: User = Depends(require_admin)
     )
     return {"status": "updated"}
 
+# SendGrid Settings
+@api_router.get("/admin/sendgrid-settings")
+async def get_sendgrid_settings(user: User = Depends(require_admin)):
+    settings = await db.sendgrid_settings.find_one({"settings_id": "sendgrid"}, {"_id": 0})
+    
+    # Check if configured via environment or database
+    env_key = os.environ.get("SENDGRID_API_KEY", "")
+    
+    response = {
+        "settings": {
+            "sendgrid_api_key": "",
+            "from_email": "",
+            "from_name": ""
+        },
+        "status": {
+            "configured": False,
+            "tested": False,
+            "lastTest": None,
+            "lastTestSuccess": False
+        }
+    }
+    
+    if settings:
+        # Mask the API key
+        if settings.get("sendgrid_api_key"):
+            key = settings["sendgrid_api_key"]
+            response["settings"]["sendgrid_api_key"] = f"SG.{'*' * 20}...{key[-4:]}" if len(key) > 10 else "SG.****"
+            response["status"]["configured"] = True
+        response["settings"]["from_email"] = settings.get("from_email", "")
+        response["settings"]["from_name"] = settings.get("from_name", "")
+        response["status"]["tested"] = settings.get("tested", False)
+        response["status"]["lastTest"] = settings.get("last_test")
+        response["status"]["lastTestSuccess"] = settings.get("last_test_success", False)
+    elif env_key:
+        response["settings"]["sendgrid_api_key"] = f"SG.{'*' * 20}...{env_key[-4:]}" if len(env_key) > 10 else "SG.****"
+        response["status"]["configured"] = True
+    
+    return response
+
+@api_router.put("/admin/sendgrid-settings")
+async def update_sendgrid_settings(data: dict, user: User = Depends(require_admin)):
+    update_data = {"settings_id": "sendgrid"}
+    
+    # Only update API key if it's a new value (not masked)
+    if data.get("sendgrid_api_key") and data["sendgrid_api_key"].startswith("SG.") and "*" not in data["sendgrid_api_key"]:
+        update_data["sendgrid_api_key"] = data["sendgrid_api_key"]
+        # Also update environment for immediate use
+        os.environ["SENDGRID_API_KEY"] = data["sendgrid_api_key"]
+    elif data.get("sendgrid_api_key") and "*" in data["sendgrid_api_key"]:
+        # Keep existing key if masked value sent
+        existing = await db.sendgrid_settings.find_one({"settings_id": "sendgrid"}, {"_id": 0})
+        if existing and existing.get("sendgrid_api_key"):
+            update_data["sendgrid_api_key"] = existing["sendgrid_api_key"]
+    
+    if "from_email" in data:
+        update_data["from_email"] = data["from_email"]
+    if "from_name" in data:
+        update_data["from_name"] = data["from_name"]
+    
+    await db.sendgrid_settings.update_one(
+        {"settings_id": "sendgrid"},
+        {"$set": update_data},
+        upsert=True
+    )
+    return {"status": "updated"}
+
+@api_router.post("/admin/sendgrid-test")
+async def test_sendgrid(user: User = Depends(require_admin)):
+    """Test SendGrid connection by sending a test email"""
+    try:
+        import sendgrid
+        from sendgrid.helpers.mail import Mail, Email, To, Content
+        
+        # Get API key from database or environment
+        settings = await db.sendgrid_settings.find_one({"settings_id": "sendgrid"}, {"_id": 0})
+        api_key = settings.get("sendgrid_api_key") if settings else None
+        if not api_key:
+            api_key = os.environ.get("SENDGRID_API_KEY")
+        
+        if not api_key:
+            return {"success": False, "error": "SendGrid API key not configured"}
+        
+        from_email = settings.get("from_email", "test@example.com") if settings else "test@example.com"
+        from_name = settings.get("from_name", "Test") if settings else "Test"
+        
+        # Get admin's email for test
+        admin_email = user.email
+        
+        sg = sendgrid.SendGridAPIClient(api_key=api_key)
+        
+        message = Mail(
+            from_email=Email(from_email, from_name),
+            to_emails=To(admin_email),
+            subject="🌽 SendGrid Test - Connection Successful!",
+            html_content=Content("text/html", f"""
+                <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+                    <div style="background:#DC2626;color:white;padding:20px;border-radius:12px 12px 0 0;text-align:center;">
+                        <h1 style="margin:0;">✅ SendGrid Working!</h1>
+                    </div>
+                    <div style="background:#f9f9f9;padding:20px;border-radius:0 0 12px 12px;">
+                        <p>Great news! Your SendGrid configuration is working correctly.</p>
+                        <p><strong>From Email:</strong> {from_email}</p>
+                        <p><strong>From Name:</strong> {from_name}</p>
+                        <p style="color:#666;font-size:12px;margin-top:20px;">
+                            This is a test email sent from your admin panel.
+                        </p>
+                    </div>
+                </div>
+            """)
+        )
+        
+        response = sg.send(message)
+        
+        # Update test status in database
+        await db.sendgrid_settings.update_one(
+            {"settings_id": "sendgrid"},
+            {"$set": {
+                "tested": True,
+                "last_test": datetime.now(timezone.utc).isoformat(),
+                "last_test_success": response.status_code in [200, 201, 202]
+            }},
+            upsert=True
+        )
+        
+        if response.status_code in [200, 201, 202]:
+            return {"success": True, "message": f"Test email sent to {admin_email}"}
+        else:
+            return {"success": False, "error": f"SendGrid returned status {response.status_code}"}
+            
+    except Exception as e:
+        # Update test status as failed
+        await db.sendgrid_settings.update_one(
+            {"settings_id": "sendgrid"},
+            {"$set": {
+                "tested": True,
+                "last_test": datetime.now(timezone.utc).isoformat(),
+                "last_test_success": False
+            }},
+            upsert=True
+        )
+        return {"success": False, "error": str(e)}
+
 # =============================================================================
 # MENU RATINGS (Public)
 # =============================================================================
