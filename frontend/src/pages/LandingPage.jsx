@@ -817,6 +817,7 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
+      <SEO settings={settings} />
       <Navbar settings={settings} />
       
       {/* TOP Sections from Page Builder */}
