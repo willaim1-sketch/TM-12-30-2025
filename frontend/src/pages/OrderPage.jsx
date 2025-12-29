@@ -168,6 +168,7 @@ const OrderPage = () => {
     try {
       const orderData = {
         ...formData,
+        payment_method: selectedPayment,
         items: cart.map(item => ({
           item_id: item.item_id,
           name: item.name,
@@ -184,12 +185,24 @@ const OrderPage = () => {
         }
       });
 
-      // Clear cart
-      localStorage.removeItem("tamaleCart");
-      
-      // Redirect to Stripe checkout
-      if (response.data.checkout_url) {
+      // Handle different payment methods
+      if (selectedPayment === 'stripe' && response.data.checkout_url) {
+        // Clear cart and redirect to Stripe
+        localStorage.removeItem("tamaleCart");
         window.location.href = response.data.checkout_url;
+      } else if (['paypal', 'venmo', 'cashapp'].includes(selectedPayment)) {
+        // Show manual payment instructions
+        const method = paymentMethods.find(m => m.type === selectedPayment);
+        setManualPaymentInfo({
+          type: selectedPayment,
+          orderId: response.data.order_id,
+          total: total,
+          ...method
+        });
+        setShowManualPaymentDialog(true);
+        // Clear cart
+        localStorage.removeItem("tamaleCart");
+        setCart([]);
       }
     } catch (error) {
       console.error("Order error:", error);
@@ -197,6 +210,11 @@ const OrderPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
   };
 
   if (cart.length === 0 && !searchParams.get("cancelled")) {
