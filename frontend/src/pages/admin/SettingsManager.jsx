@@ -185,6 +185,57 @@ const SettingsManager = () => {
     }
   };
 
+  const fetchPaymentSettings = async () => {
+    try {
+      const [paypalRes, venmoRes, cashappRes] = await Promise.all([
+        axios.get(`${API}/admin/paypal-settings`, { withCredentials: true }).catch(() => ({ data: {} })),
+        axios.get(`${API}/admin/venmo-settings`, { withCredentials: true }).catch(() => ({ data: {} })),
+        axios.get(`${API}/admin/cashapp-settings`, { withCredentials: true }).catch(() => ({ data: {} }))
+      ]);
+      if (paypalRes.data) setPaypalSettings(prev => ({ ...prev, ...paypalRes.data }));
+      if (venmoRes.data) setVenmoSettings(prev => ({ ...prev, ...venmoRes.data }));
+      if (cashappRes.data) setCashappSettings(prev => ({ ...prev, ...cashappRes.data }));
+    } catch (error) {
+      // Settings may not exist yet
+    }
+  };
+
+  const handleSavePaypal = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API}/admin/paypal-settings`, paypalSettings, { withCredentials: true });
+      toast.success("PayPal settings saved");
+    } catch (error) {
+      toast.error("Failed to save PayPal settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveVenmo = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API}/admin/venmo-settings`, venmoSettings, { withCredentials: true });
+      toast.success("Venmo settings saved");
+    } catch (error) {
+      toast.error("Failed to save Venmo settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveCashapp = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API}/admin/cashapp-settings`, cashappSettings, { withCredentials: true });
+      toast.success("Cash App settings saved");
+    } catch (error) {
+      toast.error("Failed to save Cash App settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveSendgrid = async () => {
     setSaving(true);
     try {
