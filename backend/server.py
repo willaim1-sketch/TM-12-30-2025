@@ -1546,6 +1546,143 @@ async def test_sendgrid(user: User = Depends(require_admin)):
         )
         return {"success": False, "error": str(e)}
 
+# PayPal Settings
+@api_router.get("/admin/paypal-settings")
+async def get_paypal_settings(user: User = Depends(require_admin)):
+    settings = await db.paypal_settings.find_one({"settings_id": "paypal"}, {"_id": 0})
+    if settings:
+        # Mask secret
+        if settings.get("client_secret"):
+            settings["client_secret"] = "****" + settings["client_secret"][-4:] if len(settings["client_secret"]) > 4 else "****"
+        return settings
+    return {"enabled": False, "mode": "sandbox", "client_id": "", "client_secret": "", "email": ""}
+
+@api_router.put("/admin/paypal-settings")
+async def update_paypal_settings(data: dict, user: User = Depends(require_admin)):
+    update_data = {"settings_id": "paypal"}
+    
+    if "enabled" in data:
+        update_data["enabled"] = data["enabled"]
+    if "mode" in data:
+        update_data["mode"] = data["mode"]
+    if "email" in data:
+        update_data["email"] = data["email"]
+    if "client_id" in data:
+        update_data["client_id"] = data["client_id"]
+    
+    # Only update secret if it's not masked
+    if data.get("client_secret") and not data["client_secret"].startswith("****"):
+        update_data["client_secret"] = data["client_secret"]
+    elif data.get("client_secret") and data["client_secret"].startswith("****"):
+        existing = await db.paypal_settings.find_one({"settings_id": "paypal"})
+        if existing:
+            update_data["client_secret"] = existing.get("client_secret", "")
+    
+    await db.paypal_settings.update_one(
+        {"settings_id": "paypal"},
+        {"$set": update_data},
+        upsert=True
+    )
+    return {"status": "updated"}
+
+# Venmo Settings
+@api_router.get("/admin/venmo-settings")
+async def get_venmo_settings(user: User = Depends(require_admin)):
+    settings = await db.venmo_settings.find_one({"settings_id": "venmo"}, {"_id": 0})
+    if settings:
+        return settings
+    return {"enabled": False, "username": "", "display_name": ""}
+
+@api_router.put("/admin/venmo-settings")
+async def update_venmo_settings(data: dict, user: User = Depends(require_admin)):
+    update_data = {"settings_id": "venmo"}
+    
+    if "enabled" in data:
+        update_data["enabled"] = data["enabled"]
+    if "username" in data:
+        update_data["username"] = data["username"].replace("@", "")  # Remove @ if included
+    if "display_name" in data:
+        update_data["display_name"] = data["display_name"]
+    
+    await db.venmo_settings.update_one(
+        {"settings_id": "venmo"},
+        {"$set": update_data},
+        upsert=True
+    )
+    return {"status": "updated"}
+
+# Cash App Settings
+@api_router.get("/admin/cashapp-settings")
+async def get_cashapp_settings(user: User = Depends(require_admin)):
+    settings = await db.cashapp_settings.find_one({"settings_id": "cashapp"}, {"_id": 0})
+    if settings:
+        return settings
+    return {"enabled": False, "cashtag": "", "display_name": ""}
+
+@api_router.put("/admin/cashapp-settings")
+async def update_cashapp_settings(data: dict, user: User = Depends(require_admin)):
+    update_data = {"settings_id": "cashapp"}
+    
+    if "enabled" in data:
+        update_data["enabled"] = data["enabled"]
+    if "cashtag" in data:
+        update_data["cashtag"] = data["cashtag"].replace("$", "")  # Remove $ if included
+    if "display_name" in data:
+        update_data["display_name"] = data["display_name"]
+    
+    await db.cashapp_settings.update_one(
+        {"settings_id": "cashapp"},
+        {"$set": update_data},
+        upsert=True
+    )
+    return {"status": "updated"}
+
+# Get all enabled payment methods (public)
+@api_router.get("/payment-methods")
+async def get_payment_methods():
+    """Get all enabled payment methods for the checkout page"""
+    methods = []
+    
+    # Check Stripe
+    stripe_key = os.environ.get("STRIPE_API_KEY")
+    if stripe_key and stripe_key.startswith("sk_"):
+        methods.append({"type": "stripe", "name": "Credit/Debit Card", "enabled": True})
+    
+    # Check PayPal
+    paypal = await db.paypal_settings.find_one({"settings_id": "paypal"}, {"_id": 0})
+    if paypal and paypal.get("enabled"):
+        methods.append({
+            "type": "paypal", 
+            "name": "PayPal", 
+            "enabled": True,
+            "email": paypal.get("email", ""),
+            "mode": paypal.get("mode", "sandbox")
+        })
+    
+    # Check Venmo
+    venmo = await db.venmo_settings.find_one({"settings_id": "venmo"}, {"_id": 0})
+    if venmo and venmo.get("enabled"):
+        methods.append({
+            "type": "venmo", 
+            "name": "Venmo", 
+            "enabled": True,
+            "username": venmo.get("username", ""),
+            "display_name": venmo.get("display_name", "")
+        })
+    
+    # Check Cash App
+    cashapp = await db.cashapp_settings.find_one({"settings_id": "cashapp"}, {"_id": 0})
+    if cashapp and cashapp.get("enabled"):
+        methods.append({
+            "type": "cashapp", 
+            "name": "Cash App", 
+            "enabled": True,
+            "cashtag": cashapp.get("cashtag", ""),
+            "display_name": cashapp.get("display_name", "")
+        })
+    
+    return methods
+
 # =============================================================================
 # MENU RATINGS (Public)
 # =============================================================================
