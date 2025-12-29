@@ -337,17 +337,40 @@ const OrderManager = () => {
     return <div className="text-white">Loading orders...</div>;
   }
 
+  const weeklyData = getWeeklyData();
+  const weeklyTotals = getWeeklyTotals(weeklyData);
+  const weekEndDate = new Date(selectedWeek);
+  weekEndDate.setDate(weekEndDate.getDate() + 6);
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-display font-bold text-white">Orders</h1>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[180px] input-dark" data-testid="order-filter">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1A1A1A] border-white/10">
-            <SelectItem value="all" className="text-white">All Orders</SelectItem>
-            <SelectItem value="pending" className="text-white">Pending</SelectItem>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="bg-[#1A1A1A] border border-white/10">
+          <TabsTrigger value="orders" className="data-[state=active]:bg-red-600">
+            <Eye size={16} className="mr-2" />
+            All Orders
+          </TabsTrigger>
+          <TabsTrigger value="financials" className="data-[state=active]:bg-red-600">
+            <DollarSign size={16} className="mr-2" />
+            Financials
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Orders Tab */}
+        <TabsContent value="orders">
+          <div className="flex items-center justify-between mb-6">
+            <div></div>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-[180px] input-dark" data-testid="order-filter">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1A1A1A] border-white/10">
+                <SelectItem value="all" className="text-white">All Orders</SelectItem>
+                <SelectItem value="pending" className="text-white">Pending</SelectItem>
             <SelectItem value="confirmed" className="text-white">Confirmed</SelectItem>
             <SelectItem value="preparing" className="text-white">Preparing</SelectItem>
             <SelectItem value="ready" className="text-white">Ready</SelectItem>
