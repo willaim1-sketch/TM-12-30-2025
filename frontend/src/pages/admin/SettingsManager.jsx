@@ -153,6 +153,7 @@ const SettingsManager = () => {
     fetchSettings();
     fetchStripeSettings();
     fetchSendgridSettings();
+    fetchPaymentSettings();
   }, []);
 
   const fetchSettings = async () => {
