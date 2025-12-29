@@ -240,6 +240,7 @@ class OrderCreate(BaseModel):
     pickup_date: str
     pickup_time: str
     comments: Optional[str] = None
+    payment_method: Optional[str] = "stripe"  # stripe, paypal, venmo, cashapp
 
 class ContactSubmission(BaseModel):
     submission_id: str = Field(default_factory=lambda: f"contact_{uuid.uuid4().hex[:12]}")
