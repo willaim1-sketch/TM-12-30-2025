@@ -463,6 +463,145 @@ const OrderManager = () => {
           ))}
         </div>
       )}
+        </TabsContent>
+
+        {/* Financials Tab */}
+        <TabsContent value="financials">
+          <div className="space-y-6">
+            {/* Week Navigation */}
+            <div className="card-dark p-4">
+              <div className="flex items-center justify-between">
+                <Button onClick={goToPreviousWeek} variant="outline" className="btn-secondary">
+                  <ChevronLeft size={20} />
+                </Button>
+                <div className="text-center">
+                  <h3 className="text-white font-semibold text-lg">
+                    Week of {formatDate(selectedWeek)} - {formatDate(weekEndDate)}
+                  </h3>
+                  <p className="text-white/60 text-sm">
+                    {selectedWeek.getFullYear()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={goToCurrentWeek} variant="outline" className="btn-secondary text-sm">
+                    This Week
+                  </Button>
+                  <Button onClick={goToNextWeek} variant="outline" className="btn-secondary">
+                    <ChevronRight size={20} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="card-dark p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="text-blue-500" size={20} />
+                  </div>
+                  <span className="text-white/60">Weekly Orders</span>
+                </div>
+                <p className="text-3xl font-bold text-white">{weeklyTotals.orderCount}</p>
+              </div>
+              <div className="card-dark p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-green-600/20 rounded-lg flex items-center justify-center">
+                    <DollarSign className="text-green-500" size={20} />
+                  </div>
+                  <span className="text-white/60">Total Revenue</span>
+                </div>
+                <p className="text-3xl font-bold text-green-500">${weeklyTotals.revenue.toFixed(2)}</p>
+              </div>
+              <div className="card-dark p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center">
+                    <DollarSign className="text-red-500" size={20} />
+                  </div>
+                  <span className="text-white/60">Admin Fees (10%)</span>
+                </div>
+                <p className="text-3xl font-bold text-red-500">${weeklyTotals.adminFee.toFixed(2)}</p>
+              </div>
+            </div>
+
+            {/* Daily Breakdown Table */}
+            <div className="card-dark overflow-hidden">
+              <div className="p-4 border-b border-white/10">
+                <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                  <Calendar size={20} className="text-red-500" />
+                  Daily Breakdown (Mon - Sun)
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[#2A2A2A]">
+                      <th className="text-left text-white/70 font-medium px-6 py-4">Day</th>
+                      <th className="text-left text-white/70 font-medium px-6 py-4">Date</th>
+                      <th className="text-right text-white/70 font-medium px-6 py-4">Orders</th>
+                      <th className="text-right text-white/70 font-medium px-6 py-4">Revenue</th>
+                      <th className="text-right text-white/70 font-medium px-6 py-4">Admin Fee (10%)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {weeklyData.map((day, idx) => (
+                      <tr key={day.day} className={`border-b border-white/5 ${idx % 2 === 0 ? 'bg-[#1A1A1A]' : 'bg-[#151515]'}`}>
+                        <td className="px-6 py-4">
+                          <span className="text-white font-medium">{day.day}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-white/60">{day.date}</span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className={`font-semibold ${day.orderCount > 0 ? 'text-blue-400' : 'text-white/40'}`}>
+                            {day.orderCount}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className={`font-semibold ${day.revenue > 0 ? 'text-green-400' : 'text-white/40'}`}>
+                            ${day.revenue.toFixed(2)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span className={`font-semibold ${day.adminFee > 0 ? 'text-red-400' : 'text-white/40'}`}>
+                            ${day.adminFee.toFixed(2)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-[#2A2A2A] border-t-2 border-white/20">
+                      <td className="px-6 py-4" colSpan="2">
+                        <span className="text-white font-bold text-lg">WEEKLY TOTAL</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-blue-400 font-bold text-lg">{weeklyTotals.orderCount}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-green-400 font-bold text-lg">${weeklyTotals.revenue.toFixed(2)}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-red-400 font-bold text-lg">${weeklyTotals.adminFee.toFixed(2)}</span>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            {/* Info Box */}
+            <div className="card-dark p-4 border-l-4 border-red-600">
+              <p className="text-white font-medium mb-1">Admin Fee Calculation</p>
+              <p className="text-white/60 text-sm">
+                Admin Fee = Total Revenue × 10%
+                <br />
+                This amount should be sent to the restaurant owner daily/weekly.
+              </p>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Order Detail Dialog */}
       <Dialog open={!!selectedOrder && !showEmailDialog} onOpenChange={() => setSelectedOrder(null)}>
