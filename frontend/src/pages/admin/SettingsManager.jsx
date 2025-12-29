@@ -124,6 +124,23 @@ const SettingsManager = () => {
   const [settings, setSettings] = useState(null);
   const [stripeSettings, setStripeSettings] = useState({ stripe_api_key: "", stripe_webhook_secret: "" });
   const [sendgridSettings, setSendgridSettings] = useState({ sendgrid_api_key: "", from_email: "", from_name: "" });
+  const [paypalSettings, setPaypalSettings] = useState({ 
+    enabled: false, 
+    mode: "sandbox", 
+    client_id: "", 
+    client_secret: "",
+    email: ""
+  });
+  const [venmoSettings, setVenmoSettings] = useState({ 
+    enabled: false, 
+    username: "",
+    display_name: ""
+  });
+  const [cashappSettings, setCashappSettings] = useState({ 
+    enabled: false, 
+    cashtag: "",
+    display_name: ""
+  });
   const [sendgridStatus, setSendgridStatus] = useState({ configured: false, tested: false, lastTest: null });
   const [testingSendgrid, setTestingSendgrid] = useState(false);
   const [showSendgridKey, setShowSendgridKey] = useState(false);
