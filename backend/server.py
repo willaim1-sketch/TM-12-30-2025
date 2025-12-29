@@ -600,14 +600,13 @@ async def submit_contact_form(submission: ContactSubmissionCreate, background_ta
 
 @api_router.post("/orders/create")
 async def create_order(order_data: OrderCreate, request: Request):
-    from emergentintegrations.payments.stripe.checkout import (
-        StripeCheckout, CheckoutSessionRequest
-    )
-    
     # Calculate totals
     subtotal = sum(item.price * item.quantity for item in order_data.items)
     tax = round(subtotal * 0.0825, 2)  # 8.25% tax
     total = round(subtotal + tax, 2)
+    
+    # Get payment method (default to stripe)
+    payment_method = getattr(order_data, 'payment_method', 'stripe') or 'stripe'
     
     # Create order
     order = Order(
@@ -626,53 +625,85 @@ async def create_order(order_data: OrderCreate, request: Request):
     order_dict = order.model_dump()
     order_dict["created_at"] = order_dict["created_at"].isoformat()
     order_dict["items"] = [item.model_dump() for item in order_data.items]
+    order_dict["payment_method"] = payment_method
     
-    # Create Stripe checkout session
-    host_url = str(request.headers.get("origin", request.base_url))
-    webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhook/stripe"
-    
-    stripe_checkout = StripeCheckout(
-        api_key=os.environ.get("STRIPE_API_KEY"),
-        webhook_url=webhook_url
-    )
-    
-    success_url = f"{host_url}/order/success?session_id={{CHECKOUT_SESSION_ID}}"
-    cancel_url = f"{host_url}/order?cancelled=true"
-    
-    checkout_request = CheckoutSessionRequest(
-        amount=float(total),
-        currency="usd",
-        success_url=success_url,
-        cancel_url=cancel_url,
-        metadata={
+    # Handle different payment methods
+    if payment_method == 'stripe':
+        from emergentintegrations.payments.stripe.checkout import (
+            StripeCheckout, CheckoutSessionRequest
+        )
+        
+        # Create Stripe checkout session
+        host_url = str(request.headers.get("origin", request.base_url))
+        webhook_url = f"{str(request.base_url).rstrip('/')}/api/webhook/stripe"
+        
+        stripe_checkout = StripeCheckout(
+            api_key=os.environ.get("STRIPE_API_KEY"),
+            webhook_url=webhook_url
+        )
+        
+        success_url = f"{host_url}/order/success?session_id={{CHECKOUT_SESSION_ID}}"
+        cancel_url = f"{host_url}/order?cancelled=true"
+        
+        checkout_request = CheckoutSessionRequest(
+            amount=float(total),
+            currency="usd",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "order_id": order.order_id,
+                "customer_email": order.customer_email
+            }
+        )
+        
+        session = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        order_dict["payment_session_id"] = session.session_id
+        await db.orders.insert_one(order_dict)
+        
+        # Create payment transaction record
+        await db.payment_transactions.insert_one({
+            "transaction_id": f"txn_{uuid.uuid4().hex[:12]}",
+            "session_id": session.session_id,
             "order_id": order.order_id,
-            "customer_email": order.customer_email
+            "amount": float(total),
+            "currency": "usd",
+            "status": "initiated",
+            "payment_status": "pending",
+            "payment_method": "stripe",
+            "customer_email": order.customer_email,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "order_id": order.order_id,
+            "checkout_url": session.url,
+            "session_id": session.session_id
         }
-    )
-    
-    session = await stripe_checkout.create_checkout_session(checkout_request)
-    
-    order_dict["payment_session_id"] = session.session_id
-    await db.orders.insert_one(order_dict)
-    
-    # Create payment transaction record
-    await db.payment_transactions.insert_one({
-        "transaction_id": f"txn_{uuid.uuid4().hex[:12]}",
-        "session_id": session.session_id,
-        "order_id": order.order_id,
-        "amount": float(total),
-        "currency": "usd",
-        "status": "initiated",
-        "payment_status": "pending",
-        "customer_email": order.customer_email,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    })
-    
-    return {
-        "order_id": order.order_id,
-        "checkout_url": session.url,
-        "session_id": session.session_id
-    }
+    else:
+        # For PayPal, Venmo, Cash App - create order with pending payment
+        order_dict["payment_status"] = "unpaid"
+        order_dict["status"] = "pending"
+        await db.orders.insert_one(order_dict)
+        
+        # Create payment transaction record
+        await db.payment_transactions.insert_one({
+            "transaction_id": f"txn_{uuid.uuid4().hex[:12]}",
+            "order_id": order.order_id,
+            "amount": float(total),
+            "currency": "usd",
+            "status": "awaiting_payment",
+            "payment_status": "pending",
+            "payment_method": payment_method,
+            "customer_email": order.customer_email,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "order_id": order.order_id,
+            "payment_method": payment_method,
+            "total": total
+        }
 
 @api_router.get("/orders/status/{session_id}")
 async def get_order_status(session_id: str):
