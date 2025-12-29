@@ -170,7 +170,84 @@ const OrderManager = () => {
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [emailTo, setEmailTo] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [activeTab, setActiveTab] = useState("orders");
+  const [selectedWeek, setSelectedWeek] = useState(getStartOfWeek(new Date()));
   const printRef = useRef();
+
+  // Helper function to get start of week (Monday)
+  function getStartOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  // Helper function to format date
+  function formatDate(date) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  // Calculate weekly financial data
+  const getWeeklyData = () => {
+    const weekStart = new Date(selectedWeek);
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const data = [];
+    
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(weekStart);
+      currentDate.setDate(weekStart.getDate() + i);
+      const dateStr = currentDate.toISOString().split('T')[0];
+      
+      // Filter orders for this day that are paid
+      const dayOrders = orders.filter(order => {
+        const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+        return orderDate === dateStr && order.payment_status === 'paid';
+      });
+      
+      const orderCount = dayOrders.length;
+      const revenue = dayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+      const adminFee = revenue * 0.10;
+      
+      data.push({
+        day: days[i],
+        date: formatDate(currentDate),
+        fullDate: dateStr,
+        orderCount,
+        revenue,
+        adminFee
+      });
+    }
+    
+    return data;
+  };
+
+  // Calculate totals
+  const getWeeklyTotals = (weekData) => {
+    return weekData.reduce((totals, day) => ({
+      orderCount: totals.orderCount + day.orderCount,
+      revenue: totals.revenue + day.revenue,
+      adminFee: totals.adminFee + day.adminFee
+    }), { orderCount: 0, revenue: 0, adminFee: 0 });
+  };
+
+  // Navigate weeks
+  const goToPreviousWeek = () => {
+    const newDate = new Date(selectedWeek);
+    newDate.setDate(newDate.getDate() - 7);
+    setSelectedWeek(newDate);
+  };
+
+  const goToNextWeek = () => {
+    const newDate = new Date(selectedWeek);
+    newDate.setDate(newDate.getDate() + 7);
+    setSelectedWeek(newDate);
+  };
+
+  const goToCurrentWeek = () => {
+    setSelectedWeek(getStartOfWeek(new Date()));
+  };
 
   useEffect(() => {
     fetchData();
