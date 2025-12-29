@@ -363,6 +363,47 @@ const OrderPage = () => {
                 />
               </div>
 
+              {/* Payment Method Selection */}
+              {paymentMethods.length > 0 && (
+                <div className="card-dark p-8">
+                  <h2 className="text-2xl font-display font-bold text-white mb-6">Payment Method</h2>
+                  <div className="grid gap-3">
+                    {paymentMethods.map((method) => (
+                      <button
+                        key={method.type}
+                        type="button"
+                        onClick={() => setSelectedPayment(method.type)}
+                        className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                          selectedPayment === method.type
+                            ? 'border-red-600 bg-red-600/10'
+                            : 'border-white/10 bg-[#1A1A1A] hover:border-white/30'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          selectedPayment === method.type ? 'border-red-600' : 'border-white/30'
+                        }`}>
+                          {selectedPayment === method.type && (
+                            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                          )}
+                        </div>
+                        <PaymentMethodIcon type={method.type} />
+                        <span className="text-white font-medium flex-1 text-left">{method.name}</span>
+                        {selectedPayment === method.type && (
+                          <CheckCircle className="text-red-500" size={20} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedPayment !== 'stripe' && (
+                    <p className="text-white/50 text-sm mt-4">
+                      {selectedPayment === 'paypal' && "You'll be shown PayPal payment details after placing your order."}
+                      {selectedPayment === 'venmo' && "You'll be shown Venmo payment details after placing your order."}
+                      {selectedPayment === 'cashapp' && "You'll be shown Cash App payment details after placing your order."}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Submit Button (Desktop) */}
               <div className="hidden lg:block">
                 <Button 
@@ -371,8 +412,8 @@ const OrderPage = () => {
                   disabled={loading}
                   data-testid="submit-order-btn"
                 >
-                  <CreditCard className="mr-2" size={20} />
-                  {loading ? "Processing..." : `Pay $${total.toFixed(2)}`}
+                  <PaymentMethodIcon type={selectedPayment} />
+                  <span className="ml-2">{loading ? "Processing..." : `Place Order - $${total.toFixed(2)}`}</span>
                 </Button>
               </div>
             </motion.form>
