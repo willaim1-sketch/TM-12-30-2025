@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { ArrowLeft, Trash2, Plus, Minus, CreditCard } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -17,11 +18,43 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
 };
 
+// Payment method icons/logos
+const PaymentMethodIcon = ({ type }) => {
+  switch (type) {
+    case 'stripe':
+      return <CreditCard className="text-white" size={24} />;
+    case 'paypal':
+      return (
+        <div className="w-6 h-6 bg-[#003087] rounded flex items-center justify-center">
+          <span className="text-white text-xs font-bold">PP</span>
+        </div>
+      );
+    case 'venmo':
+      return (
+        <div className="w-6 h-6 bg-[#3D95CE] rounded flex items-center justify-center">
+          <span className="text-white text-xs font-bold">V</span>
+        </div>
+      );
+    case 'cashapp':
+      return (
+        <div className="w-6 h-6 bg-[#00D632] rounded flex items-center justify-center">
+          <span className="text-white text-xs font-bold">$</span>
+        </div>
+      );
+    default:
+      return <CreditCard className="text-white" size={24} />;
+  }
+};
+
 const OrderPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedPayment, setSelectedPayment] = useState('stripe');
+  const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
+  const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
   const [formData, setFormData] = useState({
     customer_name: "",
     customer_email: "",
@@ -38,11 +71,28 @@ const OrderPage = () => {
       setCart(JSON.parse(savedCart));
     }
 
+    // Fetch available payment methods
+    fetchPaymentMethods();
+
     // Check if order was cancelled
     if (searchParams.get("cancelled") === "true") {
       toast.error("Order was cancelled. Please try again.");
     }
   }, [searchParams]);
+
+  const fetchPaymentMethods = async () => {
+    try {
+      const response = await axios.get(`${API}/payment-methods`);
+      setPaymentMethods(response.data);
+      // Default to stripe if available, otherwise first method
+      if (response.data.length > 0) {
+        const stripeMethod = response.data.find(m => m.type === 'stripe');
+        setSelectedPayment(stripeMethod ? 'stripe' : response.data[0].type);
+      }
+    } catch (error) {
+      console.error("Failed to fetch payment methods");
+    }
+  };
 
   const updateCart = (newCart) => {
     setCart(newCart);
