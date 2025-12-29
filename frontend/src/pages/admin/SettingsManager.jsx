@@ -1242,6 +1242,262 @@ const SettingsManager = () => {
           </div>
         </TabsContent>
 
+        {/* Alternative Payment Methods Tab */}
+        <TabsContent value="altpayments">
+          <div className="space-y-6">
+            {/* PayPal Section */}
+            <div className="card-dark p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#003087] rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">PP</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">PayPal</h3>
+                    <p className="text-white/60 text-sm">Accept payments via PayPal checkout</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${paypalSettings.enabled ? 'bg-green-600 text-white' : 'bg-white/10 text-white/60'}`}>
+                    {paypalSettings.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={paypalSettings.enabled} 
+                      onChange={(e) => setPaypalSettings(prev => ({ ...prev, enabled: e.target.checked }))}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <Alert className="bg-blue-950/50 border-blue-800 mb-4">
+                <Info className="h-4 w-4 text-blue-400" />
+                <AlertDescription className="text-blue-200">
+                  Get your PayPal API credentials from{" "}
+                  <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">
+                    PayPal Developer Dashboard
+                  </a>
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white/70">Mode</Label>
+                  <select 
+                    value={paypalSettings.mode}
+                    onChange={(e) => setPaypalSettings(prev => ({ ...prev, mode: e.target.value }))}
+                    className="input-dark w-full mt-1"
+                  >
+                    <option value="sandbox">Sandbox (Testing)</option>
+                    <option value="live">Live (Production)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label className="text-white/70">PayPal Email (for manual payments)</Label>
+                  <Input
+                    type="email"
+                    value={paypalSettings.email || ""}
+                    onChange={(e) => setPaypalSettings(prev => ({ ...prev, email: e.target.value }))}
+                    className="input-dark mt-1"
+                    placeholder="payments@yourbusiness.com"
+                  />
+                  <p className="text-white/50 text-xs mt-1">Customers can send payments to this email</p>
+                </div>
+
+                <div>
+                  <Label className="text-white/70">Client ID</Label>
+                  <Input
+                    value={paypalSettings.client_id || ""}
+                    onChange={(e) => setPaypalSettings(prev => ({ ...prev, client_id: e.target.value }))}
+                    className="input-dark mt-1"
+                    placeholder="AY..."
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white/70">Client Secret</Label>
+                  <div className="relative">
+                    <Input
+                      type={showSendgridKey ? "text" : "password"}
+                      value={paypalSettings.client_secret || ""}
+                      onChange={(e) => setPaypalSettings(prev => ({ ...prev, client_secret: e.target.value }))}
+                      className="input-dark mt-1 pr-10"
+                      placeholder="EL..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSendgridKey(!showSendgridKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+                    >
+                      {showSendgridKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button onClick={handleSavePaypal} disabled={saving} className="btn-primary">
+                  <Save size={16} className="mr-2" />
+                  Save PayPal Settings
+                </Button>
+              </div>
+            </div>
+
+            {/* Venmo Section */}
+            <div className="card-dark p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#3D95CE] rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">V</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">Venmo</h3>
+                    <p className="text-white/60 text-sm">Accept payments via Venmo</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${venmoSettings.enabled ? 'bg-green-600 text-white' : 'bg-white/10 text-white/60'}`}>
+                    {venmoSettings.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={venmoSettings.enabled} 
+                      onChange={(e) => setVenmoSettings(prev => ({ ...prev, enabled: e.target.checked }))}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white/70">Venmo Username</Label>
+                  <div className="flex items-center mt-1">
+                    <span className="bg-[#2A2A2A] border border-white/10 rounded-l-lg px-3 py-2 text-white/60">@</span>
+                    <Input
+                      value={venmoSettings.username || ""}
+                      onChange={(e) => setVenmoSettings(prev => ({ ...prev, username: e.target.value }))}
+                      className="input-dark rounded-l-none"
+                      placeholder="YourVenmoUsername"
+                    />
+                  </div>
+                  <p className="text-white/50 text-xs mt-1">Your Venmo handle without the @ symbol</p>
+                </div>
+
+                <div>
+                  <Label className="text-white/70">Display Name (shown to customers)</Label>
+                  <Input
+                    value={venmoSettings.display_name || ""}
+                    onChange={(e) => setVenmoSettings(prev => ({ ...prev, display_name: e.target.value }))}
+                    className="input-dark mt-1"
+                    placeholder="The Tamale Man"
+                  />
+                </div>
+
+                <Button onClick={handleSaveVenmo} disabled={saving} className="btn-primary">
+                  <Save size={16} className="mr-2" />
+                  Save Venmo Settings
+                </Button>
+              </div>
+            </div>
+
+            {/* Cash App Section */}
+            <div className="card-dark p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#00D632] rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">$</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">Cash App</h3>
+                    <p className="text-white/60 text-sm">Accept payments via Cash App</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${cashappSettings.enabled ? 'bg-green-600 text-white' : 'bg-white/10 text-white/60'}`}>
+                    {cashappSettings.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={cashappSettings.enabled} 
+                      onChange={(e) => setCashappSettings(prev => ({ ...prev, enabled: e.target.checked }))}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white/70">Cash App $Cashtag</Label>
+                  <div className="flex items-center mt-1">
+                    <span className="bg-[#2A2A2A] border border-white/10 rounded-l-lg px-3 py-2 text-white/60">$</span>
+                    <Input
+                      value={cashappSettings.cashtag || ""}
+                      onChange={(e) => setCashappSettings(prev => ({ ...prev, cashtag: e.target.value }))}
+                      className="input-dark rounded-l-none"
+                      placeholder="YourCashtag"
+                    />
+                  </div>
+                  <p className="text-white/50 text-xs mt-1">Your $cashtag without the $ symbol</p>
+                </div>
+
+                <div>
+                  <Label className="text-white/70">Display Name (shown to customers)</Label>
+                  <Input
+                    value={cashappSettings.display_name || ""}
+                    onChange={(e) => setCashappSettings(prev => ({ ...prev, display_name: e.target.value }))}
+                    className="input-dark mt-1"
+                    placeholder="The Tamale Man"
+                  />
+                </div>
+
+                <Button onClick={handleSaveCashapp} disabled={saving} className="btn-primary">
+                  <Save size={16} className="mr-2" />
+                  Save Cash App Settings
+                </Button>
+              </div>
+            </div>
+
+            {/* Payment Methods Summary */}
+            <div className="card-dark p-6">
+              <h3 className="text-white font-semibold mb-4">Active Payment Methods</h3>
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className={`p-4 rounded-lg border ${stripeSettings.stripe_api_key ? 'bg-green-950/30 border-green-700' : 'bg-white/5 border-white/10'}`}>
+                  <div className="flex items-center gap-2">
+                    {stripeSettings.stripe_api_key ? <CheckCircle className="text-green-500" size={18} /> : <X className="text-white/40" size={18} />}
+                    <span className="text-white font-medium">Stripe</span>
+                  </div>
+                </div>
+                <div className={`p-4 rounded-lg border ${paypalSettings.enabled ? 'bg-green-950/30 border-green-700' : 'bg-white/5 border-white/10'}`}>
+                  <div className="flex items-center gap-2">
+                    {paypalSettings.enabled ? <CheckCircle className="text-green-500" size={18} /> : <X className="text-white/40" size={18} />}
+                    <span className="text-white font-medium">PayPal</span>
+                  </div>
+                </div>
+                <div className={`p-4 rounded-lg border ${venmoSettings.enabled ? 'bg-green-950/30 border-green-700' : 'bg-white/5 border-white/10'}`}>
+                  <div className="flex items-center gap-2">
+                    {venmoSettings.enabled ? <CheckCircle className="text-green-500" size={18} /> : <X className="text-white/40" size={18} />}
+                    <span className="text-white font-medium">Venmo</span>
+                  </div>
+                </div>
+                <div className={`p-4 rounded-lg border ${cashappSettings.enabled ? 'bg-green-950/30 border-green-700' : 'bg-white/5 border-white/10'}`}>
+                  <div className="flex items-center gap-2">
+                    {cashappSettings.enabled ? <CheckCircle className="text-green-500" size={18} /> : <X className="text-white/40" size={18} />}
+                    <span className="text-white font-medium">Cash App</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
         {/* SendGrid Settings Tab */}
         <TabsContent value="sendgrid">
           <div className="card-dark p-6 space-y-6">
