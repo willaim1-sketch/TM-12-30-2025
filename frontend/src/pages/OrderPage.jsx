@@ -381,41 +381,74 @@ const OrderPage = () => {
               {/* Payment Method Selection */}
               {paymentMethods.length > 0 && (
                 <div className="card-dark p-8">
-                  <h2 className="text-2xl font-display font-bold text-white mb-6">Payment Method</h2>
-                  <div className="grid gap-3">
-                    {paymentMethods.map((method) => (
-                      <button
-                        key={method.type}
-                        type="button"
-                        onClick={() => setSelectedPayment(method.type)}
-                        className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                          selectedPayment === method.type
-                            ? 'border-red-600 bg-red-600/10'
-                            : 'border-white/10 bg-[#1A1A1A] hover:border-white/30'
-                        }`}
-                      >
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                          selectedPayment === method.type ? 'border-red-600' : 'border-white/30'
-                        }`}>
-                          {selectedPayment === method.type && (
-                            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                  <h2 className="text-2xl font-display font-bold text-white mb-2">Select Payment Method</h2>
+                  <p className="text-white/60 mb-6">Choose how you'd like to pay for your order</p>
+                  
+                  <div className="space-y-3">
+                    {paymentMethods.map((method) => {
+                      const isSelected = selectedPayment === method.type;
+                      return (
+                        <button
+                          key={method.type}
+                          type="button"
+                          onClick={() => setSelectedPayment(method.type)}
+                          className={`w-full flex items-center gap-4 p-5 rounded-xl border-2 transition-all ${
+                            isSelected
+                              ? 'border-red-600 bg-red-600/20 shadow-lg shadow-red-600/20'
+                              : 'border-white/20 bg-[#1A1A1A] hover:border-white/40 hover:bg-[#222]'
+                          }`}
+                        >
+                          {/* Checkbox */}
+                          <div className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
+                            isSelected 
+                              ? 'bg-red-600 border-red-600' 
+                              : 'border-white/40 bg-transparent'
+                          }`}>
+                            {isSelected && <Check className="text-white" size={18} strokeWidth={3} />}
+                          </div>
+                          
+                          {/* Icon */}
+                          <PaymentMethodIcon type={method.type} size={32} />
+                          
+                          {/* Label */}
+                          <div className="flex-1 text-left">
+                            <span className={`font-semibold text-lg ${isSelected ? 'text-white' : 'text-white/80'}`}>
+                              {method.name}
+                            </span>
+                            {method.type === 'stripe' && (
+                              <p className="text-white/50 text-sm">Visa, Mastercard, Amex, etc.</p>
+                            )}
+                            {method.type === 'paypal' && method.email && (
+                              <p className="text-white/50 text-sm">{method.email}</p>
+                            )}
+                            {method.type === 'venmo' && method.username && (
+                              <p className="text-white/50 text-sm">@{method.username}</p>
+                            )}
+                            {method.type === 'cashapp' && method.cashtag && (
+                              <p className="text-white/50 text-sm">${method.cashtag}</p>
+                            )}
+                          </div>
+                          
+                          {/* Selected Badge */}
+                          {isSelected && (
+                            <span className="px-3 py-1 bg-red-600 text-white text-sm font-semibold rounded-full">
+                              SELECTED
+                            </span>
                           )}
-                        </div>
-                        <PaymentMethodIcon type={method.type} />
-                        <span className="text-white font-medium flex-1 text-left">{method.name}</span>
-                        {selectedPayment === method.type && (
-                          <CheckCircle className="text-red-500" size={20} />
-                        )}
-                      </button>
-                    ))}
+                        </button>
+                      );
+                    })}
                   </div>
-                  {selectedPayment !== 'stripe' && (
-                    <p className="text-white/50 text-sm mt-4">
-                      {selectedPayment === 'paypal' && "You'll be shown PayPal payment details after placing your order."}
-                      {selectedPayment === 'venmo' && "You'll be shown Venmo payment details after placing your order."}
-                      {selectedPayment === 'cashapp' && "You'll be shown Cash App payment details after placing your order."}
-                    </p>
-                  )}
+                  
+                  {/* Selected Payment Summary */}
+                  <div className="mt-6 p-4 bg-[#2A2A2A] rounded-lg border border-white/10">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="text-green-500" size={20} />
+                      <span className="text-white">
+                        You will pay with: <strong>{paymentMethods.find(m => m.type === selectedPayment)?.name || 'Credit Card'}</strong>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
 
