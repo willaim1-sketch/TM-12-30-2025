@@ -390,7 +390,11 @@ const SettingsManager = () => {
           <TabsTrigger value="design" className="data-[state=active]:bg-red-600">Design</TabsTrigger>
           <TabsTrigger value="stripe" className="data-[state=active]:bg-red-600">
             <CreditCard size={16} className="mr-1" />
-            Payments
+            Stripe
+          </TabsTrigger>
+          <TabsTrigger value="altpayments" className="data-[state=active]:bg-red-600">
+            <DollarSign size={16} className="mr-1" />
+            PayPal/Venmo
           </TabsTrigger>
           <TabsTrigger value="sendgrid" className="data-[state=active]:bg-red-600">
             <Mail size={16} className="mr-1" />
