@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy, Check, Square, CheckSquare } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -10,6 +10,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -19,30 +20,44 @@ const fadeInUp = {
 };
 
 // Payment method icons/logos
-const PaymentMethodIcon = ({ type }) => {
+const PaymentMethodIcon = ({ type, size = 24 }) => {
   switch (type) {
     case 'stripe':
-      return <CreditCard className="text-white" size={24} />;
+      return <CreditCard className="text-white" size={size} />;
     case 'paypal':
       return (
-        <div className="w-6 h-6 bg-[#003087] rounded flex items-center justify-center">
-          <span className="text-white text-xs font-bold">PP</span>
+        <div className={`bg-[#003087] rounded flex items-center justify-center`} style={{ width: size, height: size }}>
+          <span className="text-white font-bold" style={{ fontSize: size * 0.5 }}>PP</span>
         </div>
       );
     case 'venmo':
       return (
-        <div className="w-6 h-6 bg-[#3D95CE] rounded flex items-center justify-center">
-          <span className="text-white text-xs font-bold">V</span>
+        <div className={`bg-[#3D95CE] rounded flex items-center justify-center`} style={{ width: size, height: size }}>
+          <span className="text-white font-bold" style={{ fontSize: size * 0.5 }}>V</span>
         </div>
       );
     case 'cashapp':
       return (
-        <div className="w-6 h-6 bg-[#00D632] rounded flex items-center justify-center">
-          <span className="text-white text-xs font-bold">$</span>
+        <div className={`bg-[#00D632] rounded flex items-center justify-center`} style={{ width: size, height: size }}>
+          <span className="text-white font-bold" style={{ fontSize: size * 0.5 }}>$</span>
         </div>
       );
     default:
-      return <CreditCard className="text-white" size={24} />;
+      return <CreditCard className="text-white" size={size} />;
+  }
+};
+
+// Generate payment URL for QR code
+const getPaymentUrl = (type, info) => {
+  switch (type) {
+    case 'paypal':
+      return `https://paypal.me/${info.email?.split('@')[0] || info.email}/${info.total?.toFixed(2)}`;
+    case 'venmo':
+      return `https://venmo.com/${info.username}?txn=pay&amount=${info.total?.toFixed(2)}&note=Order%20${info.orderId}`;
+    case 'cashapp':
+      return `https://cash.app/$${info.cashtag}/${info.total?.toFixed(2)}`;
+    default:
+      return '';
   }
 };
 
