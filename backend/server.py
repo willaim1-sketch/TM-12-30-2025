@@ -937,12 +937,19 @@ async def send_order_email(order_id: str, data: dict, user: User = Depends(requi
         """
     
     # Notes section
-    notes_html = ""
+    # Notes section - always show, with default text if empty
     if order.get("comments"):
         notes_html = f"""
         <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:8px;padding:16px;margin-top:20px;">
             <h3 style="margin:0 0 10px 0;color:#856404;">📝 NOTES / Special Instructions</h3>
             <p style="margin:0;color:#856404;white-space:pre-wrap;">{order.get('comments')}</p>
+        </div>
+        """
+    else:
+        notes_html = """
+        <div style="background:#f0f0f0;border:2px solid #ccc;border-radius:8px;padding:16px;margin-top:20px;">
+            <h3 style="margin:0 0 10px 0;color:#666;">📝 NOTES / Special Instructions</h3>
+            <p style="margin:0;color:#888;font-style:italic;">No Special Instructions</p>
         </div>
         """
     
