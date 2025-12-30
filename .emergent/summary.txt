@@ -7,187 +7,214 @@ Build a modern, high-converting restaurant website for The Tamale Man.
 *   **Backend & Admin Dashboard:** Include an admin panel with a Menu manager, Order Online system, Contact form submissions, Opening hours editor, SEO settings, Media library, and Design customization.
 
 **Subsequent User Requests from this session:**
-*   Fix non-working menu add-ons (e.g., extra salsa).
-*   Integrate Stripe for checkout.
-*   Enable multiple email addresses for order notifications using SendGrid.
-*   Allow logo upload for the header and footer (footer logo should be 1/3 width on the left).
-*   Fix the Page Builder so that sections added by the admin appear on the live site.
-*   Allow adding Page Builder sections to the top or bottom of the page.
-*   Provide a way to add/remove pages from the main navigation menu.
-*   Fix the Merch Manager to allow adding/editing/removing items.
-*   Fix the hero section title so it's fully editable from the admin panel.
-*   Make the merch promo category images on the landing page editable.
-*   Improve the Hours editor in the admin panel and display the hours prominently on the landing page.
+*   Make all pictures on the website updatable/deletable from the admin panel and show dimensions.
+*   Fix the menu add-ons, which are reportedly not working again.
+*   Build a comprehensive Media Manager of professional quality.
+*   Replace the homepage SVG silhouette with a user-provided PNG image, editable from the admin panel.
+*   Fix disappearing logos and images on the homepage.
+*   Ensure payments are working and fix any issues.
+*   Make all page metadata (title, description) editable from the admin panel to remove Emergent branding.
+*   Update the Stripe key to a provided live key and ensure it's not in test mode.
+*   Update the SendGrid key and configure it for sending order notification emails.
+*   Fix data persistence issues to prevent uploaded images and settings from being lost.
+*   Add TikTok, Snapchat, YouTube, and LinkedIn to social media links.
+*   Enhance the admin View Orders page to show the logo, allow emailing the order to the chef, and enable a printable PDF download.
+*   Add a full SendGrid setup UI in the admin panel to manage API keys and monitor status.
+*   Fix the special instructions to show a default message in order emails if empty.
+*   Add PayPal, Venmo, and CashApp as payment options, with settings configurable in the admin panel.
+*   Create a financial reporting tab in the Orders admin section to show daily/weekly totals, counts, and a 10% fee calculation.
+*   Update the checkout page to let customers choose their payment method using clear checkboxes and generate a QR code for each manual payment option.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack restaurant website for The Tamale Man using FastAPI, React, and MongoDB. The application's UI has been completely overhauled to a Red & White theme with larger fonts.
+A full-stack restaurant website for The Tamale Man (FastAPI/React/MongoDB) with a comprehensive admin panel. The site has a Red & White theme.
 
-Key features implemented in this session include:
-- A functional menu with selectable add-ons that correctly adjust the price.
-- A fully connected Divi-like Page Builder that allows an admin to add custom sections to the top or bottom of the homepage, which are then rendered on the live site.
-- An admin settings panel with controls for:
-    - Uploading header and footer logos.
-    - Managing main navigation menu links.
-    - Specifying multiple email addresses for order notifications.
-    - Editing hero section text.
-    - Editing operating hours.
-    - Editing the four merchandise promo images on the landing page.
-- A functional Merch Manager in the admin area for full CRUD operations on merchandise, with the public merch page fetching data directly from the database.
-- Backend support for image uploads, which are stored locally and served statically.
-- Automated email notifications via SendGrid upon successful Stripe payment.
+**Key Features:**
+*   **Content Management:** A Divi-like Page Builder, editable Hero section, and a full Media Manager for all site images.
+*   **Admin Settings:** Extensive controls for logos, branding, SEO metadata, navigation, operating hours, and social media links (including new ones like TikTok, YouTube).
+*   **Commerce:**
+    *   A functional menu and merch manager.
+    *   A checkout page that supports Stripe, with UI elements in place for PayPal, Venmo, and CashApp.
+    *   Admin configuration panels for Stripe, SendGrid, and alternative payment methods (PayPal, Venmo, CashApp).
+*   **Order Management:** An enhanced admin order viewer with a logo, a button to email the order to the kitchen, and PDF download functionality. It also includes a Financials tab with daily/weekly reporting on revenue and calculated fees.
+*   **Integrations:** Stripe (live key configured), SendGrid (live key configured), and Emergent-managed Google Auth for admin login.
 
 **Last working item**:
-    - Last item agent was working: The agent just finished implementing the user's request for an improved operating hours management system. This involved updating the Hours tab in the admin settings for better usability and redesigning the  on the landing page to display the hours in a cute little block above the contact information.
-    - Status: USER VERIFICATION PENDING
-    - Agent Testing Done: Y
-    - Which testing method agent to use? manual testing by screenshot tool
+    - Last item agent was working: Refactoring the checkout page () to change the payment selection from radio buttons to checkboxes and to implement QR code generation for manual payment methods (PayPal, Venmo, CashApp).
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use? Frontend testing agent
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: The  in the database was not updating when changed in the admin settings. The agent fixed the display logic but the save functionality itself may still be faulty. (P1)
+  - Issue 1: Complete Checkout Page Refactor (P0)
+  - Issue 2: Verify and Fix Payment Flow (P1)
+  - Issue 3: Data Persistence Concerns (P2)
+  - Issue 4: Recurring Add-ons Not Working Bug (P3)
   
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: The agent discovered the hero title was hardcoded in  and fixed it to display the value from the settings prop. It also manually updated the database to confirm the display works. However, the root cause might be that the admin settings save button for the Hero tab is not correctly updating the  field in the database.
+     - Attempted fixes: The agent installed  and started editing  to replace the payment method selection UI.
      - Next debug checklist:
-       - Manually test the Hero tab in the admin settings ().
-       - Change the Hero Title text and save.
-       - Check the network request to .
-       - Verify if the  field in the MongoDB  collection was updated.
-       - If not, debug the  function in  and the corresponding backend endpoint in .
-     - Why fix this issue and what will be achieved with the fix? This will ensure that the user's changes to the main landing page heading are correctly saved and displayed, a core part of the requested content management functionality.
-     - Status:  TESTING PENDING
-     - Is recurring issue? Y
+       1. Finish implementing the checkbox UI in .
+       2. Integrate the  component to display a QR code when a non-Stripe payment method is selected. The QR code should encode the payment details (e.g., PayPal.Me link, Venmo username).
+       3. Ensure the  function in  and the  endpoint in  correctly handle the new payment methods.
+       4. Test the entire flow: select a manual payment, see the QR code, and confirm the order is created with a pending status.
+     - Why fix this issue and what will be achieved with the fix? This directly addresses the user's latest request for a clearer, more user-friendly checkout experience with modern payment options.
+     - Status:  IN PROGRESS
+     - Is recurring issue? N
      - Should Test frontend/backend/both after fix? both
      - Blocked on other issue: None
 
+  - Issue 2: 
+     - Attempted fixes: The agent verified the  endpoint works via  and confirmed the live Stripe key is in the .
+     - Next debug checklist:
+        1. After fixing Issue #1, perform a full end-to-end test of the Stripe checkout flow as a user would.
+        2. Add an item to the cart, go to checkout, fill in details, select Credit/Debit Card, and proceed.
+        3. Check the browser console for errors during the redirect to Stripe.
+        4. In , double-check the  function to ensure there are no hardcoded test mode parameters being passed to Stripe, though this is unlikely.
+     - Why fix this issue and what will be achieved with the fix? Payments are a critical business function. This ensures the primary payment method is fully operational with the live key.
+     - Status:  TESTING PENDING
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? both
+     - Blocked on other issue: Issue 1
+
+  - Issue 3: 
+     - Attempted fixes: The agent investigated a data loss event, found some database collections were empty, and identified a  function that runs on startup. The agent also fixed the  endpoint to allow clearing fields (saving empty strings instead of filtering them out).
+     - Next debug checklist:
+        1. Review the  function in  again. Although it checks for existing data, confirm it has no edge cases that could cause a wipe.
+        2. Investigate the environment's persistence layer. The data loss was attributed to a container restart, which is a critical flaw. The database volume () must be properly mounted and persistent.
+        3. Advise the user to upload all critical data (logos, product images) on the live, deployed site, as the preview environment has an independent, non-persistent database.
+     - Why fix this issue and what will be achieved with the fix? This is the most critical issue for user trust. A fix will ensure that the user's work is not lost, making the application usable as a long-term solution.
+     - Status:  NOT STARTED
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? backend
+     - Blocked on other issue: None
+
+  - Issue 4: 
+     - Attempted fixes: The agent tested the add-on functionality via screenshots and confirmed it was working (price updates, items selectable). The user agreed to deprioritize it.
+     - Next debug checklist: This can be revisited if the user reports it again. If so, ask for a screen recording or very specific steps to reproduce the exact scenario where it fails.
+     - Why fix this issue and what will beached with the fix? It's a recurring user complaint, suggesting a subtle bug might exist. Fixing it would improve user confidence.
+     - Status:  NOT STARTED
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? frontend
+     - Blocked on other issue: None
+
 **In progress Task List**:
-  - Task 1: Verify recently implemented features (P0)
+  - Task 1: Complete Checkout Page Refactor (Same as Issue #1 above) (P0)
   
  Task Detail:
   - Task 1: 
-     - Where to resume: The agent has just completed a large batch of features. The user needs to verify them. The next agent should guide the user through testing the following:
-        1.  **Operating Hours**: Check the new display on the landing page and the editor in .
-        2.  **Navigation Menu**: Test adding/removing links in .
-        3.  **Page Builder Placement**: Confirm that adding sections to the  and  in the Page Builder works as expected.
-     - What will be achieved with this? This will confirm the successful implementation of the user's latest requests and build confidence before moving to new tasks.
-     - Status:  USER VERIFICATION PENDING
-     - Should Test frontend/backend/both after fix? frontend
-     - Blocked on something: User feedback.
+     - Where to resume: Continue editing  to implement checkboxes and QR code display for payment methods. The last action was installing  and starting the file edit.
+     - What will be achieved with this? A user-friendly checkout page that supports multiple payment types with clear selection and instructions.
+     - Status:  IN PROGRESS
+     - Should Test frontend/backend/both after fix? both
+     - Blocked on something: None
 
 **Upcoming and Future Tasks**
    Upcoming Tasks:
-    - **Verify Merch Manager (P1)**: Although implemented, the user should be guided to test adding, editing, and deleting an item in  to confirm it meets their needs.
-    - **Verify Logo Upload (P1)**: The functionality is implemented. The user needs to be prompted to upload a header and footer logo via  to confirm it works as expected.
-    - **Verify Image Dimension Guides (P2)**: The original request for image dimension guides in the admin panel has not been fully addressed. The agent should add a simple, non-editable text section in relevant admin areas (e.g., Settings, Page Builder) that lists recommended image sizes.
+    - **Add Image Dimension Guides (P1):** The user has repeatedly requested that ideal image dimensions be displayed in the admin panel (e.g., for logos, hero images, merch). This needs to be implemented across the Media Manager and Settings panel.
+    - **Fix Minor ESLint Warning (P2):** The frontend has a persistent  warning in . This should be cleaned up.
 
 **Completed work in this session**
-- List of all completed tasks with file and method name:
-  - **UI Theme Overhaul**: Completed the site-wide migration to a Red & White theme with larger fonts. (All  files)
-  - **Menu Add-ons Fix**: Implemented selectable toppings with price adjustments. (, )
-  - **Multi-Email Notifications**: Enabled notifications to multiple emails on successful orders. ()
-  - **Logo Upload & Display**: Added admin UI and backend logic for logo uploads. (, , )
-  - **Page Builder Live Connection**: Connected the admin Page Builder to the live landing page. (, , )
-  - **Page Builder Top/Bottom Placement**: Added functionality to place custom sections at the top or bottom of the page. (, )
-  - **Navigation Menu Manager**: Implemented an admin UI to manage main navigation links. (, )
-  - **Merch Manager Implementation**: Fixed the merch page to use DB data and seeded initial items. (, )
-  - **Editable Merch Promo Section**: Made landing page merch category images editable in admin settings. (, )
-  - **Editable Operating Hours**: Improved the admin hours editor and added a display block to the landing page. (, )
-
-- Recently completed:
-  - Operating Hours UI/Editor (DONE)
-  - Navigation Menu Manager (DONE)
-  - Page Builder Top/Bottom Placement (DONE)
-  - Merch Manager Fix & Seeding (DONE)
-  - Menu Add-ons Bug Fix (DONE)
-  - Full UI Theme Overhaul (DONE)
-
-**Earlier issues found/mentioned but not fixed**
-   - None, the agent was diligent in addressing user requests as they arose.
-
-**Known issue recurrence from previous fork**
-  - None.
+- **Admin Payment Settings:** Added comprehensive admin UI to manage Stripe, PayPal, Venmo, and CashApp credentials.
+- **Financial Reporting:** Implemented a new Financials tab in the Order Manager with daily/weekly revenue and fee calculations.
+- **Checkout Payment Selection:** Updated the checkout page to dynamically show payment methods enabled in the admin.
+- **Enhanced Order Viewer:** Added logo, email-to-chef, and PDF download features to the admin order details view.
+- **SendGrid Integration:** Added a full admin UI for SendGrid API key setup and fixed the backend logic to correctly use the configured From email for order notifications.
+- **Data Persistence Fix:** Patched the admin settings save logic to allow clearing image/text fields.
+- **Live API Keys:** Configured the application with the user's live Stripe and SendGrid API keys and fixed  file parsing issues.
+- **Editable SEO:** Implemented  to allow site-wide meta titles and descriptions to be managed from the admin panel, removing the Emergent default.
+- **New Social Media Links:** Added support for TikTok, Snapchat, YouTube, and LinkedIn in admin settings and the site footer.
+- **Media Manager V2:** Built and integrated a professional-grade Media Manager for all site images.
+- **Editable Mascot Image:** Replaced the hardcoded SVG silhouette with a dynamic image manageable from the admin panel and set the user's custom image.
+- **Hero Title Bug Fix:** Resolved the recurring issue where the homepage hero title would not save from the admin panel.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend**: React, Tailwind CSS, Shadcn/UI, Framer Motion
+- **Frontend**: React, Tailwind CSS, Shadcn/UI, Framer Motion, , 
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Integrations**: Stripe, SendGrid, Emergent Google Auth, Emergent LLM Key
+- **Integrations**: Stripe, SendGrid, Emergent Google Auth
 
 **key DB schema**
-  - **site_settings**: {..., : List[EmailStr], : Optional[str], : Optional[str], : List[dict], : Optional[str], : Optional[str], ...}
-  - **page_content**: {page_slug, : List[dict], : List[dict], updated_at}
-  - **orders**: {items: List[OrderItem], ...} where  now contains  instead of .
-  - **merch_items**: {name, description, price, image_url, category, : bool, ...}
+  - **site_settings**: Added , , , , .
+  - **sendgrid_settings**: New collection {, , , }
+  - **payment_settings**: New collection {, , , , , etc.}
+  - **media_items**: New collection {, , , , , , }
+  - **orders**: Added , .
 
 **changes in tech stack**
-  - None.
+  - **Frontend**: Added  for SEO and  for payment QR codes.
 
 **All files of reference**
-- : Heavily modified to add new settings fields, SendGrid notifications, a file upload endpoint, a public endpoint for page content, and schema updates for orders and page content.
-- : Heavily modified to render Page Builder content, display logos, and incorporate a new location/hours section.
-- : Heavily modified to include new admin tabs and controls for Logos, Notifications, Navigation, Merch Promos, and Hours.
-- : Modified to fix the menu add-ons bug.
-- : Enhanced to support top/bottom section placement and add direct image upload buttons.
-- : New component created to dynamically render sections from the Page Builder on the live site.
-- : Updated to fetch items from the database instead of using hardcoded fallbacks.
+- : Heavily modified to add endpoints for new payment settings, SendGrid settings, financial reports, media management, and to fix email/order logic.
+- : Heavily modified to add UI tabs and logic for SendGrid and all new payment methods (PayPal, Venmo, CashApp).
+- : Heavily modified to add payment method selection. Currently mid-refactor for checkboxes and QR codes.
+- : Overhauled to use a tabbed layout and include the new Financials reporting dashboard.
+- : Updated to render the dynamic mascot image, new social media icons, and the  component.
+- : New file for the comprehensive media library feature.
+- : New component to manage dynamic page meta tags using .
+- , : Updated with live API keys.
 
 **Areas that need refactoring**:
-- The pattern of passing the  object down through multiple layers of components in  is becoming cumbersome. Refactoring to use a React Context provider for site settings would simplify state management and improve maintainability.
+-  is extremely large and complex. It should be broken down into smaller, more manageable components for each settings tab (General, Social, Payments, etc.).
+- The use of a global React Context for the  object is still a valid recommendation to avoid prop-drilling.
 
 **key api endpoints**
-- : **New** endpoint for all file/image uploads.
-- : **New** public endpoint to fetch content for the Page Builder renderer.
-- : Updated to save  and .
-- : Updated to handle new fields for logos, notifications, navigation, etc.
-- : Updated to trigger SendGrid email notifications on successful payment.
+- **Media:** , , 
+- **Order Financials:** 
+- **Order Email:** 
+- **SendGrid Settings:** , , 
+- **Payment Settings:** , 
+- **Order Creation (Modified):**  (now accepts ).
 
 **Critical Info for New Agent**
-- The user is very direct and value-conscious (your buning my credits so please get this right). Prioritize efficiency and clear communication.
-- The highest priority is user verification of the recently completed features (Hours, Nav Menu, Page Builder placement). Guide the user through testing these.
-- **Image Uploads**: A universal image upload system is now in place. All image inputs in the admin panel should use this. Uploaded files are stored in  and served via .
-- **Admin Access**: Admin features require Google Authentication. Use the testing agent for tasks that need admin access if you cannot guide the user.
+- **DATA PERSISTENCE IS PARAMOUNT.** The user has experienced data loss (uploaded images, settings) and is extremely sensitive to it. A container restart was blamed. Double-check all database operations and inform the user that the preview environment's data is temporary and they MUST upload their final content on the deployed, live website.
+- The highest priority is completing the checkout page refactor (Issue #1) to use checkboxes and QR codes. The user is highly focused on payment functionality.
+- **Admin Panel First:** The user's core philosophy is to manage the entire website from the admin panel without developer help. All new features or fixes must be fully controllable from the admin UI.
+- The user has provided live API keys for Stripe and SendGrid. Ensure all operations, especially payments, are handled with care.
 
-**documents and test_reports created in this job**
-  - /app/test_reports/iteration_4.json
-  - /app/test_reports/iteration_5.json
-  - /app/test_reports/iteration_6.json
+**documents and test reports created in this job**
+  - 
 
-**Last 10 User Messages and any pending HUMAN messages**
-- 10: in site settings, i updated the wording on the home page header and it did not change, i changed Authentic Tamales to The Tamale Man and nothing happened
-- 9: the merch shop has items in it and i have no way to edit them , add or remove them or correct them. add this functionality to the admin area.
-- 8: ok i want to be able to add and remove pages from the menu, i aslow want new sections added to be able to add new sections to the page at the top or at the bottom above the footer. dont forget i am also planning to add a picture in the footer on the left 1/3 the size of the page. your buning my credits so please get this right
-- 7: i added a section but where is it . i used the page builder and the test section is no where to be found , i need to be able to edit pages faster so please make it easy to dl
-- 6: the page builder is still not working right so test it alone and make sure just that is working and fix it and let me know when it works and adding sections is working and 2. is there a place to upload pictures or do i use my server to host files and use http links to them
-- 5: when i check out, make sure stripe is integrated so we can put our info in to it. also when an order is made i want to be able to add more than one email to notify that an order came in. i want to be able to add our logo to the footer and on every page. i need to know the sizes to create and have a easy way to upload to the pages to make wording changes, swap pictures , etc like divi builder
-- 4: 1. use test key 2. notify 2 emails and use Sendgrid long as it works 3. i like those and i want a bigger logo for the bottom footer that takes up 1/3rd of the footer on the left and something like 250x150 if that fits but go bigger if you need to ,
-- 3: the add extra salsa and sour cream, does not work, any available add-ons in the menu are not working
-- 2: 1. b 2. yes 3. focus on completing the existing in progress work'
-- 1: in the merch section, T-Shirts, Cups & Mugs, Hats, Souvenirs has place holder pics all the same size, add a way to easily change them in the admin section
+**Last 10 User Messages and any pending HUMAN messages** 
+- **10:** User wants Stripe payments to be live, not test mode, and ensure the live API key is used. (Status: In Progress, key was set, but full flow test pending).
+- **9:** User requests to change the checkout payment selection to clear checkboxes and to generate a unique QR code for each manual payment option (PayPal, Venmo, etc.). (Status: In Progress, this is the 
+wtmp begins Sun Dec 21 05:04:18 2025).
+- **8:** User wants to give customers a choice of payment method during checkout. (Status: Completed, now being refactored in message #9).
+- **7:** User wants a financial reporting dashboard in the orders admin section with daily/weekly totals for orders, revenue, and a 10% fee calculation. (Status: Completed).
+- **6:** User wants to add PayPal, Venmo, and CashApp as payment options, with full setup in the admin panel. (Status: Completed).
+- **5:** User wants the special instructions notes to be at the bottom of the order email and to show a default message if empty. (Status: Completed).
+s
+- **4:** User reports mail fail to send when trying to email an order to the chef. (Status: Completed, agent fixed  file and email logic).
+- **3:** User asks how to set up SendGrid to use their custom domain. (Status: Completed, agent provided instructions).
+- **2:** User wants to add a SendGrid setup section in the admin panel to manage the API key and monitor its status. (Status: Completed).
+- **1:** User wants to enhance the view orders page to show a logo, email the order to the chef, and download a printable PDF. (Status: Completed).
 
 **Project Health Check:**
-- **Broken**: Nothing is critically broken. The potential issue with saving the  from admin settings is the only known bug.
-- **Mocked**: None.
+- **Broken**: The checkout page () is currently broken mid-refactor.
+- **Mocked**: The QR code functionality for manual payments is not yet implemented. The payment flow for PayPal, Venmo, and CashApp is not integrated via SDKs; it will rely on the user scanning a QR code and paying manually.
 
 **3rd Party Integrations**
-	 •	Stripe (Payments) — Fully integrated for checkout. Uses a test key from the environment.
-	 •	SendGrid (Email) — Integrated to send notifications for new orders.
-	 •	Emergent-managed Google Auth (Authentication) — Used for admin login.
-	 •	OpenAI GPT Image 1 (Image Generation) — Available via Emergent LLM Key, but not currently used in the UI.
+	 •	**Stripe (Payments)** — Fully integrated for checkout. **Live key is configured.**
+	 •	**SendGrid (Email)** — Integrated for order notifications. **Live key is configured.**
+	 •	**Emergent-managed Google Auth (Authentication)** — Used for admin login.
+     •  **PayPal, Venmo, CashApp** - Admin settings are in place to store user payment details (e.g., email, username). No SDK integration; the plan is to generate QR codes for manual payment.
 
 **Testing status**
-  - Testing agent used after significant changes: YES (last used to test Page Builder APIs)
+  - Testing agent used after significant changes: YES (for Media Manager)
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: None.
+  - Known regressions: Data was lost at one point, attributed to a container restart. This is a critical risk.
 
 **Credentials to test flow:**
 - **Admin Login**: Navigate to the Admin Login link in the website footer. Use the Continue with Google button to sign in. The first user to authenticate is automatically granted admin privileges.
 
 **What agent forgot to execute**
-- The request for image dimension guides has not been fully implemented yet. It was mentioned in the original handoff and implicitly in a user message but was a lower priority than the functional changes.</analysis>
+- The recurring ESLint warning  in  has not been addressed.
+- The user's original request for clear image dimension guides in the admin panel has only been partially fulfilled (for the mascot) and needs to be implemented comprehensively.
+- Did not explicitly verify that the Stripe checkout session code is free of any hardcoded test_mode flags after setting the live key.</analysis>

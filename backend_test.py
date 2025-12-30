@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 class TamaleManAPITester:
-    def __init__(self, base_url="https://tamale-web.preview.emergentagent.com"):
+    def __init__(self, base_url="https://tamale-manager.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
@@ -668,7 +668,7 @@ class TamaleManAPITester:
             response = requests.post(
                 f"{self.api_url}/orders/create",
                 json=order_data,
-                headers={'Content-Type': 'application/json', 'Origin': 'https://tamale-web.preview.emergentagent.com'},
+                headers={'Content-Type': 'application/json', 'Origin': 'https://tamale-manager.preview.emergentagent.com'},
                 timeout=15
             )
             
