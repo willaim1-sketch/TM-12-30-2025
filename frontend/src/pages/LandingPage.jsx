@@ -248,6 +248,11 @@ const VideoSection = ({ settings }) => {
   
   if (!videoUrl) return null;
   
+  // Convert relative URLs to full URLs using the API base
+  const fullVideoUrl = videoUrl.startsWith('/api') 
+    ? `${process.env.REACT_APP_BACKEND_URL}${videoUrl}`
+    : videoUrl;
+  
   return (
     <section className="w-full bg-black">
       <div className="relative w-full" style={{ maxHeight: '80vh' }}>
@@ -259,8 +264,8 @@ const VideoSection = ({ settings }) => {
           playsInline
           poster={settings?.video_poster || ''}
         >
-          <source src={videoUrl} type="video/mp4" />
-          <source src={videoUrl} type="video/quicktime" />
+          <source src={fullVideoUrl} type="video/mp4" />
+          <source src={fullVideoUrl} type="video/quicktime" />
           Your browser does not support the video tag.
         </video>
         {/* Optional overlay for text */}
