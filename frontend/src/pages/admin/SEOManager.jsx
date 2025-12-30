@@ -301,7 +301,8 @@ const SEOManager = () => {
                 </div>
 
                 <div>
-                  <Label className="text-white/70">OG Image URL (1200x630px recommended)</Label>
+                  <Label className="text-white/70">OG Image URL</Label>
+                  <ImageDimensionGuide width={1200} height={630} description="Facebook/Twitter preview image" />
                   <Input
                     value={form.og_image}
                     onChange={(e) => setForm(prev => ({ ...prev, og_image: e.target.value }))}
@@ -310,7 +311,12 @@ const SEOManager = () => {
                     data-testid="seo-og-image-input"
                   />
                   {form.og_image && (
-                    <img src={form.og_image} alt="OG Preview" className="mt-2 w-full h-32 object-cover rounded" />
+                    <div className="mt-2 relative">
+                      <img src={form.og_image} alt="OG Preview" className="w-full h-32 object-cover rounded" />
+                      <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        1200 × 630px recommended
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
