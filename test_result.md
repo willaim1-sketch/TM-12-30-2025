@@ -103,24 +103,51 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Test the Page Builder feature specifically - make sure adding sections works, drag-drop reordering, 
-  and content editing. Also verify image upload functionality exists for admin use.
+  Test the Checkout page payment flow - make sure payment method selection works, QR codes display 
+  for manual payments (PayPal, Venmo, CashApp), and Stripe checkout uses live API key.
   
 frontend:
-  - task: "Page Builder - Add Sections"
+  - task: "Checkout - Payment Method Selection"
     implemented: true
     working: "NA"
-    file: "/app/frontend/src/pages/admin/PageBuilder.jsx"
+    file: "/app/frontend/src/pages/OrderPage.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Page Builder has 15 section types, drag-drop reorder, section editor with content fields"
+        comment: "Payment methods displayed as checkbox-style buttons. User can select Stripe, PayPal, Venmo, or CashApp."
+      - working: "NA"
+        agent: "main"
+        comment: "Added QR code display in manual payment dialog using qrcode.react QRCodeSVG component"
+
+  - task: "Checkout - QR Code Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/OrderPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "QR codes now render in the manual payment dialog showing payment URLs for PayPal, Venmo, CashApp"
+
+  - task: "Checkout - Stripe Live Mode"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend uses STRIPE_API_KEY from .env which is set to sk_live_... (live key confirmed)"
 
 backend:
-  - task: "Page Builder API"
+  - task: "Order Creation API"
     implemented: true
     working: "NA"
     file: "/app/backend/server.py"
@@ -130,35 +157,47 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "GET/PUT /api/admin/page-builder/{page_id} endpoints exist"
+        comment: "POST /api/orders/create handles both Stripe and manual payments (PayPal, Venmo, CashApp)"
 
-  - task: "File Upload API"
+  - task: "Payment Methods API"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "high"
-    needs_retesting: false
+    priority: "medium"
+    needs_retesting: true
     status_history:
-      - working: true
-        agent: "testing"
-        comment: "POST /api/upload accepts images and returns URLs"
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/payment-methods returns enabled payment options from admin settings"
 
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 6
+  test_sequence: 7
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Page Builder - Add Sections"
-    - "Page Builder - Edit Section Content"
-    - "Page Builder - Drag Drop Reorder"
+    - "Checkout - Payment Method Selection"
+    - "Checkout - QR Code Display"
+    - "Checkout - Stripe Live Mode"
+    - "Order Creation API"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Please test the Page Builder thoroughly after admin login. Test: 1) Navigate to Page Builder, 2) Add different section types (Hero, Text, Image, CTA), 3) Edit section content, 4) Reorder sections via drag-drop, 5) Save page and verify persistence."
+    message: |
+      PRIORITY TEST: Checkout payment flow
+      
+      1. First verify the menu page loads and you can add items to cart
+      2. Go to /order checkout page with items in cart
+      3. Fill in customer details (name, email, phone, pickup date/time)
+      4. Test payment method selection - verify checkbox-style UI shows all available methods
+      5. Select Stripe (Credit/Debit Card) and verify Place Order button works (should redirect to Stripe)
+      6. Backend API test: POST /api/orders/create with sample order data
+      7. Backend API test: GET /api/payment-methods should return available payment options
+      
+      Note: The Stripe live key is configured (sk_live_...). The checkout should create a real Stripe session.
