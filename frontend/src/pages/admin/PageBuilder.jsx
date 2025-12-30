@@ -561,9 +561,26 @@ const PageBuilder = () => {
   const [showAddSection, setShowAddSection] = useState(false);
   const [addPosition, setAddPosition] = useState("top"); // "top" or "bottom"
 
+  const fetchPageContent = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/admin/page-builder/${activePage}`, { withCredentials: true });
+      if (response.data) {
+        setSectionsTop(response.data.sections_top || response.data.sections || []);
+        setSectionsBottom(response.data.sections_bottom || []);
+      } else {
+        setSectionsTop([]);
+        setSectionsBottom([]);
+      }
+    } catch (error) {
+      console.error("Error fetching page content:", error);
+      setSectionsTop([]);
+      setSectionsBottom([]);
+    }
+  }, [activePage]);
+
   useEffect(() => {
     fetchPageContent();
-  }, [activePage]);
+  }, [fetchPageContent]);
 
   const fetchPageContent = async () => {
     try {
