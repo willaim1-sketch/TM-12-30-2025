@@ -279,6 +279,7 @@ const MerchManager = () => {
 
             <div>
               <Label className="text-white/70">Product Image</Label>
+              <ImageDimensionGuide width={600} height={600} description="Square image, product photography" />
               <div className="flex gap-3 mt-2">
                 <label className="cursor-pointer flex-shrink-0">
                   <input
@@ -315,9 +316,13 @@ const MerchManager = () => {
                 />
               </div>
               {form.image_url && (
-                <img src={form.image_url} alt="Preview" className="mt-4 w-full h-40 object-cover rounded-lg" />
+                <div className="mt-4 relative">
+                  <img src={form.image_url} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    600 × 600px recommended
+                  </span>
+                </div>
               )}
-              <p className="text-white/50 text-xs mt-2">Recommended size: 600 x 600px (square)</p>
             </div>
 
             <div>
