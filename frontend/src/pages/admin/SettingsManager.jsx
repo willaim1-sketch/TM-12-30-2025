@@ -627,6 +627,38 @@ const SettingsManager = () => {
                 </div>
               )}
             </div>
+            
+            {/* Homepage Video Section */}
+            <div className="border-t border-white/10 pt-6">
+              <Label className="text-white/70">Homepage Video (Below Hero)</Label>
+              <p className="text-white/50 text-sm mb-2">
+                Add a YouTube URL or direct video link. YouTube videos will autoplay on loop (muted).
+              </p>
+              <Input
+                value={settings.homepage_video || ""}
+                onChange={(e) => updateSettings("homepage_video", e.target.value)}
+                className="input-dark mt-1"
+                placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+                data-testid="setting-homepage-video"
+              />
+              {settings.homepage_video && (
+                <div className="mt-4">
+                  {settings.homepage_video.includes('youtube') || settings.homepage_video.includes('youtu.be') ? (
+                    <div className="bg-green-900/30 border border-green-600/50 rounded-lg p-3 flex items-center gap-2">
+                      <span className="text-green-400">✓</span>
+                      <span className="text-white/80 text-sm">YouTube video will autoplay on loop (muted)</span>
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3">
+                      <span className="text-yellow-400 text-sm">Direct video URL detected. For best results, use YouTube.</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {!settings.homepage_video && (
+                <p className="text-white/40 text-xs mt-2">Leave empty to hide the video section</p>
+              )}
+            </div>
           </div>
         </TabsContent>
 
