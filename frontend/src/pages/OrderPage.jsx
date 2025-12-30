@@ -593,11 +593,27 @@ const OrderPage = () => {
                   <p className="text-4xl font-bold text-red-500">${manualPaymentInfo.total?.toFixed(2)}</p>
                 </div>
 
+                {/* QR Code Section */}
+                <div className="flex flex-col items-center bg-white rounded-xl p-6">
+                  <p className="text-gray-700 text-sm mb-3 font-medium">Scan to Pay</p>
+                  <QRCodeSVG
+                    value={getPaymentUrl(manualPaymentInfo.type, manualPaymentInfo)}
+                    size={180}
+                    level="H"
+                    includeMargin={true}
+                    bgColor="#FFFFFF"
+                    fgColor="#000000"
+                  />
+                  <p className="text-gray-500 text-xs mt-3 text-center">
+                    Scan with your {manualPaymentInfo.type === 'paypal' ? 'PayPal' : manualPaymentInfo.type === 'venmo' ? 'Venmo' : 'Cash App'} app
+                  </p>
+                </div>
+
                 {/* Payment Instructions */}
                 <div className="space-y-4">
                   {manualPaymentInfo.type === 'paypal' && (
                     <>
-                      <p className="text-white/70">Send payment to:</p>
+                      <p className="text-white/70 text-center">Or send payment manually to:</p>
                       <div className="flex items-center gap-2 bg-[#2A2A2A] rounded-lg p-4">
                         <span className="text-white font-mono flex-1">{manualPaymentInfo.email}</span>
                         <Button 
@@ -624,7 +640,7 @@ const OrderPage = () => {
 
                   {manualPaymentInfo.type === 'venmo' && (
                     <>
-                      <p className="text-white/70">Send payment via Venmo to:</p>
+                      <p className="text-white/70 text-center">Or send payment manually to:</p>
                       <div className="flex items-center gap-2 bg-[#2A2A2A] rounded-lg p-4">
                         <span className="text-white font-mono flex-1">@{manualPaymentInfo.username}</span>
                         <Button 
@@ -651,7 +667,7 @@ const OrderPage = () => {
 
                   {manualPaymentInfo.type === 'cashapp' && (
                     <>
-                      <p className="text-white/70">Send payment via Cash App to:</p>
+                      <p className="text-white/70 text-center">Or send payment manually to:</p>
                       <div className="flex items-center gap-2 bg-[#2A2A2A] rounded-lg p-4">
                         <span className="text-white font-mono flex-1">${manualPaymentInfo.cashtag}</span>
                         <Button 
