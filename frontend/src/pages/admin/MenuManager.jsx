@@ -423,6 +423,7 @@ const MenuManager = () => {
 
             <div>
               <Label className="text-white/70">Image</Label>
+              <ImageDimensionGuide width={600} height={450} description="4:3 ratio, food photography" />
               <div className="mt-1 flex gap-4">
                 <Input
                   value={itemForm.image_url}
@@ -444,7 +445,12 @@ const MenuManager = () => {
                 </Button>
               </div>
               {itemForm.image_url && (
-                <img src={itemForm.image_url} alt="Preview" className="mt-4 w-full h-48 object-cover rounded-lg" />
+                <div className="mt-4 relative">
+                  <img src={itemForm.image_url} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    600 × 450px recommended
+                  </span>
+                </div>
               )}
             </div>
 
