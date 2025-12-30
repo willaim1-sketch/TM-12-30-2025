@@ -158,27 +158,33 @@ frontend:
 backend:
   - task: "Order Creation API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "POST /api/orders/create handles both Stripe and manual payments (PayPal, Venmo, CashApp)"
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING - API endpoint tested successfully. Creates orders with proper totals (subtotal + 8.25% tax), generates Stripe checkout sessions, and returns correct response with order_id, checkout_url, and session_id."
 
   - task: "Payment Methods API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "GET /api/payment-methods returns enabled payment options from admin settings"
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING - API returns correct payment methods. Currently only Stripe is configured: [{\"type\":\"stripe\",\"name\":\"Credit/Debit Card\",\"enabled\":true}]"
 
 metadata:
   created_by: "main_agent"
