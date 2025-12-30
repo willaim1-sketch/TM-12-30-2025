@@ -269,6 +269,7 @@ const BlogManager = () => {
 
             <div>
               <Label className="text-white/70">Featured Image URL</Label>
+              <ImageDimensionGuide width={1200} height={630} description="Social share optimized (OG image)" />
               <Input
                 value={form.featured_image}
                 onChange={(e) => setForm(prev => ({ ...prev, featured_image: e.target.value }))}
@@ -276,6 +277,14 @@ const BlogManager = () => {
                 placeholder="https://..."
                 data-testid="post-image-input"
               />
+              {form.featured_image && (
+                <div className="mt-4 relative">
+                  <img src={form.featured_image} alt="Featured preview" className="w-full h-40 object-cover rounded-lg" />
+                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    1200 × 630px recommended
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="border-t border-white/10 pt-6">
