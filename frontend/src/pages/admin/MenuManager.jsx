@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Plus, Edit, Trash2, Save, X, ImagePlus, Wand2 } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, ImagePlus, Wand2, Info } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -13,6 +13,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { toast } from "sonner";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Image dimension guide component
+const ImageDimensionGuide = ({ width, height, description }) => (
+  <div className="flex items-center gap-2 mt-1 text-xs">
+    <Info size={12} className="text-red-500" />
+    <span className="text-white/50">
+      Recommended: <span className="text-red-400 font-mono">{width} × {height}px</span>
+      {description && <span className="text-white/40"> • {description}</span>}
+    </span>
+  </div>
+);
 
 const MenuManager = () => {
   const [categories, setCategories] = useState([]);
