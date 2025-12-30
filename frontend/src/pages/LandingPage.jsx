@@ -244,6 +244,9 @@ const HeroSection = ({ settings }) => {
 
 // Video Section - Full Width Autoplay Loop
 const VideoSection = ({ settings }) => {
+  const [videoLoaded, setVideoLoaded] = React.useState(false);
+  const [videoError, setVideoError] = React.useState(false);
+  const videoRef = React.useRef(null);
   const videoUrl = settings?.homepage_video || null;
   
   if (!videoUrl) return null;
@@ -252,24 +255,55 @@ const VideoSection = ({ settings }) => {
   const fullVideoUrl = videoUrl.startsWith('/api') 
     ? `${process.env.REACT_APP_BACKEND_URL}${videoUrl}`
     : videoUrl;
+
+  const handleLoadedData = () => {
+    setVideoLoaded(true);
+    // Try to play when loaded
+    if (videoRef.current) {
+      videoRef.current.play().catch(e => console.log('Autoplay prevented:', e));
+    }
+  };
+
+  const handleError = (e) => {
+    console.error('Video error:', e);
+    setVideoError(true);
+  };
   
   return (
-    <section className="w-full bg-black">
-      <div className="relative w-full" style={{ maxHeight: '80vh' }}>
+    <section className="w-full bg-black py-0">
+      <div className="relative w-full overflow-hidden" style={{ maxHeight: '80vh', minHeight: videoLoaded ? 'auto' : '400px' }}>
+        {/* Loading state */}
+        {!videoLoaded && !videoError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <div className="text-white/50 text-lg">Loading video...</div>
+          </div>
+        )}
+        
+        {/* Error state */}
+        {videoError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <div className="text-white/50 text-lg">Video unavailable</div>
+          </div>
+        )}
+        
         <video
-          className="w-full h-auto object-cover"
+          ref={videoRef}
+          className={`w-full h-auto object-cover ${videoLoaded ? 'block' : 'invisible'}`}
           autoPlay
           loop
           muted
           playsInline
-          poster={settings?.video_poster || ''}
+          preload="auto"
+          onLoadedData={handleLoadedData}
+          onError={handleError}
         >
           <source src={fullVideoUrl} type="video/mp4" />
           <source src={fullVideoUrl} type="video/quicktime" />
           Your browser does not support the video tag.
         </video>
+        
         {/* Optional overlay for text */}
-        {settings?.video_overlay_text && (
+        {settings?.video_overlay_text && videoLoaded && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
             <h2 className="text-white text-3xl md:text-5xl font-display font-bold text-center px-4">
               {settings.video_overlay_text}
