@@ -733,7 +733,7 @@ const PageBuilder = () => {
         
         {sectionsTop.length === 0 ? (
           <div className="card-dark p-8 text-center border-2 border-dashed border-white/20">
-            <p className="text-white/50">No sections at top. Click "Add to Top" to add sections that appear before the default page content.</p>
+            <p className="text-white/50">No sections at top. Click &quot;Add to Top&quot; to add sections that appear before the default page content.</p>
           </div>
         ) : (
           <Reorder.Group values={sectionsTop} onReorder={handleReorderTop} className="space-y-4">
@@ -774,7 +774,7 @@ const PageBuilder = () => {
         
         {sectionsBottom.length === 0 ? (
           <div className="card-dark p-8 text-center border-2 border-dashed border-white/20">
-            <p className="text-white/50">No sections at bottom. Click "Add to Bottom" to add sections that appear above the footer.</p>
+            <p className="text-white/50">No sections at bottom. Click &quot;Add to Bottom&quot; to add sections that appear above the footer.</p>
           </div>
         ) : (
           <Reorder.Group values={sectionsBottom} onReorder={handleReorderBottom} className="space-y-4">
