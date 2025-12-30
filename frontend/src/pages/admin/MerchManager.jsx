@@ -334,7 +334,7 @@ const MerchManager = () => {
                 placeholder="S, M, L, XL, 2XL"
                 data-testid="merch-sizes-input"
               />
-              <p className="text-white/50 text-xs mt-1">For one-size items, enter "One Size"</p>
+              <p className="text-white/50 text-xs mt-1">For one-size items, enter &quot;One Size&quot;</p>
             </div>
 
             <div className="flex items-center gap-2">
