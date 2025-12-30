@@ -881,6 +881,7 @@ const LandingPage = () => {
       
       {/* Default Page Content */}
       <HeroSection settings={settings} />
+      <VideoSection settings={settings} />
       <AboutSection settings={settings} />
       <FeaturedMenuSection items={featuredItems} />
       <MerchPromoSection settings={settings} />
