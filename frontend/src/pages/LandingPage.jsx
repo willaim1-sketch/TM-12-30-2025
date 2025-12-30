@@ -242,6 +242,40 @@ const HeroSection = ({ settings }) => {
   );
 };
 
+// Video Section - Full Width Autoplay Loop
+const VideoSection = ({ settings }) => {
+  const videoUrl = settings?.homepage_video || null;
+  
+  if (!videoUrl) return null;
+  
+  return (
+    <section className="w-full bg-black">
+      <div className="relative w-full" style={{ maxHeight: '80vh' }}>
+        <video
+          className="w-full h-auto object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={settings?.video_poster || ''}
+        >
+          <source src={videoUrl} type="video/mp4" />
+          <source src={videoUrl} type="video/quicktime" />
+          Your browser does not support the video tag.
+        </video>
+        {/* Optional overlay for text */}
+        {settings?.video_overlay_text && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <h2 className="text-white text-3xl md:text-5xl font-display font-bold text-center px-4">
+              {settings.video_overlay_text}
+            </h2>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 // About Section
 const AboutSection = ({ settings }) => {
   return (
