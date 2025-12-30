@@ -242,7 +242,7 @@ const HeroSection = ({ settings }) => {
   );
 };
 
-// Video Section - Full Width Autoplay Loop
+// Video Section - Full Width Autoplay Loop (YouTube or Direct Video)
 const VideoSection = ({ settings }) => {
   const [videoLoaded, setVideoLoaded] = React.useState(false);
   const [videoError, setVideoError] = React.useState(false);
@@ -251,6 +251,37 @@ const VideoSection = ({ settings }) => {
   
   if (!videoUrl) return null;
   
+  // Check if it's a YouTube URL
+  const youtubeMatch = videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  const youtubeVideoId = youtubeMatch ? youtubeMatch[1] : null;
+  
+  // YouTube embed
+  if (youtubeVideoId) {
+    return (
+      <section className="w-full bg-black">
+        <div className="relative w-full overflow-hidden" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+            title="Promotional Video"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+          {/* Optional overlay for text */}
+          {settings?.video_overlay_text && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+              <h2 className="text-white text-3xl md:text-5xl font-display font-bold text-center px-4">
+                {settings.video_overlay_text}
+              </h2>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+  
+  // Direct video (fallback)
   // Convert relative URLs to full URLs using the API base
   const fullVideoUrl = videoUrl.startsWith('/api') 
     ? `${process.env.REACT_APP_BACKEND_URL}${videoUrl}`
@@ -258,7 +289,6 @@ const VideoSection = ({ settings }) => {
 
   const handleLoadedData = () => {
     setVideoLoaded(true);
-    // Try to play when loaded
     if (videoRef.current) {
       videoRef.current.play().catch(e => console.log('Autoplay prevented:', e));
     }
@@ -272,14 +302,12 @@ const VideoSection = ({ settings }) => {
   return (
     <section className="w-full bg-black py-0">
       <div className="relative w-full overflow-hidden" style={{ maxHeight: '80vh', minHeight: videoLoaded ? 'auto' : '400px' }}>
-        {/* Loading state */}
         {!videoLoaded && !videoError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-white/50 text-lg">Loading video...</div>
           </div>
         )}
         
-        {/* Error state */}
         {videoError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-white/50 text-lg">Video unavailable</div>
@@ -302,7 +330,6 @@ const VideoSection = ({ settings }) => {
           Your browser does not support the video tag.
         </video>
         
-        {/* Optional overlay for text */}
         {settings?.video_overlay_text && videoLoaded && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
             <h2 className="text-white text-3xl md:text-5xl font-display font-bold text-center px-4">
