@@ -207,13 +207,16 @@ const OrderPage = () => {
         localStorage.removeItem("tamaleCart");
         setCart([]);
         
-        // Show redirecting message
+        // Show redirecting message - keep loading true since we're redirecting
         toast.success("Redirecting to Stripe checkout...");
         
-        // Small delay to ensure message is shown, then redirect
+        // Redirect to Stripe
         setTimeout(() => {
           window.location.href = response.data.checkout_url;
-        }, 500);
+        }, 300);
+        
+        // Don't set loading to false - we're redirecting away
+        return;
       } else if (['paypal', 'venmo', 'cashapp'].includes(selectedPayment)) {
         // Show manual payment instructions
         const method = paymentMethods.find(m => m.type === selectedPayment);
