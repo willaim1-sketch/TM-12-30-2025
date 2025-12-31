@@ -70,6 +70,7 @@ const OrderPage = () => {
   const [selectedPayment, setSelectedPayment] = useState('stripe');
   const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
   const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
+  const [orderPlaced, setOrderPlaced] = useState(false); // Track if order was placed successfully
   const [formData, setFormData] = useState({
     customer_name: "",
     customer_email: "",
