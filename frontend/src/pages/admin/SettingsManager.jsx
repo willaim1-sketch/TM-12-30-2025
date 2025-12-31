@@ -1270,6 +1270,20 @@ const SettingsManager = () => {
                     : "Add your Stripe API key to start receiving payments"}
                 </span>
               </div>
+              {stripeSettings.stripe_api_key && (
+                <div className={`mt-3 p-3 rounded-lg border ${stripeSettings.stripe_api_key.includes('live') ? 'bg-green-950/50 border-green-600' : 'bg-yellow-950/50 border-yellow-600'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${stripeSettings.stripe_api_key.includes('live') ? 'bg-green-600 text-white' : 'bg-yellow-600 text-black'}`}>
+                      {stripeSettings.stripe_api_key.includes('live') ? '🟢 LIVE MODE' : '🟡 TEST MODE'}
+                    </span>
+                    <span className="text-white/60 text-xs">
+                      {stripeSettings.stripe_api_key.includes('live') 
+                        ? 'Real payments will be processed' 
+                        : 'Using test/sandbox environment'}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
