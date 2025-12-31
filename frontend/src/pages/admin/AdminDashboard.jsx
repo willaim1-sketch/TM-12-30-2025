@@ -22,11 +22,13 @@ import FAQManager from "./FAQManager";
 import TestimonialManager from "./TestimonialManager";
 import SEOManager from "./SEOManager";
 import PageBuilder from "./PageBuilder";
+import VisitorStats from "./VisitorStats";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const sidebarItems = [
   { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
+  { path: "/admin/analytics", icon: TrendingUp, label: "Analytics" },
   { path: "/admin/page-builder", icon: Layout, label: "Page Builder" },
   { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu" },
   { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop" },
