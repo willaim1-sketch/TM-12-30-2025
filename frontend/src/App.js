@@ -21,6 +21,35 @@ export const API = `${BACKEND_URL}/api`;
 // Auth context
 export const AuthContext = React.createContext(null);
 
+// Visitor tracking hook
+const useVisitorTracking = () => {
+  const location = useLocation();
+  const tracked = useRef(new Set());
+
+  useEffect(() => {
+    // Skip tracking for admin pages
+    if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/auth')) {
+      return;
+    }
+
+    const pageKey = `${location.pathname}-${new Date().toDateString()}`;
+    if (tracked.current.has(pageKey)) return;
+    tracked.current.add(pageKey);
+
+    // Track the visit
+    axios.post(`${API}/track-visit`, {
+      page: location.pathname,
+      referrer: document.referrer || ''
+    }).catch(() => {}); // Silent fail
+  }, [location.pathname]);
+};
+
+// Visitor tracking wrapper component
+const VisitorTracker = ({ children }) => {
+  useVisitorTracking();
+  return children;
+};
+
 // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
 const AuthCallback = () => {
   const navigate = useNavigate();
