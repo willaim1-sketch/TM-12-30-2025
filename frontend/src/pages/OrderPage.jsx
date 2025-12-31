@@ -709,7 +709,10 @@ const OrderPage = () => {
                 {/* Done Button */}
                 <Button 
                   onClick={() => {
+                    // Clear cart state now that user is done
+                    setCart([]);
                     setShowManualPaymentDialog(false);
+                    setOrderPlaced(false);
                     navigate('/');
                     toast.success("Thank you! We'll confirm your order once payment is received.");
                   }}
