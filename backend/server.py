@@ -506,6 +506,107 @@ async def root():
 async def health_check():
     return {"status": "healthy", "service": "tamale-man-api"}
 
+# =============================================================================
+# VISITOR TRACKING
+# =============================================================================
+
+@api_router.post("/track-visit")
+async def track_visit(request: Request):
+    """Track a page visit"""
+    try:
+        body = await request.json()
+        page = body.get("page", "/")
+        referrer = body.get("referrer", "")
+        user_agent = request.headers.get("user-agent", "")
+        
+        # Get client IP (handle proxies)
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            ip = forwarded.split(",")[0].strip()
+        else:
+            ip = request.client.host if request.client else "unknown"
+        
+        visit = {
+            "visit_id": f"visit_{uuid.uuid4().hex[:12]}",
+            "page": page,
+            "referrer": referrer,
+            "user_agent": user_agent,
+            "ip_hash": str(hash(ip))[:12],  # Hash IP for privacy
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "date": datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        }
+        
+        await db.visitor_tracking.insert_one(visit)
+        
+        # Also update daily stats
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        await db.visitor_stats.update_one(
+            {"date": today},
+            {
+                "$inc": {"total_visits": 1, f"pages.{page.replace('/', '_') or 'home'}": 1},
+                "$addToSet": {"unique_visitors": ip_hash} if (ip_hash := str(hash(ip))[:12]) else {},
+                "$setOnInsert": {"date": today, "created_at": datetime.now(timezone.utc).isoformat()}
+            },
+            upsert=True
+        )
+        
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error tracking visit: {e}")
+        return {"success": False}
+
+@api_router.get("/admin/visitor-stats")
+async def get_visitor_stats(user: User = Depends(require_admin)):
+    """Get visitor statistics for admin dashboard"""
+    try:
+        # Get stats for last 30 days
+        thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
+        
+        stats = await db.visitor_stats.find(
+            {"date": {"$gte": thirty_days_ago}},
+            {"_id": 0}
+        ).sort("date", -1).to_list(30)
+        
+        # Calculate totals
+        total_visits = sum(s.get("total_visits", 0) for s in stats)
+        
+        # Get unique visitors (approximate)
+        unique_ips = set()
+        for s in stats:
+            unique_ips.update(s.get("unique_visitors", []))
+        
+        # Today's stats
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today_stats = await db.visitor_stats.find_one({"date": today}, {"_id": 0})
+        
+        # Get page breakdown
+        page_totals = {}
+        for s in stats:
+            pages = s.get("pages", {})
+            for page, count in pages.items():
+                page_totals[page] = page_totals.get(page, 0) + count
+        
+        return {
+            "total_visits_30d": total_visits,
+            "unique_visitors_30d": len(unique_ips),
+            "today_visits": today_stats.get("total_visits", 0) if today_stats else 0,
+            "today_unique": len(today_stats.get("unique_visitors", [])) if today_stats else 0,
+            "daily_stats": stats,
+            "page_breakdown": page_totals,
+            "top_pages": sorted(page_totals.items(), key=lambda x: x[1], reverse=True)[:10]
+        }
+    except Exception as e:
+        logger.error(f"Error getting visitor stats: {e}")
+        return {
+            "total_visits_30d": 0,
+            "unique_visitors_30d": 0,
+            "today_visits": 0,
+            "today_unique": 0,
+            "daily_stats": [],
+            "page_breakdown": {},
+            "top_pages": []
+        }
+
 # Menu Routes (Public)
 @api_router.get("/menu/categories", response_model=List[MenuCategory])
 async def get_categories():
