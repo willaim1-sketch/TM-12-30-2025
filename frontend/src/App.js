@@ -142,21 +142,23 @@ function AppRouter() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/menu" element={<MenuPage />} />
-      <Route path="/merch" element={<MerchPage />} />
-      <Route path="/order" element={<OrderPage />} />
-      <Route path="/order/success" element={<OrderSuccessPage />} />
-      <Route path="/blog" element={<BlogPage />} />
-      <Route path="/blog/:slug" element={<BlogPostPage />} />
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/*" element={
-        <ProtectedRoute>
-          <AdminDashboard />
-        </ProtectedRoute>
-      } />
-    </Routes>
+    <VisitorTracker>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/menu" element={<MenuPage />} />
+        <Route path="/merch" element={<MerchPage />} />
+        <Route path="/order" element={<OrderPage />} />
+        <Route path="/order/success" element={<OrderSuccessPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/*" element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </VisitorTracker>
   );
 }
 
