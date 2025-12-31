@@ -209,6 +209,10 @@ const OrderPage = () => {
       } else if (['paypal', 'venmo', 'cashapp'].includes(selectedPayment)) {
         // Show manual payment instructions
         const method = paymentMethods.find(m => m.type === selectedPayment);
+        
+        // Set order as placed BEFORE clearing cart to prevent empty cart screen
+        setOrderPlaced(true);
+        
         setManualPaymentInfo({
           type: selectedPayment,
           orderId: response.data.order_id,
@@ -216,9 +220,9 @@ const OrderPage = () => {
           ...method
         });
         setShowManualPaymentDialog(true);
-        // Clear cart
+        
+        // Clear cart from localStorage (but keep state for display purposes)
         localStorage.removeItem("tamaleCart");
-        setCart([]);
       }
     } catch (error) {
       console.error("Order error:", error);
