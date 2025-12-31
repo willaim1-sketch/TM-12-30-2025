@@ -203,9 +203,17 @@ const OrderPage = () => {
 
       // Handle different payment methods
       if (selectedPayment === 'stripe' && response.data.checkout_url) {
-        // Clear cart and redirect to Stripe
+        // Clear cart and show redirecting message
         localStorage.removeItem("tamaleCart");
-        window.location.href = response.data.checkout_url;
+        setCart([]);
+        
+        // Show redirecting message
+        toast.success("Redirecting to Stripe checkout...");
+        
+        // Small delay to ensure message is shown, then redirect
+        setTimeout(() => {
+          window.location.href = response.data.checkout_url;
+        }, 500);
       } else if (['paypal', 'venmo', 'cashapp'].includes(selectedPayment)) {
         // Show manual payment instructions
         const method = paymentMethods.find(m => m.type === selectedPayment);
