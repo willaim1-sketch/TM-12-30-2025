@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { 
   LayoutDashboard, UtensilsCrossed, ShoppingCart, MessageSquare, 
   Settings, Image, FileText, HelpCircle, LogOut, Menu, X,
-  Star, Globe, ShoppingBag, Layout, Palette
+  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { AuthContext } from "../../App";
