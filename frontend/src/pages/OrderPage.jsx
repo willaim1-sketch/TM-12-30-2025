@@ -237,7 +237,8 @@ const OrderPage = () => {
     toast.success("Copied to clipboard!");
   };
 
-  if (cart.length === 0 && !searchParams.get("cancelled")) {
+  // Show empty cart message only if cart is empty AND no order was placed AND not cancelled
+  if (cart.length === 0 && !searchParams.get("cancelled") && !orderPlaced && !showManualPaymentDialog) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
         <motion.div 
