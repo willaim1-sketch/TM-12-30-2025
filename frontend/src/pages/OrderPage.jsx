@@ -388,7 +388,7 @@ const OrderPage = () => {
               {paymentMethods.length > 0 && (
                 <div className="card-dark p-8">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">Select Payment Method</h2>
-                  <p className="text-white/60 mb-6">Choose how you'd like to pay for your order</p>
+                  <p className="text-white/60 mb-6">Choose how you&apos;d like to pay for your order</p>
                   
                   <div className="space-y-3">
                     {paymentMethods.map((method) => {
