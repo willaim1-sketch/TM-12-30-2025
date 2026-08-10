@@ -24,7 +24,7 @@ const staggerContainer = {
 const ShareModal = ({ item, isOpen, onClose }) => {
   const [copied, setCopied] = useState(false);
   const shareUrl = `${window.location.origin}/menu?item=${item?.item_id}`;
-  const shareText = `Check out ${item?.name} at The Tamale Man! 🌽`;
+  const shareText = `Check out ${item?.name} at Nic Nackables BBQ & More!`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);

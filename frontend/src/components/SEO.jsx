@@ -11,9 +11,9 @@ const SEO = ({
   settings 
 }) => {
   // Use settings as fallbacks if available
-  const siteTitle = title || settings?.meta_title || settings?.site_name || "The Tamale Man";
+  const siteTitle = title || settings?.meta_title || settings?.site_name || "Nic Nackables BBQ & More";
   const siteDescription = description || settings?.meta_description || "Authentic homestyle tamales made with love. Big portions, bold flavors!";
-  const siteKeywords = keywords || "tamales, mexican food, authentic tamales, homestyle cooking, The Tamale Man";
+  const siteKeywords = keywords || "BBQ, barbecue, smoked meats, homestyle cooking, Nic Nackables";
   
   return (
     <Helmet>

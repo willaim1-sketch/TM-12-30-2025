@@ -105,7 +105,7 @@ const BlogPostPage = () => {
           </div>
           <div className="flex items-center gap-2">
             <User size={16} />
-            <span>The Tamale Man</span>
+            <span>Nic Nackables</span>
           </div>
         </motion.div>
 

@@ -22,7 +22,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Create the main app
-app = FastAPI(title="The Tamale Man API")
+app = FastAPI(title="Nic Nackables BBQ & More API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -124,7 +124,7 @@ async def send_order_notification_emails(order: dict):
             </div>
             
             <div style="background: #333; color: white; padding: 15px; text-align: center;">
-                <p style="margin:0;">The Tamale Man - Order Notification</p>
+                <p style="margin:0;">Nic Nackables BBQ & More - Order Notification</p>
             </div>
         </body>
         </html>
@@ -132,7 +132,7 @@ async def send_order_notification_emails(order: dict):
         
         # Send to all notification emails
         sg = SendGridAPIClient(sendgrid_api_key)
-        sender_email = settings.get("email", "noreply@thetamaleman.com") if settings else "noreply@thetamaleman.com"
+        sender_email = settings.get("email", "noreply@nicnackables.com") if settings else "noreply@nicnackables.com"
         
         for email in notification_emails:
             try:
@@ -288,15 +288,15 @@ class NavMenuItem(BaseModel):
 
 class SiteSettings(BaseModel):
     settings_id: str = "main_settings"
-    site_name: str = "The Tamale Man"
-    tagline: str = "Authentic Gourmet Tamales"
-    meta_title: str = "The Tamale Man - Gourmet Tamales"
+    site_name: str = "Nic Nackables BBQ & More"
+    tagline: str = "BBQ & More"
+    meta_title: str = "Nic Nackables BBQ & More"
     meta_description: str = "Experience authentic gourmet tamales made with premium ingredients."
     primary_color: str = "#DC2626"
     secondary_color: str = "#020617"
     font_heading: str = "Playfair Display"
     font_body: str = "Manrope"
-    hero_title: str = "Authentic Gourmet Tamales"
+    hero_title: str = "BBQ & More"
     hero_subtitle: str = "Crafted with passion, served with pride"
     hero_image: Optional[str] = None
     about_title: str = "Our Story"
@@ -305,7 +305,7 @@ class SiteSettings(BaseModel):
     chef_image: Optional[str] = None
     address: str = "123 Main Street, Austin, TX"
     phone: str = "(512) 555-0123"
-    email: str = "hello@thetamaleman.com"
+    email: str = "hello@nicnackables.com"
     notification_emails: List[str] = []
     header_logo: Optional[str] = None
     footer_logo: Optional[str] = None
@@ -500,11 +500,11 @@ async def require_admin(request: Request) -> User:
 
 @api_router.get("/")
 async def root():
-    return {"message": "The Tamale Man API"}
+    return {"message": "Nic Nackables BBQ & More API"}
 
 @api_router.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "tamale-man-api"}
+    return {"status": "healthy", "service": "nicnackables-api"}
 
 # =============================================================================
 # VISITOR TRACKING
@@ -684,7 +684,7 @@ async def get_blog_post(slug: str):
 async def get_page_seo(page_slug: str):
     seo = await db.page_seo.find_one({"page_slug": page_slug}, {"_id": 0})
     if not seo:
-        return {"page_slug": page_slug, "meta_title": "The Tamale Man", "meta_description": "Authentic Gourmet Tamales"}
+        return {"page_slug": page_slug, "meta_title": "Nic Nackables BBQ & More", "meta_description": "Delicious BBQ and More"}
     return seo
 
 # Contact Form (Public)
@@ -1053,7 +1053,7 @@ async def send_order_email(order_id: str, data: dict, user: User = Depends(requi
     
     # Get settings for branding
     settings = await db.site_settings.find_one({"settings_id": "main_settings"}, {"_id": 0})
-    site_name = settings.get("site_name", "The Tamale Man") if settings else "The Tamale Man"
+    site_name = settings.get("site_name", "Nic Nackables BBQ & More") if settings else "Nic Nackables BBQ & More"
     
     # Build items HTML
     items_html = ""
@@ -1164,7 +1164,7 @@ async def send_order_email(order_id: str, data: dict, user: User = Depends(requi
         
         # Get SendGrid settings for from_email
         sg_settings = await db.sendgrid_settings.find_one({"settings_id": "sendgrid"}, {"_id": 0})
-        from_email = sg_settings.get("from_email", "info@thetamaleman.xyz") if sg_settings else "info@thetamaleman.xyz"
+        from_email = sg_settings.get("from_email", "info@nicnackables.com") if sg_settings else "info@nicnackables.com"
         from_name = sg_settings.get("from_name", site_name) if sg_settings else site_name
         
         message = Mail(
@@ -1997,7 +1997,7 @@ async def seed_database():
         },
         {
             "testimonial_id": "test_2", "author_name": "James R.", "author_title": "Local Regular",
-            "content": "I order from The Tamale Man every week. The quality is consistently amazing and the service is always friendly.",
+            "content": "I order from Nic Nackables every week. The quality is consistently amazing and the service is always friendly.",
             "rating": 5, "is_featured": True, "created_at": datetime.now(timezone.utc).isoformat()
         },
         {
@@ -2036,22 +2036,22 @@ async def seed_database():
     
     # Seed default merch items
     merch_items = [
-        {"item_id": "merch_tshirt_black", "name": "Super Dooper Dooper T-Shirt - Black", "description": "Classic black tee featuring our legendary Super Dooper Dooper Tamale design. 100% cotton, pre-shrunk.", "price": 24.99, "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": True},
-        {"item_id": "merch_tshirt_red", "name": "The Tamale Man Logo Tee - Red", "description": "Show your tamale pride with our signature red logo tee. Soft, comfortable, and ready to flex.", "price": 24.99, "image_url": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": True},
-        {"item_id": "merch_hoodie", "name": "Tamale Man Hoodie", "description": "Stay cozy with our premium hoodie. Features the Super Dooper Dooper Tamale on the back.", "price": 49.99, "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": False},
-        {"item_id": "merch_cap", "name": "Tamale Man Dad Cap", "description": "Classic dad cap with embroidered Tamale Man logo. Adjustable strap, one size fits most.", "price": 19.99, "image_url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400", "category": "accessories", "sizes": ["One Size"], "is_featured": True},
-        {"item_id": "merch_mug", "name": "Super Dooper Coffee Mug", "description": "Start your morning right with our 12oz ceramic mug. Dishwasher and microwave safe.", "price": 14.99, "image_url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400", "category": "drinkware", "sizes": ["12oz"], "is_featured": True},
-        {"item_id": "merch_tumbler", "name": "Tamale Man Tumbler", "description": "20oz insulated tumbler keeps drinks hot or cold for hours. Perfect for on-the-go!", "price": 29.99, "image_url": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400", "category": "drinkware", "sizes": ["20oz"], "is_featured": False},
+        {"item_id": "merch_tshirt_black", "name": "Nic Nackables T-Shirt - Black", "description": "Classic black tee featuring our Nic Nackables logo. 100% cotton, pre-shrunk.", "price": 24.99, "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": True},
+        {"item_id": "merch_tshirt_red", "name": "Nic Nackables Logo Tee - Red", "description": "Show your BBQ pride with our signature red logo tee. Soft, comfortable, and ready to flex.", "price": 24.99, "image_url": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": True},
+        {"item_id": "merch_hoodie", "name": "Nic Nackables Hoodie", "description": "Stay cozy with our premium hoodie. Features the Nic Nackables logo on the back.", "price": 49.99, "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400", "category": "apparel", "sizes": ["S", "M", "L", "XL", "2XL"], "is_featured": False},
+        {"item_id": "merch_cap", "name": "Nic Nackables Dad Cap", "description": "Classic dad cap with embroidered Nic Nackables logo. Adjustable strap, one size fits most.", "price": 19.99, "image_url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400", "category": "accessories", "sizes": ["One Size"], "is_featured": True},
+        {"item_id": "merch_mug", "name": "Nic Nackables Coffee Mug", "description": "Start your morning right with our 12oz ceramic mug. Dishwasher and microwave safe.", "price": 14.99, "image_url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400", "category": "drinkware", "sizes": ["12oz"], "is_featured": True},
+        {"item_id": "merch_tumbler", "name": "Nic Nackables Tumbler", "description": "20oz insulated tumbler keeps drinks hot or cold for hours. Perfect for on-the-go!", "price": 29.99, "image_url": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400", "category": "drinkware", "sizes": ["20oz"], "is_featured": False},
         {"item_id": "merch_apron", "name": "Chef's Apron", "description": "Cook like a pro with our branded apron. Adjustable neck strap, two front pockets.", "price": 22.99, "image_url": "https://images.unsplash.com/photo-1591634616938-1dfa7ee2e617?w=400", "category": "accessories", "sizes": ["One Size"], "is_featured": False},
-        {"item_id": "merch_ornament", "name": "Tamale Ornament Set", "description": "Festive set of 3 tamale-shaped ornaments. Perfect for the holidays!", "price": 16.99, "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400", "category": "souvenirs", "sizes": ["Set of 3"], "is_featured": False},
+        {"item_id": "merch_ornament", "name": "BBQ Ornament Set", "description": "Festive set of 3 BBQ-shaped ornaments. Perfect for the holidays!", "price": 16.99, "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400", "category": "souvenirs", "sizes": ["Set of 3"], "is_featured": False},
     ]
     await db.merch_items.insert_many(merch_items)
     
     # Seed default page SEO
     page_seo_items = [
-        {"page_id": "seo_home", "page_slug": "home", "meta_title": "The Tamale Man - Authentic Gourmet Tamales", "meta_description": "Experience the finest handcrafted tamales in town. Made with love, served with pride.", "keywords": ["tamales", "mexican food", "gourmet", "authentic"]},
-        {"page_id": "seo_menu", "page_slug": "menu", "meta_title": "Our Menu - The Tamale Man", "meta_description": "Explore our selection of authentic tamales, sides, drinks, and desserts.", "keywords": ["menu", "tamales", "mexican cuisine"]},
-        {"page_id": "seo_order", "page_slug": "order", "meta_title": "Order Online - The Tamale Man", "meta_description": "Order your favorite tamales online for pickup. Quick, easy, delicious.", "keywords": ["order online", "tamales", "pickup"]},
+        {"page_id": "seo_home", "page_slug": "home", "meta_title": "Nic Nackables BBQ & More", "meta_description": "Experience the finest BBQ and more in town. Made with love, served with pride.", "keywords": ["BBQ", "barbecue", "smoked meats", "comfort food"]},
+        {"page_id": "seo_menu", "page_slug": "menu", "meta_title": "Our Menu - Nic Nackables BBQ & More", "meta_description": "Explore our selection of BBQ, sides, drinks, and desserts.", "keywords": ["menu", "BBQ", "barbecue"]},
+        {"page_id": "seo_order", "page_slug": "order", "meta_title": "Order Online - Nic Nackables BBQ & More", "meta_description": "Order your favorite BBQ online for pickup. Quick, easy, delicious.", "keywords": ["order online", "BBQ", "pickup"]},
     ]
     await db.page_seo.insert_many(page_seo_items)
     

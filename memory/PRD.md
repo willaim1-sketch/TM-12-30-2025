@@ -1,7 +1,7 @@
-# The Tamale Man - Restaurant Website PRD
+# Nic Nackables BBQ & More - Restaurant Website PRD
 
 ## Original Problem Statement
-Build a modern, high-converting restaurant website for "The Tamale Man" with:
+Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More" (rebranded from "The Tamale Man") with:
 - Full-stack React/FastAPI/MongoDB architecture
 - Standard restaurant sections (Hero, About, Menu)
 - Comprehensive admin panel for Divi-like page building, media management, and settings

@@ -34,8 +34,8 @@ const defaultMerchItems = [
   },
   {
     item_id: "merch_tshirt_red",
-    name: "The Tamale Man Logo Tee - Red",
-    description: "Show your tamale pride with our signature red logo tee. Soft, comfortable, and ready to flex.",
+    name: "Nic Nackables Logo Tee - Red",
+    description: "Show your BBQ pride with our signature red logo tee. Soft, comfortable, and ready to flex.",
     price: 24.99,
     image_url: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400",
     category: "apparel",
@@ -44,8 +44,8 @@ const defaultMerchItems = [
   },
   {
     item_id: "merch_hoodie",
-    name: "Tamale Man Hoodie",
-    description: "Stay cozy with our premium hoodie. Features the Super Dooper Dooper Tamale on the back.",
+    name: "Nic Nackables Hoodie",
+    description: "Stay cozy with our premium hoodie. Features the Nic Nackables logo on the back.",
     price: 49.99,
     image_url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400",
     category: "apparel",
@@ -54,8 +54,8 @@ const defaultMerchItems = [
   },
   {
     item_id: "merch_cap",
-    name: "Tamale Man Dad Cap",
-    description: "Classic dad cap with embroidered Tamale Man logo. Adjustable strap, one size fits most.",
+    name: "Nic Nackables Dad Cap",
+    description: "Classic dad cap with embroidered Nic Nackables logo. Adjustable strap, one size fits most.",
     price: 19.99,
     image_url: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400",
     category: "accessories",
@@ -64,7 +64,7 @@ const defaultMerchItems = [
   },
   {
     item_id: "merch_mug",
-    name: "Super Dooper Coffee Mug",
+    name: "Nic Nackables Coffee Mug",
     description: "Start your morning right with our 12oz ceramic mug. Dishwasher and microwave safe.",
     price: 14.99,
     image_url: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400",
@@ -74,7 +74,7 @@ const defaultMerchItems = [
   },
   {
     item_id: "merch_tumbler",
-    name: "Tamale Man Tumbler",
+    name: "Nic Nackables Tumbler",
     description: "20oz insulated tumbler keeps drinks hot or cold for hours. Perfect for on-the-go!",
     price: 29.99,
     image_url: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400",
@@ -84,8 +84,8 @@ const defaultMerchItems = [
   },
   {
     item_id: "merch_keychain",
-    name: "Tamale Keychain",
-    description: "Cute tamale-shaped keychain. A little piece of The Tamale Man wherever you go!",
+    name: "BBQ Keychain",
+    description: "Cute BBQ-shaped keychain. A little piece of Nic Nackables wherever you go!",
     price: 9.99,
     image_url: "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=400",
     category: "souvenirs",
@@ -95,7 +95,7 @@ const defaultMerchItems = [
   {
     item_id: "merch_magnet",
     name: "Logo Fridge Magnet",
-    description: "Decorate your fridge with The Tamale Man! Set of 3 magnets.",
+    description: "Decorate your fridge with Nic Nackables! Set of 3 magnets.",
     price: 12.99,
     image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
     category: "souvenirs",
@@ -115,7 +115,7 @@ const defaultMerchItems = [
   {
     item_id: "merch_sticker",
     name: "Sticker Pack",
-    description: "Pack of 5 vinyl stickers featuring various Tamale Man designs. Waterproof!",
+    description: "Pack of 5 vinyl stickers featuring various Nic Nackables designs. Waterproof!",
     price: 7.99,
     image_url: "https://images.unsplash.com/photo-1589384267710-7a170981ca78?w=400",
     category: "souvenirs",
@@ -251,7 +251,7 @@ const MerchPage = () => {
             className="space-y-4"
           >
             <h1 className="text-4xl lg:text-5xl font-display font-bold text-white">
-              Rep The <span className="text-red-500">Tamale Man</span>
+              Rep <span className="text-red-500">Nic Nackables</span>
             </h1>
             <p className="text-white/80 text-lg max-w-2xl mx-auto">
               T-shirts, cups, souvenirs & more! Show off your love for the Super Dooper Dooper Tamale.

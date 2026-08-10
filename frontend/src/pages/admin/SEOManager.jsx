@@ -243,7 +243,7 @@ const SEOManager = () => {
                     value={form.meta_title}
                     onChange={(e) => setForm(prev => ({ ...prev, meta_title: e.target.value }))}
                     className="input-dark mt-1"
-                    placeholder="The Tamale Man - Authentic Gourmet Tamales"
+                    placeholder="Nic Nackables BBQ & More"
                     data-testid="seo-title-input"
                   />
                   <p className="text-white/50 text-xs mt-1">{form.meta_title.length}/60 characters</p>

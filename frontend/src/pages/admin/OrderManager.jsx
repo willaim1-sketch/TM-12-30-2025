@@ -44,7 +44,7 @@ const PrintableOrder = React.forwardRef(({ order, settings }, ref) => {
               className="h-16 w-auto object-contain"
             />
           ) : (
-            <div className="text-2xl font-bold">{settings?.site_name || "The Tamale Man"}</div>
+            <div className="text-2xl font-bold">{settings?.site_name || "Nic Nackables BBQ & More"}</div>
           )}
         </div>
         <div className="text-right text-sm text-gray-600">

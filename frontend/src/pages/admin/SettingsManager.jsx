@@ -1024,7 +1024,7 @@ const SettingsManager = () => {
               <div className="p-4 bg-[#2A2A2A] rounded-lg">
                 <Label className="text-white/70">Sender Email</Label>
                 <p className="text-white/60 text-sm mt-1">
-                  Notifications are sent from: <span className="text-red-400">{settings.email || "noreply@thetamaleman.com"}</span>
+                  Notifications are sent from: <span className="text-red-400">{settings.email || "noreply@nicnackables.com"}</span>
                 </p>
                 <p className="text-white/50 text-xs mt-2">
                   To change the sender email, update the "Email" field in the Contact tab.
@@ -1440,7 +1440,7 @@ const SettingsManager = () => {
                     value={venmoSettings.display_name || ""}
                     onChange={(e) => setVenmoSettings(prev => ({ ...prev, display_name: e.target.value }))}
                     className="input-dark mt-1"
-                    placeholder="The Tamale Man"
+                    placeholder="Nic Nackables BBQ & More"
                   />
                 </div>
 
@@ -1500,7 +1500,7 @@ const SettingsManager = () => {
                     value={cashappSettings.display_name || ""}
                     onChange={(e) => setCashappSettings(prev => ({ ...prev, display_name: e.target.value }))}
                     className="input-dark mt-1"
-                    placeholder="The Tamale Man"
+                    placeholder="Nic Nackables BBQ & More"
                   />
                 </div>
 
@@ -1657,7 +1657,7 @@ const SettingsManager = () => {
                   value={sendgridSettings.from_name || ""}
                   onChange={(e) => setSendgridSettings(prev => ({ ...prev, from_name: e.target.value }))}
                   className="input-dark"
-                  placeholder="The Tamale Man"
+                  placeholder="Nic Nackables BBQ & More"
                 />
               </div>
             </div>

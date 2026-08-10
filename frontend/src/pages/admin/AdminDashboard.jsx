@@ -182,7 +182,7 @@ const AdminDashboard = () => {
           {/* Logo */}
           <div className="p-6 border-b border-white/10">
             <Link to="/admin" className="flex items-center gap-2">
-              <span className="text-xl font-display font-bold text-white">The Tamale Man</span>
+              <span className="text-xl font-display font-bold text-white">Nic Nackables</span>
             </Link>
             <p className="text-white/50 text-sm mt-1">Admin Dashboard</p>
           </div>

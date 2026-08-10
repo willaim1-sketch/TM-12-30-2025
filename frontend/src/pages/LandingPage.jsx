@@ -42,13 +42,13 @@ const Navbar = ({ settings }) => {
           {settings?.header_logo ? (
             <img 
               src={settings.header_logo} 
-              alt={settings?.site_name || "The Tamale Man"} 
+              alt={settings?.site_name || "Nic Nackables"} 
               className="h-10 md:h-12 w-auto object-contain"
               onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'block'); }}
             />
           ) : null}
           <span className={`text-2xl font-display font-bold text-white ${settings?.header_logo ? 'hidden' : ''}`}>
-            {settings?.site_name || "The Tamale Man"}
+            {settings?.site_name || "Nic Nackables"}
           </span>
         </Link>
         
@@ -168,7 +168,7 @@ const HeroSection = ({ settings }) => {
                 {settings?.mascot_image ? (
                   <img 
                     src={settings.mascot_image} 
-                    alt="The Tamale Man" 
+                    alt="Nic Nackables" 
                     className="w-full h-full object-contain drop-shadow-2xl"
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
@@ -376,13 +376,13 @@ const AboutSection = ({ settings }) => {
               {settings?.about_title || "Mom's Kitchen, Your Table"}
             </h2>
             <p className="text-white/80 text-lg leading-relaxed">
-              {settings?.about_content || "Started in a small kitchen with big dreams, The Tamale Man has been serving up home-style Mexican comfort food for over 25 years. No fancy stuff here - just real food, big portions, and flavors that remind you of mom's cooking."}
+              {settings?.about_content || "Started in a small kitchen with big dreams, Nic Nackables BBQ & More has been serving up home-style comfort food for years. No fancy stuff here - just real food, big portions, and flavors that remind you of mom's cooking."}
             </p>
             <p className="text-white/60 leading-relaxed text-lg">
               Our Super Dooper Dooper Tamale isn't just a menu item - it's a legend. Packed with seasoned meat, wrapped in love, and big enough to make you say "WOW!" Every tamale, every plate of beans and rice, every scoop of guac is made fresh daily.
             </p>
             <div className="pt-4">
-              <p className="text-white font-display text-xl italic">— {settings?.chef_name || "The Tamale Man"}</p>
+              <p className="text-white font-display text-xl italic">— {settings?.chef_name || "Nic Nackables"}</p>
               <p className="text-white/50 text-base">Founder & Head Cook</p>
             </div>
           </motion.div>
@@ -502,13 +502,13 @@ const MerchPromoSection = ({ settings }) => {
           {/* Content */}
           <motion.div variants={fadeInUp} className="space-y-6">
             <p className="text-red-500 uppercase tracking-[0.2em] text-sm font-semibold">
-              Rep The Tamale Man
+              Rep Nic Nackables
             </p>
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">
               Get Your <span className="text-red-500">Merch!</span>
             </h2>
             <p className="text-white/80 text-lg">
-              Show your love for The Tamale Man! T-shirts, cups, souvenirs, and gear featuring our famous Super Dooper Dooper Tamale. Perfect gifts or just to flex your tamale pride!
+              Show your love for Nic Nackables! T-shirts, cups, souvenirs, and gear. Perfect gifts or just to flex your BBQ pride!
             </p>
             <Link to="/merch">
               <Button className="btn-primary text-lg px-8 py-4" data-testid="shop-merch-btn">
@@ -720,7 +720,7 @@ const LocationSection = ({ settings }) => {
                 <Mail className="text-red-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <p className="text-white font-semibold mb-1 text-lg">Email</p>
-                  <p className="text-white/70 text-lg">{settings?.email || "hello@thetamaleman.com"}</p>
+                  <p className="text-white/70 text-lg">{settings?.email || "hello@nicnackables.com"}</p>
                 </div>
               </div>
             </motion.div>
@@ -799,14 +799,14 @@ const Footer = ({ settings }) => {
             {settings?.footer_logo ? (
               <img 
                 src={settings.footer_logo} 
-                alt={settings?.site_name || "The Tamale Man"} 
+                alt={settings?.site_name || "Nic Nackables"} 
                 className="max-w-full h-auto max-h-36 object-contain mb-6"
                 style={{ maxWidth: "250px" }}
                 onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'block'); }}
               />
             ) : null}
             <h3 className={`text-3xl font-display font-bold text-white mb-4 ${settings?.footer_logo ? 'hidden' : ''}`}>
-              {settings?.site_name || "The Tamale Man"}
+              {settings?.site_name || "Nic Nackables"}
             </h3>
             <p className="text-white/60 mb-6 text-lg">
               Home-style fast food tamales made with love. Big portions, bold flavors!
@@ -869,13 +869,13 @@ const Footer = ({ settings }) => {
             <ul className="space-y-3 text-white/60 text-lg">
               <li>{settings?.address || "123 Main Street, Austin, TX"}</li>
               <li>{settings?.phone || "(512) 555-0123"}</li>
-              <li>{settings?.email || "hello@thetamaleman.com"}</li>
+              <li>{settings?.email || "hello@nicnackables.com"}</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-white/10 pt-8 text-center text-white/50 text-base">
-          <p>&copy; {new Date().getFullYear()} {settings?.site_name || "The Tamale Man"}. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {settings?.site_name || "Nic Nackables"}. All rights reserved.</p>
         </div>
       </div>
     </footer>
