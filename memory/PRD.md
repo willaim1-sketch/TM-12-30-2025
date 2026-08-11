@@ -13,6 +13,7 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 ## Recent Changes (December 2025)
 - **Rebranding**: Changed from "The Tamale Man" to "Nic Nackables BBQ & More" across all code
 - **Image Upload Fix**: Added ImageUploader components for mascot_image, hero_image, and chef_image in admin settings
+- **Media Manager Rewrite**: Complete rewrite with improved error handling, loading states, proper URL construction, and data-testid attributes for testing
 
 ## User Personas
 1. **Restaurant Owner/Admin**: Manages menu, orders, content, and settings via admin panel

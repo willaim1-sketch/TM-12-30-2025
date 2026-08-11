@@ -5,7 +5,7 @@ import {
   Plus, Trash2, Copy, Image, Wand2, Upload, Search, Filter, Grid, List, 
   X, Check, Download, Eye, Edit2, FolderOpen, Calendar, HardDrive, 
   Maximize2, Link2, RefreshCw, ChevronDown, ImageIcon, AlertCircle,
-  Home, ShoppingBag, UtensilsCrossed, MapPin, FileImage, Settings
+  Home, ShoppingBag, UtensilsCrossed, MapPin, FileImage, Settings, Loader2
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Badge } from "../../components/ui/badge";
 import { toast } from "sonner";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const API = process.env.REACT_APP_BACKEND_URL;
 
 // Image dimension recommendations
 const IMAGE_DIMENSIONS = {
@@ -58,8 +58,22 @@ const formatFileSize = (bytes) => {
 // Format date
 const formatDate = (dateStr) => {
   if (!dateStr) return "Unknown";
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return "Unknown";
+  }
+};
+
+// Get full URL for images (handles both relative and absolute URLs)
+const getFullUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  // For relative URLs, prepend the API base (keep the /api/ prefix!)
+  return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 // Drag & Drop Upload Zone
@@ -100,6 +114,8 @@ const UploadZone = ({ onUpload, uploading }) => {
     if (files && files.length > 0) {
       onUpload(Array.from(files));
     }
+    // Reset input so same file can be selected again
+    e.target.value = '';
   };
 
   return (
@@ -114,6 +130,7 @@ const UploadZone = ({ onUpload, uploading }) => {
       onDragOver={handleDrag}
       onDrop={handleDrop}
       onClick={() => fileInputRef.current?.click()}
+      data-testid="upload-zone"
     >
       <input
         ref={fileInputRef}
@@ -122,13 +139,18 @@ const UploadZone = ({ onUpload, uploading }) => {
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
+        data-testid="file-input"
       />
-      <Upload className={`mx-auto mb-4 ${isDragging ? 'text-red-500' : 'text-white/40'}`} size={48} />
+      {uploading ? (
+        <Loader2 className="mx-auto mb-4 text-red-500 animate-spin" size={48} />
+      ) : (
+        <Upload className={`mx-auto mb-4 ${isDragging ? 'text-red-500' : 'text-white/40'}`} size={48} />
+      )}
       <p className="text-white font-semibold text-lg mb-2">
         {uploading ? 'Uploading...' : 'Drag & drop images here'}
       </p>
       <p className="text-white/60 text-sm">or click to browse</p>
-      <p className="text-white/40 text-xs mt-2">Supports: JPG, PNG, GIF, WebP, SVG (max 5MB)</p>
+      <p className="text-white/40 text-xs mt-2">Supports: JPG, PNG, GIF, WebP, SVG (max 5MB each)</p>
     </div>
   );
 };
@@ -136,18 +158,27 @@ const UploadZone = ({ onUpload, uploading }) => {
 // Image Card Component
 const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selected }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [imageDimensions, setImageDimensions] = useState(null);
+  
+  const imageUrl = getFullUrl(item.url);
 
   useEffect(() => {
-    if (item.url) {
+    if (imageUrl) {
+      setImageLoaded(false);
+      setImageError(false);
       const img = new window.Image();
       img.onload = () => {
         setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
         setImageLoaded(true);
       };
-      img.src = item.url;
+      img.onerror = () => {
+        setImageError(true);
+        setImageLoaded(true);
+      };
+      img.src = imageUrl;
     }
-  }, [item.url]);
+  }, [imageUrl]);
 
   if (viewMode === 'list') {
     return (
@@ -158,9 +189,19 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
           selected ? 'bg-red-600/20 border border-red-600' : 'bg-[#1A1A1A] hover:bg-[#252525] border border-transparent'
         }`}
         onClick={() => onSelect(item)}
+        data-testid={`media-item-${item.media_id}`}
       >
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#2A2A2A] flex-shrink-0">
-          <img src={item.url} alt={item.alt_text || item.filename} className="w-full h-full object-cover" />
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#2A2A2A] flex-shrink-0 flex items-center justify-center">
+          {imageError ? (
+            <ImageIcon className="text-white/30" size={24} />
+          ) : (
+            <img 
+              src={imageUrl} 
+              alt={item.alt_text || item.filename} 
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white font-medium truncate">{item.filename || 'Untitled'}</p>
@@ -172,7 +213,7 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
           <span className="w-28">{formatDate(item.created_at)}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onCopy(item.url); }} className="text-white/60 hover:text-white">
+          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onCopy(imageUrl); }} className="text-white/60 hover:text-white">
             <Copy size={16} />
           </Button>
           <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="text-white/60 hover:text-white">
@@ -194,26 +235,35 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
         selected ? 'ring-2 ring-red-600 ring-offset-2 ring-offset-[#0A0A0A]' : ''
       }`}
       onClick={() => onSelect(item)}
+      data-testid={`media-item-${item.media_id}`}
     >
-      <div className="aspect-square bg-[#2A2A2A] relative overflow-hidden">
-        {!imageLoaded && (
+      <div className="aspect-square bg-[#2A2A2A] relative overflow-hidden flex items-center justify-center">
+        {!imageLoaded && !imageError && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white/20 border-t-red-500 rounded-full animate-spin"></div>
+            <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
           </div>
         )}
-        <img
-          src={item.url}
-          alt={item.alt_text || item.filename}
-          className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onLoad={() => setImageLoaded(true)}
-        />
+        {imageError ? (
+          <div className="text-center p-4">
+            <ImageIcon className="mx-auto text-white/30 mb-2" size={32} />
+            <p className="text-white/40 text-xs">Failed to load</p>
+          </div>
+        ) : (
+          <img
+            src={imageUrl}
+            alt={item.alt_text || item.filename}
+            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+          />
+        )}
         
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onCopy(item.url); }} className="bg-white/10 hover:bg-white/20 text-white">
+                <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onCopy(imageUrl); }} className="bg-white/10 hover:bg-white/20 text-white">
                   <Copy size={14} />
                 </Button>
                 <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="bg-white/10 hover:bg-white/20 text-white">
@@ -246,7 +296,7 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
         <p className="text-white text-sm font-medium truncate">{item.filename || 'Untitled'}</p>
         <div className="flex items-center justify-between mt-1">
           <p className="text-white/50 text-xs">{formatDate(item.created_at)}</p>
-          {item.category && (
+          {item.category && item.category !== 'other' && (
             <Badge variant="outline" className="text-xs border-white/20 text-white/60">{item.category}</Badge>
           )}
         </div>
@@ -256,10 +306,12 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
 };
 
 // Image Detail/Edit Modal
-const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings }) => {
+const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete }) => {
   const [editData, setEditData] = useState({ filename: '', alt_text: '', category: '' });
   const [imageDimensions, setImageDimensions] = useState(null);
   const [saving, setSaving] = useState(false);
+  
+  const imageUrl = item ? getFullUrl(item.url) : '';
 
   useEffect(() => {
     if (item) {
@@ -271,18 +323,21 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
       
       const img = new window.Image();
       img.onload = () => setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
-      img.src = item.url;
+      img.src = imageUrl;
     }
-  }, [item]);
+  }, [item, imageUrl]);
 
   const handleSave = async () => {
     setSaving(true);
-    await onSave(item.media_id, editData);
-    setSaving(false);
+    try {
+      await onSave(item.media_id, editData);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const copyUrl = () => {
-    navigator.clipboard.writeText(item.url);
+    navigator.clipboard.writeText(imageUrl);
     toast.success("URL copied to clipboard");
   };
 
@@ -301,8 +356,8 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
         <div className="grid md:grid-cols-2 gap-6">
           {/* Image Preview */}
           <div className="space-y-4">
-            <div className="aspect-video bg-[#2A2A2A] rounded-lg overflow-hidden relative">
-              <img src={item.url} alt={item.alt_text} className="w-full h-full object-contain" />
+            <div className="aspect-video bg-[#2A2A2A] rounded-lg overflow-hidden relative flex items-center justify-center">
+              <img src={imageUrl} alt={item.alt_text} className="max-w-full max-h-full object-contain" />
             </div>
             
             {/* Quick Actions */}
@@ -310,7 +365,7 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
               <Button onClick={copyUrl} variant="outline" className="flex-1 btn-secondary">
                 <Copy size={16} className="mr-2" /> Copy URL
               </Button>
-              <Button onClick={() => window.open(item.url, '_blank')} variant="outline" className="flex-1 btn-secondary">
+              <Button onClick={() => window.open(imageUrl, '_blank')} variant="outline" className="flex-1 btn-secondary">
                 <Maximize2 size={16} className="mr-2" /> Full Size
               </Button>
             </div>
@@ -351,6 +406,7 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
                 onChange={(e) => setEditData(prev => ({ ...prev, filename: e.target.value }))}
                 className="input-dark mt-1"
                 placeholder="image-name"
+                data-testid="edit-filename"
               />
             </div>
 
@@ -362,6 +418,7 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
                 className="input-dark mt-1"
                 placeholder="Describe this image for search engines and screen readers..."
                 rows={3}
+                data-testid="edit-alt-text"
               />
               <p className="text-white/40 text-xs mt-1">Good alt text improves SEO and accessibility</p>
             </div>
@@ -369,7 +426,7 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
             <div>
               <Label className="text-white/70">Category</Label>
               <Select value={editData.category} onValueChange={(val) => setEditData(prev => ({ ...prev, category: val }))}>
-                <SelectTrigger className="input-dark mt-1">
+                <SelectTrigger className="input-dark mt-1" data-testid="edit-category">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1A1A1A] border-white/10">
@@ -386,23 +443,10 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
             <div>
               <Label className="text-white/70">Image URL</Label>
               <div className="flex gap-2 mt-1">
-                <Input value={item.url} readOnly className="input-dark flex-1 text-white/60" />
+                <Input value={imageUrl} readOnly className="input-dark flex-1 text-white/60 text-sm" />
                 <Button onClick={copyUrl} variant="outline" className="btn-secondary">
                   <Copy size={16} />
                 </Button>
-              </div>
-            </div>
-
-            {/* Recommended Dimensions */}
-            <div className="bg-[#2A2A2A] rounded-lg p-4">
-              <h4 className="text-white font-semibold mb-3 text-sm">Recommended Sizes</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {Object.entries(IMAGE_DIMENSIONS).slice(0, 6).map(([key, dim]) => (
-                  <div key={key} className="flex justify-between text-white/60">
-                    <span>{dim.label}:</span>
-                    <span className="font-mono text-white/80">{dim.width}×{dim.height}</span>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -413,7 +457,8 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
               </Button>
               <div className="flex-1"></div>
               <Button onClick={onClose} variant="outline" className="btn-secondary">Cancel</Button>
-              <Button onClick={handleSave} className="btn-primary" disabled={saving}>
+              <Button onClick={handleSave} className="btn-primary" disabled={saving} data-testid="save-image-btn">
+                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : null}
                 {saving ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
@@ -428,15 +473,11 @@ const ImageDetailModal = ({ item, isOpen, onClose, onSave, onDelete, settings })
 const SiteImagesManager = ({ settings, onUpdateSetting, onSelectFromLibrary }) => {
   const siteImages = [
     { key: 'hero_image', label: 'Hero Background', dim: IMAGE_DIMENSIONS.hero, current: settings?.hero_image },
-    { key: 'mascot_image', label: 'Mascot/Silhouette', dim: { width: 400, height: 500, label: 'Mascot', description: 'PNG with transparent background recommended' }, current: settings?.mascot_image },
+    { key: 'mascot_image', label: 'Mascot/Character', dim: IMAGE_DIMENSIONS.mascot, current: settings?.mascot_image },
     { key: 'chef_image', label: 'Chef/About Image', dim: IMAGE_DIMENSIONS.chef, current: settings?.chef_image },
     { key: 'header_logo', label: 'Header Logo', dim: IMAGE_DIMENSIONS.header_logo, current: settings?.header_logo },
     { key: 'footer_logo', label: 'Footer Logo', dim: IMAGE_DIMENSIONS.footer_logo, current: settings?.footer_logo },
     { key: 'favicon', label: 'Favicon', dim: IMAGE_DIMENSIONS.favicon, current: settings?.favicon },
-    { key: 'merch_tshirt_image', label: 'Merch: T-Shirts', dim: IMAGE_DIMENSIONS.merch_promo, current: settings?.merch_tshirt_image },
-    { key: 'merch_cups_image', label: 'Merch: Cups & Mugs', dim: IMAGE_DIMENSIONS.merch_promo, current: settings?.merch_cups_image },
-    { key: 'merch_hats_image', label: 'Merch: Hats', dim: IMAGE_DIMENSIONS.merch_promo, current: settings?.merch_hats_image },
-    { key: 'merch_souvenirs_image', label: 'Merch: Souvenirs', dim: IMAGE_DIMENSIONS.merch_promo, current: settings?.merch_souvenirs_image },
   ];
 
   return (
@@ -466,6 +507,8 @@ const SiteImagesManager = ({ settings, onUpdateSetting, onSelectFromLibrary }) =
 const SiteImageCard = ({ image, onUpdate, onSelectFromLibrary }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  
+  const currentImageUrl = image.current ? getFullUrl(image.current) : '';
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -481,7 +524,7 @@ const SiteImageCard = ({ image, onUpdate, onSelectFromLibrary }) => {
       const formData = new FormData();
       formData.append("file", file);
       
-      const response = await axios.post(`${API}/upload`, formData, {
+      const response = await axios.post(`${API}/api/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true
       });
@@ -489,9 +532,11 @@ const SiteImageCard = ({ image, onUpdate, onSelectFromLibrary }) => {
       onUpdate(response.data.url);
       toast.success("Image updated!");
     } catch (error) {
-      toast.error("Failed to upload image");
+      console.error("Upload error:", error);
+      toast.error(error.response?.data?.detail || "Failed to upload image");
     } finally {
       setUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -508,6 +553,7 @@ const SiteImageCard = ({ image, onUpdate, onSelectFromLibrary }) => {
             variant="ghost" 
             onClick={() => onUpdate('')}
             className="text-white/40 hover:text-red-500"
+            title="Remove image"
           >
             <X size={14} />
           </Button>
@@ -515,11 +561,16 @@ const SiteImageCard = ({ image, onUpdate, onSelectFromLibrary }) => {
       </div>
 
       <div 
-        className="aspect-video bg-[#2A2A2A] rounded-lg overflow-hidden mb-3 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
-        onClick={() => fileInputRef.current?.click()}
+        className="aspect-video bg-[#2A2A2A] rounded-lg overflow-hidden mb-3 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity relative"
+        onClick={() => !uploading && fileInputRef.current?.click()}
       >
-        {image.current ? (
-          <img src={image.current} alt={image.label} className="w-full h-full object-contain" />
+        {uploading && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+            <Loader2 className="text-red-500 animate-spin" size={32} />
+          </div>
+        )}
+        {currentImageUrl ? (
+          <img src={currentImageUrl} alt={image.label} className="w-full h-full object-contain" />
         ) : (
           <div className="text-center p-4">
             <ImageIcon size={32} className="mx-auto text-white/30 mb-2" />
@@ -577,22 +628,31 @@ const MediaManager = () => {
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [generatePrompt, setGeneratePrompt] = useState('');
   const [generating, setGenerating] = useState(false);
-  const [selectingFor, setSelectingFor] = useState(null); // For site image selection
+  const [selectingFor, setSelectingFor] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const [mediaRes, settingsRes] = await Promise.all([
-        axios.get(`${API}/admin/media`, { withCredentials: true }),
-        axios.get(`${API}/settings`)
+        axios.get(`${API}/api/admin/media`, { withCredentials: true }),
+        axios.get(`${API}/api/settings`)
       ]);
-      setMedia(mediaRes.data);
+      setMedia(Array.isArray(mediaRes.data) ? mediaRes.data : []);
       setSettings(settingsRes.data);
     } catch (error) {
-      toast.error("Failed to load media");
+      console.error("Failed to load media:", error);
+      if (error.response?.status === 401) {
+        setError("Please login as admin to access the Media Manager");
+      } else {
+        setError("Failed to load media library. Please try again.");
+      }
+      setMedia([]);
     } finally {
       setLoading(false);
     }
@@ -613,27 +673,29 @@ const MediaManager = () => {
         const formData = new FormData();
         formData.append("file", file);
         
-        const uploadRes = await axios.post(`${API}/upload`, formData, {
+        const uploadRes = await axios.post(`${API}/api/upload`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true
         });
 
         // Add to media library
-        await axios.post(`${API}/admin/media`, {
+        await axios.post(`${API}/api/admin/media`, {
           url: uploadRes.data.url,
           filename: file.name,
           file_type: file.type,
-          file_size: file.size,
+          file_size: uploadRes.data.file_size || file.size,
           category: 'other'
         }, { withCredentials: true });
 
         uploadedCount.success++;
       } catch (error) {
+        console.error(`Upload failed for ${file.name}:`, error);
         uploadedCount.failed++;
       }
     }
 
     setUploading(false);
+    setShowUploadDialog(false);
     
     if (uploadedCount.success > 0) {
       toast.success(`Uploaded ${uploadedCount.success} file(s)`);
@@ -648,55 +710,62 @@ const MediaManager = () => {
     if (!window.confirm(`Delete "${item.filename}"? This cannot be undone.`)) return;
 
     try {
-      await axios.delete(`${API}/admin/media/${item.media_id}`, { withCredentials: true });
+      await axios.delete(`${API}/api/admin/media/${item.media_id}`, { withCredentials: true });
       toast.success("Image deleted");
       setDetailItem(null);
+      setSelectedItems(prev => prev.filter(i => i.media_id !== item.media_id));
       fetchData();
     } catch (error) {
+      console.error("Delete error:", error);
       toast.error("Failed to delete image");
     }
   };
 
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return;
-    if (!window.confirm(`Delete ${selectedItems.length} selected images?`)) return;
+    if (!window.confirm(`Delete ${selectedItems.length} selected images? This cannot be undone.`)) return;
 
     let deleted = 0;
     for (const item of selectedItems) {
       try {
-        await axios.delete(`${API}/admin/media/${item.media_id}`, { withCredentials: true });
+        await axios.delete(`${API}/api/admin/media/${item.media_id}`, { withCredentials: true });
         deleted++;
-      } catch (error) {}
+      } catch (error) {
+        console.error(`Delete failed for ${item.filename}:`, error);
+      }
     }
 
-    toast.success(`Deleted ${deleted} images`);
+    toast.success(`Deleted ${deleted} of ${selectedItems.length} images`);
     setSelectedItems([]);
     fetchData();
   };
 
   const handleSaveDetails = async (mediaId, data) => {
     try {
-      await axios.put(`${API}/admin/media/${mediaId}`, data, { withCredentials: true });
+      await axios.put(`${API}/api/admin/media/${mediaId}`, data, { withCredentials: true });
       toast.success("Image updated");
       setDetailItem(null);
       fetchData();
     } catch (error) {
+      console.error("Save error:", error);
       toast.error("Failed to update image");
     }
   };
 
   const handleUpdateSiteSetting = async (key, value) => {
     try {
-      await axios.put(`${API}/admin/settings`, { [key]: value }, { withCredentials: true });
+      await axios.put(`${API}/api/admin/settings`, { [key]: value }, { withCredentials: true });
       setSettings(prev => ({ ...prev, [key]: value }));
       toast.success("Site image updated");
     } catch (error) {
+      console.error("Update setting error:", error);
       toast.error("Failed to update site image");
     }
   };
 
   const handleSelectForSite = (key) => {
     setSelectingFor(key);
+    toast.info(`Select an image for ${key.replace(/_/g, ' ')}`);
   };
 
   const handleSelectFromLibrary = (item) => {
@@ -712,7 +781,7 @@ const MediaManager = () => {
   };
 
   const handleGenerateImage = async () => {
-    if (!generatePrompt) {
+    if (!generatePrompt.trim()) {
       toast.error("Please enter a description");
       return;
     }
@@ -720,7 +789,7 @@ const MediaManager = () => {
     setGenerating(true);
     try {
       const response = await axios.post(
-        `${API}/admin/generate-image`,
+        `${API}/api/admin/generate-image`,
         { prompt: generatePrompt },
         { withCredentials: true }
       );
@@ -740,9 +809,23 @@ const MediaManager = () => {
         setShowAIDialog(false);
         setGeneratePrompt('');
         toast.success("AI image generated and added to library!");
+      } else if (response.data.image_url) {
+        // Handle URL-based response
+        await axios.post(`${API}/api/admin/media`, {
+          url: response.data.image_url,
+          filename: `ai-generated-${Date.now()}.png`,
+          file_type: 'image/png',
+          category: 'other'
+        }, { withCredentials: true });
+        
+        setShowAIDialog(false);
+        setGeneratePrompt('');
+        toast.success("AI image generated and added to library!");
+        fetchData();
       }
     } catch (error) {
-      toast.error("Failed to generate image");
+      console.error("AI generation error:", error);
+      toast.error(error.response?.data?.detail || "Failed to generate image. Make sure AI integration is configured.");
     } finally {
       setGenerating(false);
     }
@@ -752,14 +835,18 @@ const MediaManager = () => {
   const filteredMedia = media
     .filter(item => {
       if (categoryFilter !== 'all' && item.category !== categoryFilter) return false;
-      if (searchQuery && !item.filename?.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !item.alt_text?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesFilename = item.filename?.toLowerCase().includes(query);
+        const matchesAlt = item.alt_text?.toLowerCase().includes(query);
+        if (!matchesFilename && !matchesAlt) return false;
+      }
       return true;
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'newest': return new Date(b.created_at) - new Date(a.created_at);
-        case 'oldest': return new Date(a.created_at) - new Date(b.created_at);
+        case 'newest': return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        case 'oldest': return new Date(a.created_at || 0) - new Date(b.created_at || 0);
         case 'name': return (a.filename || '').localeCompare(b.filename || '');
         case 'size': return (b.file_size || 0) - (a.file_size || 0);
         default: return 0;
@@ -781,14 +868,27 @@ const MediaManager = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white text-xl">Loading media library...</div>
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <Loader2 className="w-12 h-12 text-red-500 animate-spin" />
+        <p className="text-white/60">Loading media library...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+        <AlertCircle className="w-12 h-12 text-red-500" />
+        <p className="text-white text-lg">{error}</p>
+        <Button onClick={fetchData} className="btn-primary">
+          <RefreshCw size={16} className="mr-2" /> Try Again
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="media-manager">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -800,7 +900,7 @@ const MediaManager = () => {
             <Wand2 size={18} className="mr-2" />
             AI Generate
           </Button>
-          <Button onClick={() => setShowUploadDialog(true)} className="btn-primary">
+          <Button onClick={() => setShowUploadDialog(true)} className="btn-primary" data-testid="upload-btn">
             <Upload size={18} className="mr-2" />
             Upload Images
           </Button>
@@ -810,15 +910,15 @@ const MediaManager = () => {
       {/* Tabs */}
       <Tabs defaultValue="library" className="space-y-6">
         <TabsList className="bg-[#1A1A1A] border border-white/10">
-          <TabsTrigger value="library" className="data-[state=active]:bg-red-600">
+          <TabsTrigger value="library" className="data-[state=active]:bg-red-600" data-testid="tab-library">
             <FolderOpen size={16} className="mr-2" />
             Media Library
           </TabsTrigger>
-          <TabsTrigger value="site-images" className="data-[state=active]:bg-red-600">
+          <TabsTrigger value="site-images" className="data-[state=active]:bg-red-600" data-testid="tab-site-images">
             <Settings size={16} className="mr-2" />
             Site Images
           </TabsTrigger>
-          <TabsTrigger value="dimensions" className="data-[state=active]:bg-red-600">
+          <TabsTrigger value="dimensions" className="data-[state=active]:bg-red-600" data-testid="tab-dimensions">
             <Maximize2 size={16} className="mr-2" />
             Size Guide
           </TabsTrigger>
@@ -828,14 +928,18 @@ const MediaManager = () => {
         <TabsContent value="library" className="space-y-4">
           {/* Selection banner */}
           {selectingFor && (
-            <div className="bg-red-600/20 border border-red-600 rounded-lg p-4 flex items-center justify-between">
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-600/20 border border-red-600 rounded-lg p-4 flex items-center justify-between"
+            >
               <p className="text-white">
                 <span className="font-semibold">Selecting image for:</span> {selectingFor.replace(/_/g, ' ')}
               </p>
               <Button onClick={() => setSelectingFor(null)} variant="ghost" className="text-white">
                 <X size={18} className="mr-2" /> Cancel
               </Button>
-            </div>
+            </motion.div>
           )}
 
           {/* Toolbar */}
@@ -848,12 +952,13 @@ const MediaManager = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search images..."
                 className="input-dark pl-10"
+                data-testid="search-input"
               />
             </div>
 
             {/* Category Filter */}
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="input-dark w-40">
+              <SelectTrigger className="input-dark w-40" data-testid="category-filter">
                 <Filter size={16} className="mr-2 text-white/60" />
                 <SelectValue />
               </SelectTrigger>
@@ -868,7 +973,7 @@ const MediaManager = () => {
 
             {/* Sort */}
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="input-dark w-36">
+              <SelectTrigger className="input-dark w-36" data-testid="sort-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#1A1A1A] border-white/10">
@@ -884,44 +989,49 @@ const MediaManager = () => {
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded ${viewMode === 'grid' ? 'bg-red-600 text-white' : 'text-white/60 hover:text-white'}`}
+                data-testid="view-grid"
               >
                 <Grid size={18} />
               </button>
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded ${viewMode === 'list' ? 'bg-red-600 text-white' : 'text-white/60 hover:text-white'}`}
+                data-testid="view-list"
               >
                 <List size={18} />
               </button>
             </div>
 
             {/* Refresh */}
-            <Button onClick={fetchData} variant="ghost" size="sm" className="text-white/60 hover:text-white">
+            <Button onClick={fetchData} variant="ghost" size="sm" className="text-white/60 hover:text-white" data-testid="refresh-btn">
               <RefreshCw size={18} />
             </Button>
           </div>
 
           {/* Bulk Actions */}
-          {selectedItems.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-[#2A2A2A] rounded-lg p-4 flex items-center justify-between"
-            >
-              <p className="text-white">
-                <span className="font-semibold">{selectedItems.length}</span> items selected
-              </p>
-              <div className="flex gap-2">
-                <Button onClick={() => setSelectedItems([])} variant="ghost" className="text-white/60">
-                  Clear Selection
-                </Button>
-                <Button onClick={handleBulkDelete} variant="destructive">
-                  <Trash2 size={16} className="mr-2" />
-                  Delete Selected
-                </Button>
-              </div>
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {selectedItems.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-[#2A2A2A] rounded-lg p-4 flex items-center justify-between"
+              >
+                <p className="text-white">
+                  <span className="font-semibold">{selectedItems.length}</span> items selected
+                </p>
+                <div className="flex gap-2">
+                  <Button onClick={() => setSelectedItems([])} variant="ghost" className="text-white/60">
+                    Clear Selection
+                  </Button>
+                  <Button onClick={handleBulkDelete} variant="destructive" data-testid="bulk-delete-btn">
+                    <Trash2 size={16} className="mr-2" />
+                    Delete Selected
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Media Grid/List */}
           {filteredMedia.length === 0 ? (
@@ -938,18 +1048,20 @@ const MediaManager = () => {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {filteredMedia.map((item) => (
-                <ImageCard
-                  key={item.media_id}
-                  item={item}
-                  viewMode={viewMode}
-                  selected={selectedItems.some(i => i.media_id === item.media_id)}
-                  onSelect={toggleSelect}
-                  onDelete={handleDelete}
-                  onCopy={copyUrl}
-                  onEdit={setDetailItem}
-                />
-              ))}
+              <AnimatePresence>
+                {filteredMedia.map((item) => (
+                  <ImageCard
+                    key={item.media_id}
+                    item={item}
+                    viewMode={viewMode}
+                    selected={selectedItems.some(i => i.media_id === item.media_id)}
+                    onSelect={toggleSelect}
+                    onDelete={handleDelete}
+                    onCopy={copyUrl}
+                    onEdit={setDetailItem}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           ) : (
             <div className="space-y-2">
@@ -962,18 +1074,20 @@ const MediaManager = () => {
                 <div className="w-28">Date</div>
                 <div className="w-28"></div>
               </div>
-              {filteredMedia.map((item) => (
-                <ImageCard
-                  key={item.media_id}
-                  item={item}
-                  viewMode={viewMode}
-                  selected={selectedItems.some(i => i.media_id === item.media_id)}
-                  onSelect={toggleSelect}
-                  onDelete={handleDelete}
-                  onCopy={copyUrl}
-                  onEdit={setDetailItem}
-                />
-              ))}
+              <AnimatePresence>
+                {filteredMedia.map((item) => (
+                  <ImageCard
+                    key={item.media_id}
+                    item={item}
+                    viewMode={viewMode}
+                    selected={selectedItems.some(i => i.media_id === item.media_id)}
+                    onSelect={toggleSelect}
+                    onDelete={handleDelete}
+                    onCopy={copyUrl}
+                    onEdit={setDetailItem}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </TabsContent>
@@ -1024,7 +1138,7 @@ const MediaManager = () => {
               Upload Images
             </DialogTitle>
           </DialogHeader>
-          <UploadZone onUpload={(files) => { handleUpload(files); setShowUploadDialog(false); }} uploading={uploading} />
+          <UploadZone onUpload={handleUpload} uploading={uploading} />
         </DialogContent>
       </Dialog>
 
@@ -1043,9 +1157,10 @@ const MediaManager = () => {
               <Textarea
                 value={generatePrompt}
                 onChange={(e) => setGeneratePrompt(e.target.value)}
-                placeholder="A delicious plate of authentic Mexican tamales with red salsa and fresh cilantro garnish, professional food photography..."
+                placeholder="A delicious plate of BBQ ribs with coleslaw and cornbread, professional food photography, warm lighting..."
                 className="input-dark mt-2"
                 rows={4}
+                data-testid="ai-prompt"
               />
             </div>
             <p className="text-white/40 text-sm">
@@ -1055,8 +1170,8 @@ const MediaManager = () => {
               <Button variant="outline" onClick={() => setShowAIDialog(false)} className="btn-secondary">
                 Cancel
               </Button>
-              <Button onClick={handleGenerateImage} disabled={generating} className="btn-primary">
-                <Wand2 size={16} className="mr-2" />
+              <Button onClick={handleGenerateImage} disabled={generating} className="btn-primary" data-testid="generate-btn">
+                {generating ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Wand2 size={16} className="mr-2" />}
                 {generating ? 'Generating...' : 'Generate Image'}
               </Button>
             </div>
@@ -1071,7 +1186,6 @@ const MediaManager = () => {
         onClose={() => setDetailItem(null)}
         onSave={handleSaveDetails}
         onDelete={handleDelete}
-        settings={settings}
       />
     </div>
   );

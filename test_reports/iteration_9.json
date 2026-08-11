@@ -1,0 +1,58 @@
+{
+  "summary": "Static code review + public endpoint verification of the rewritten MediaManager.jsx at /admin/media. Interactive admin UI flows cannot be automated (Google OAuth). Backend media CRUD, /api/upload, and static /api/uploads serving all work correctly. HOWEVER a CRITICAL regression was introduced by the getFullUrl() helper: it strips '/api/' from image URLs, causing every image preview in the Media Manager (grid, list, detail modal, and Site Images cards) to fail (returns SPA HTML instead of the PNG). This will make the rewritten Media Manager appear 'broken' to the user even after they upload images.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "MediaManager.jsx -> getFullUrl() (lines 70-77)",
+        "issue": "getFullUrl strips '/api/' from relative URLs via url.replace('/api/', '/'). Backend returns URLs like '/api/uploads/<hash>.png' and mounts static files at '/api/uploads'. After stripping, the requested URL becomes '<REACT_APP_BACKEND_URL>/uploads/<hash>.png' which is NOT routed to backend (ingress only forwards '/api' prefix). Verified with curl: /api/uploads/... -> 200 image/png, /uploads/... -> 200 text/html (SPA). Result: every ImageCard, list thumbnail, ImageDetailModal preview, and SiteImageCard preview will render as broken/failed image. This is triggered by ImageCard's onerror -> setImageError(true) branch.",
+        "selector": "getFullUrl()",
+        "priority": "CRITICAL"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Upload -> library display",
+        "issue": "Upload POST succeeds (backend returns {url: '/api/uploads/<hash>.png'}) and record is created in /api/admin/media, but the returned URL is rendered through the buggy getFullUrl() so the uploaded image appears as a broken image tile.",
+        "affected_selectors": ["[data-testid^='media-item-']", "SiteImageCard preview img"]
+      }
+    ],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET /admin/media page loads (redirects to /admin/login when unauthenticated - expected)",
+    "GET /api/admin/media -> 401 without auth (expected)",
+    "GET /api/uploads/<existing>.png -> 200 image/png (backend static mount OK)",
+    "Code review: /api/admin/media (GET/POST/PUT/DELETE) endpoints correctly excluded MongoDB _id",
+    "Code review: MediaManager uses process.env.REACT_APP_BACKEND_URL, withCredentials on all admin calls, data-testid attributes present on key elements (upload-btn, upload-zone, file-input, search-input, category-filter, sort-select, view-grid, view-list, refresh-btn, tab-library, tab-site-images, tab-dimensions, media-item-*, edit-filename, edit-alt-text, edit-category, save-image-btn, ai-prompt, generate-btn, bulk-delete-btn)",
+    "Loading/error state UI properly implemented (Loader2 spinner + AlertCircle + Try Again button)"
+  ],
+  "not_tested_due_to_oauth": [
+    "Interactive click flows: opening upload dialog, drag&drop upload, view toggle, search, category filter, sort, opening detail modal, save changes, delete, AI Generate, Refresh button, Site Images tab uploads.",
+    "End-to-end verification of whether the getFullUrl bug actually manifests in UI (deduced with certainty from code + curl of /uploads/ path)."
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "CRITICAL: Fix getFullUrl() in /app/frontend/src/pages/admin/MediaManager.jsx (lines 70-77). Remove the '.replace('/api/', '/')' transformation. The correct implementation is: if url starts with http(s) return as-is; else return `${API}${url.startsWith('/') ? '' : '/'}${url}`. The backend already returns the correct '/api/uploads/...' path and static files are mounted at '/api/uploads'.",
+    "After fix, main agent should self-verify by logging in as admin, uploading a test image, and confirming the thumbnail renders (not the 'Failed to load' placeholder). Same for Site Images tab previews and the Image Detail modal."
+  ],
+  "critical_code_review_comments": [
+    "getFullUrl() URL rewriting is the exact opposite of what's needed - backend static mount is at '/api/uploads', not '/uploads'. Simply return `${API}${url}` when url starts with '/'.",
+    "MediaManager.jsx is 1195 lines - exceeds 700-line guideline. Consider splitting UploadZone, ImageCard, ImageDetailModal, SiteImagesManager, SiteImageCard into separate files.",
+    "SiteImageCard.handleFileUpload duplicates upload logic already present in MediaManager.handleUpload (DRY violation).",
+    "handleBulkDelete performs N sequential DELETE requests (await in a for loop) - could be Promise.all for parallelism.",
+    "IMAGE_DIMENSIONS.merch_item/merch_promo defined but not used in SiteImagesManager list.",
+    "No file-type validation client side beyond accept='image/*'; server should also enforce (assumed but not verified)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (public+static endpoints verified)", "frontend": "static-review only; critical URL bug found blocking image display"},
+  "test_credentials": "Admin access is Google OAuth only (per /app/memory/test_credentials.md) - no automatable test credentials available.",
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Google OAuth blocks automated admin login. The rewritten /admin/media page cannot be interacted with by an agent. Key bug to verify after fix: open browser DevTools Network tab on /admin/media, look at image requests - they should be '<BASE>/api/uploads/<hash>.png' (200 image/png) NOT '<BASE>/uploads/<hash>.png' (200 text/html). Backend media endpoints are at /api/admin/media (GET/POST/PUT/DELETE, all require admin) and upload at /api/upload. Static mount at /api/uploads.",
+  "rca of the issue": "Root cause: In MediaManager.jsx (from the rewrite), the getFullUrl helper contains `url.replace('/api/', '/')` which strips the '/api/' prefix from image URLs returned by the backend. Since the FastAPI StaticFiles mount is at '/api/uploads' (server.py:2075) and the Kubernetes ingress only routes '/api/*' to the backend, stripping '/api/' causes the browser to request '<host>/uploads/<file>.png' which is served by the React frontend (returning index.html). Reproduction: 1) upload any image via the admin UI; 2) observe the thumbnail shows 'Failed to load' placeholder; 3) confirm via curl -I '<BASE>/uploads/<file>.png' returns text/html. Mitigation: change line 76 to `return `${API}${url.startsWith('/') ? '' : '/'}${url}`;` (drop the .replace)."
+}

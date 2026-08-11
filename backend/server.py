@@ -1883,6 +1883,11 @@ async def upload_file(file: UploadFile = File(...)):
         if file.content_type not in allowed_types:
             raise HTTPException(status_code=400, detail="Invalid file type. Only images allowed.")
         
+        # Validate file size (5MB max)
+        contents = await file.read()
+        if len(contents) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large. Maximum size is 5MB.")
+        
         # Generate unique filename
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "png"
         unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
@@ -1890,10 +1895,16 @@ async def upload_file(file: UploadFile = File(...)):
         
         # Save file
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(contents)
         
-        # Return URL (served via static files)
-        return {"url": f"/api/uploads/{unique_filename}", "filename": unique_filename}
+        # Return URL - use relative URL that works with ingress routing
+        return {
+            "url": f"/api/uploads/{unique_filename}", 
+            "filename": unique_filename,
+            "file_size": len(contents)
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail="Failed to upload file")
