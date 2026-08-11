@@ -257,6 +257,7 @@ class OrderItem(BaseModel):
 
 class Order(BaseModel):
     order_id: str = Field(default_factory=lambda: f"order_{uuid.uuid4().hex[:12]}")
+    user_id: Optional[str] = None  # Link to registered user for order history
     customer_name: str
     customer_email: str
     customer_phone: str
@@ -475,8 +476,9 @@ class User(BaseModel):
     name: Optional[str] = ""  # Legacy field for backward compatibility
     phone: Optional[str] = None
     picture: Optional[str] = None
-    role: str = "customer"  # customer, admin
+    role: str = "customer"  # customer, staff, admin
     is_admin: bool = False
+    is_staff: bool = False  # Staff can manage orders but not settings/users
     newsletter_subscribed: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
@@ -596,6 +598,15 @@ async def require_admin(request: Request) -> User:
         raise HTTPException(status_code=401, detail="Not authenticated")
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+async def require_staff_or_admin(request: Request) -> User:
+    """Allow staff or admin users to access order management features"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    if not user.is_admin and not user.is_staff:
+        raise HTTPException(status_code=403, detail="Staff or admin access required")
     return user
 
 async def check_brute_force(identifier: str) -> bool:
@@ -850,8 +861,13 @@ async def create_order(order_data: OrderCreate, request: Request):
     # Get payment method (default to stripe)
     payment_method = getattr(order_data, 'payment_method', 'stripe') or 'stripe'
     
+    # Try to get current user for order history linking
+    current_user = await get_current_user(request)
+    user_id = current_user.user_id if current_user else None
+    
     # Create order
     order = Order(
+        user_id=user_id,
         customer_name=order_data.customer_name,
         customer_email=order_data.customer_email,
         customer_phone=order_data.customer_phone,
@@ -976,6 +992,27 @@ async def get_order_status(session_id: str):
         "status": checkout_status.status,
         "order": order
     }
+
+
+# Customer order history
+@api_router.get("/orders/my-orders")
+async def get_my_orders(request: Request):
+    """Get order history for the current logged-in user"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Please log in to view your orders")
+    
+    # Find orders by user_id or by email (for orders placed before user_id was added)
+    orders = await db.orders.find(
+        {"$or": [
+            {"user_id": user.user_id},
+            {"customer_email": user.email.lower()}
+        ]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return orders
+
 
 @api_router.post("/webhook/stripe")
 async def stripe_webhook(request: Request, background_tasks: BackgroundTasks):
@@ -1177,6 +1214,7 @@ async def login(data: LoginRequest, request: Request):
         "picture": user.get("picture"),
         "role": user.get("role", "customer"),
         "is_admin": user.get("is_admin", False),
+        "is_staff": user.get("is_staff", False),
         "newsletter_subscribed": user.get("newsletter_subscribed", True)
     }
     
@@ -1489,9 +1527,9 @@ async def get_all_categories(user: User = Depends(require_admin)):
     categories = await db.menu_categories.find({}, {"_id": 0}).sort("display_order", 1).to_list(100)
     return categories
 
-# Orders Management (Admin)
+# Orders Management (Admin and Staff)
 @api_router.get("/admin/orders")
-async def get_orders(status: Optional[str] = None, user: User = Depends(require_admin)):
+async def get_orders(status: Optional[str] = None, user: User = Depends(require_staff_or_admin)):
     query = {}
     if status:
         query["status"] = status
@@ -1499,7 +1537,7 @@ async def get_orders(status: Optional[str] = None, user: User = Depends(require_
     return orders
 
 @api_router.put("/admin/orders/{order_id}")
-async def update_order(order_id: str, data: dict, user: User = Depends(require_admin)):
+async def update_order(order_id: str, data: dict, user: User = Depends(require_staff_or_admin)):
     result = await db.orders.update_one(
         {"order_id": order_id},
         {"$set": data}
@@ -1509,7 +1547,7 @@ async def update_order(order_id: str, data: dict, user: User = Depends(require_a
     return {"status": "updated"}
 
 @api_router.post("/admin/orders/{order_id}/send-email")
-async def send_order_email(order_id: str, data: dict, user: User = Depends(require_admin)):
+async def send_order_email(order_id: str, data: dict, user: User = Depends(require_staff_or_admin)):
     """Send order details to kitchen/chef via email"""
     email_to = data.get("email")
     if not email_to:
@@ -2388,6 +2426,54 @@ async def delete_user(user_id: str, current_user: User = Depends(get_current_use
     
     logger.info(f"Admin deleted user: {user.get('email')}")
     return {"status": "success", "message": "User deleted successfully"}
+
+
+class UserRoleUpdate(BaseModel):
+    """Request model for updating user role"""
+    role: str  # "customer" or "staff"
+
+@api_router.put("/admin/users/{user_id}/role")
+async def update_user_role(
+    user_id: str,
+    role_data: UserRoleUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a user's role to staff or customer (admin only)"""
+    if not current_user or not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Validate role
+    if role_data.role not in ["customer", "staff"]:
+        raise HTTPException(status_code=400, detail="Role must be 'customer' or 'staff'")
+    
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Don't allow changing the main admin's role
+    admin_email = os.environ.get("ADMIN_EMAIL", "").lower()
+    if user.get("email", "").lower() == admin_email:
+        raise HTTPException(status_code=403, detail="Cannot change the primary admin's role")
+    
+    # Update role
+    is_staff = role_data.role == "staff"
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "role": role_data.role,
+            "is_staff": is_staff,
+            "is_admin": False  # Staff cannot be admin
+        }}
+    )
+    
+    logger.info(f"Admin updated user role: {user.get('email')} -> {role_data.role}")
+    
+    updated_user = await db.users.find_one(
+        {"user_id": user_id},
+        {"_id": 0, "password_hash": 0}
+    )
+    return updated_user
+
 
 
 # Get all enabled payment methods (public)

@@ -34,17 +34,17 @@ const AdminLogin = () => {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    // Check if already authenticated as admin
+    // Check if already authenticated as admin or staff
     const checkAuth = async () => {
       try {
         const response = await axios.get(`${API}/api/auth/me`, { withCredentials: true });
-        // Only redirect if user is admin
-        if (response.data.is_admin) {
+        // Redirect if user is admin or staff
+        if (response.data.is_admin || response.data.is_staff) {
           navigate('/admin');
         } else {
-          // User is logged in but not admin
+          // User is logged in but not admin/staff
           setChecking(false);
-          setError("You don't have admin access. Please login with an admin account.");
+          setError("You don't have admin or staff access. Please login with an authorized account.");
         }
       } catch (error) {
         // Not logged in, show login form
@@ -73,14 +73,15 @@ const AdminLogin = () => {
         { withCredentials: true }
       );
       
-      // Check if user is admin
-      if (!response.data.is_admin) {
-        setError("This account does not have admin access. Please use an admin account.");
+      // Check if user is admin or staff
+      if (!response.data.is_admin && !response.data.is_staff) {
+        setError("This account does not have admin or staff access. Please use an authorized account.");
         setLoading(false);
         return;
       }
       
-      toast.success(`Welcome back, ${response.data.first_name || response.data.name || 'Admin'}!`);
+      const roleLabel = response.data.is_admin ? 'Admin' : 'Staff';
+      toast.success(`Welcome back, ${response.data.first_name || response.data.name || roleLabel}!`);
       navigate('/admin');
     } catch (err) {
       const errorMsg = formatApiError(err.response?.data?.detail);

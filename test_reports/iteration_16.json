@@ -1,0 +1,59 @@
+{
+  "summary": "Tested new Order History and Staff Role features. Backend: 15/15 pytest passed - /api/orders/my-orders returns list for auth users (401 for anonymous), PUT /api/admin/users/{id}/role promotes/demotes correctly, staff can access /api/admin/orders, staff blocked (403) from /api/admin/menu/items, /api/admin/users, /api/admin/settings, invalid roles rejected (400), primary admin role protected (403), non-admin cannot call role endpoint. Frontend: Admin UserManager UI verified working - role change button shows current role (Staff/Customer), Staff purple badge appears, role change dialog opens with Select + confirm-change-role-btn. AdminDashboard sidebarItems filter correctly declares staffAllowed flags. HOWEVER: found CRITICAL FRONTEND BUG - /admin/login blocks staff login entirely.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AdminLogin.jsx", "issue": "Staff users cannot log in via /admin/login. Line 77 checks only `if (!response.data.is_admin)` and blocks staff with error 'This account does not have admin access'. Line 42 in useEffect similarly only redirects if is_admin, otherwise sets error. This makes the entire Staff role feature unusable via UI even though backend + ProtectedRoute in App.js (line 163) correctly allow is_staff. Verified: admin@nicnackables.com (role=staff, is_staff=true) cannot pass /admin/login; URL stays at /admin/login with error message.", "selector": "form on /admin/login", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [
+      {"flow": "Staff login -> Admin panel", "issue": "Backend accepts staff login and issues cookie; ProtectedRoute allows staff; but AdminLogin.jsx front-door check rejects staff and clears/keeps them at login page.", "affected_selectors": ["/admin/login form", "AdminLogin.jsx handleEmailLogin", "AdminLogin.jsx useEffect checkAuth"]}
+    ],
+    "design_issues": [
+      {"screen": "OrderPage /order", "issues": ["Order History collapsible only renders when cart is NOT empty (line 288 short-circuit returns 'Your cart is empty' before order-history section). Logged-in customers with past orders but empty cart cannot view their order history from /order. Consider showing history above the empty-cart message, or move history to /account page."]}
+    ]
+  },
+  "passed_tests": [
+    "pytest backend/tests/test_staff_and_order_history.py: 15/15 passed",
+    "GET /api/orders/my-orders: 401/403 anon, 200 list for customer + admin, no _id leakage",
+    "PUT /api/admin/users/{id}/role role='staff' sets is_staff=true, role='staff', is_admin=false",
+    "PUT /api/admin/users/{id}/role role='customer' demotes cleanly",
+    "PUT /api/admin/users/{id}/role role='superadmin' -> 400",
+    "PUT /api/admin/users/{primary_admin_id}/role -> 403",
+    "Unauthenticated PUT /api/admin/users/{id}/role -> 401/403",
+    "Staff GET /api/admin/orders -> 200 (allowed)",
+    "Staff GET /api/admin/menu/items -> 403",
+    "Staff GET /api/admin/users -> 403",
+    "Staff PUT /api/admin/settings -> 403",
+    "Staff PUT /api/admin/users/{other}/role -> 403 (staff cannot change roles)",
+    "Demoted staff loses /api/admin/orders access (403)",
+    "UI Admin UserManager: 22 users listed, purple 'Staff' badge shown next to admin@nicnackables.com, change-role-btn label shows 'Staff' vs 'Customer' correctly, Mr. Terpenes protected"
+  ],
+  "failed_tests": [
+    "UI: Staff user login at /admin/login - stays on /admin/login (blocked by is_admin-only check in AdminLogin.jsx)",
+    "UI: Cannot verify staff sidebar filtering / staff dashboard quick actions because staff cannot reach /admin via login flow"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_staff_and_order_history.py",
+    "/app/test_reports/pytest/staff_order_history_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: In /app/frontend/src/pages/admin/AdminLogin.jsx, update the two is_admin checks (line 42 in useEffect and line 77 in handleEmailLogin) to also allow is_staff. Example: `if (response.data.is_admin || response.data.is_staff) { navigate('/admin'); }` and `if (!response.data.is_admin && !response.data.is_staff) { setError(...); return; }`. Same for Google auth handler in App.js line 121 to allow staff via SSO.",
+    "UX: Show Order History section on /order even when cart is empty, or expose it on /account page, so users can view past orders without adding items first.",
+    "Optional: Add DialogDescription to Change Role dialog for a11y (Radix warning)."
+  ],
+  "critical_code_review_comments": [
+    "AdminLogin.jsx and App.js Google-auth handler use `is_admin` only, but ProtectedRoute and AdminDashboard sidebar filter use `is_admin || is_staff`. Inconsistent gating - staff can be authenticated per backend but blocked at login front-door. This is the key bug.",
+    "server.py /api/admin/users/{id}/role correctly forces is_admin=false when setting staff - good. Does NOT set role back to 'customer' explicitly when demoting; instead uses role_data.role which is set to 'customer' - correct.",
+    "OrderPage.jsx: order history render is gated on cart.length > 0 due to early return at line 288. Consider decoupling history display from cart state.",
+    "OrderPage.jsx fetchOrderHistory: no error toast/UI on failure - silent console.error only.",
+    "server.py get_my_orders correctly excludes _id and matches by user_id OR customer_email (lowercased), good for backfilling legacy orders."
+  ],
+  "updated_files": ["/app/backend/tests/test_staff_and_order_history.py"],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "60% (admin UserManager UI works; staff login flow broken)"},
+  "test_credentials": "Admin: Mrterpenes@gmail.com / NicNack2024! (works). Staff test account admin@nicnackables.com / NicNack2024! (backend login works, /admin/login UI rejects due to is_admin-only check).",
+  "seed_data_creation": "Created ~3 TEST_ users during pytest runs via /api/auth/register (test_staff_*, test_other_*). One test_ui_*@example.com created during UI probe. All safe to leave; can be cleaned via UserManager delete buttons.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The staff role feature is fully working on the backend (verified with 15 pytest cases). The only blocker is the frontend AdminLogin.jsx which checks is_admin exclusively. Once main agent fixes AdminLogin (and App.js Google session handler) to allow is_staff, staff login + sidebar filtering + staff-restricted routes should all work end-to-end. Re-run pytest + UI test of staff login sidebar (Dashboard/Orders/Messages only) after fix. Ignore /admin/login redirect issues if bcrypt cookie is set - the ProtectedRoute already allows staff.",
+  "rca of the issue": "Frontend authorization gate is duplicated in three places: (1) AdminLogin.jsx useEffect checkAuth (line 42), (2) AdminLogin.jsx handleEmailLogin (line 77), and (3) App.js OAuth session handler (line 121). All three still use only `is_admin` and were not updated when staff role was introduced. In contrast, ProtectedRoute (App.js line 163) and AdminDashboard sidebar (line 194) correctly check `is_admin || is_staff`. Fix: update the three older checks to include is_staff."
+}

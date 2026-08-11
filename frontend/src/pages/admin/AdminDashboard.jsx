@@ -27,24 +27,26 @@ import UserManager from "./UserManager";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const sidebarItems = [
-  { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
-  { path: "/admin/analytics", icon: TrendingUp, label: "Analytics" },
-  { path: "/admin/page-builder", icon: Layout, label: "Page Builder" },
-  { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu" },
-  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop" },
-  { path: "/admin/orders", icon: ShoppingCart, label: "Orders" },
-  { path: "/admin/contacts", icon: MessageSquare, label: "Messages" },
-  { path: "/admin/testimonials", icon: Star, label: "Testimonials" },
-  { path: "/admin/blog", icon: FileText, label: "Blog" },
-  { path: "/admin/faq", icon: HelpCircle, label: "FAQ" },
-  { path: "/admin/media", icon: Image, label: "Media" },
-  { path: "/admin/seo", icon: Globe, label: "SEO" },
-  { path: "/admin/users", icon: Users, label: "Users" },
-  { path: "/admin/settings", icon: Settings, label: "Settings" },
+// All sidebar items with role restrictions
+const allSidebarItems = [
+  { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true, staffAllowed: true },
+  { path: "/admin/analytics", icon: TrendingUp, label: "Analytics", staffAllowed: false },
+  { path: "/admin/page-builder", icon: Layout, label: "Page Builder", staffAllowed: false },
+  { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu", staffAllowed: false },
+  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop", staffAllowed: false },
+  { path: "/admin/orders", icon: ShoppingCart, label: "Orders", staffAllowed: true },
+  { path: "/admin/contacts", icon: MessageSquare, label: "Messages", staffAllowed: true },
+  { path: "/admin/testimonials", icon: Star, label: "Testimonials", staffAllowed: false },
+  { path: "/admin/blog", icon: FileText, label: "Blog", staffAllowed: false },
+  { path: "/admin/faq", icon: HelpCircle, label: "FAQ", staffAllowed: false },
+  { path: "/admin/media", icon: Image, label: "Media", staffAllowed: false },
+  { path: "/admin/seo", icon: Globe, label: "SEO", staffAllowed: false },
+  { path: "/admin/users", icon: Users, label: "Users", staffAllowed: false },
+  { path: "/admin/settings", icon: Settings, label: "Settings", staffAllowed: false },
 ];
 
 const DashboardHome = () => {
+  const { user } = useContext(AuthContext);
   const [stats, setStats] = useState({
     orders: 0,
     menuItems: 0,
@@ -55,18 +57,27 @@ const DashboardHome = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [ordersRes, itemsRes, contactsRes, testimonialsRes] = await Promise.all([
+        // Staff can only see orders and contacts
+        const requests = [
           axios.get(`${API}/admin/orders`, { withCredentials: true }),
-          axios.get(`${API}/admin/menu/items`, { withCredentials: true }),
-          axios.get(`${API}/admin/contacts`, { withCredentials: true }),
-          axios.get(`${API}/admin/testimonials`, { withCredentials: true })
-        ]);
+          axios.get(`${API}/admin/contacts`, { withCredentials: true })
+        ];
+        
+        // Admins can see all stats
+        if (user?.is_admin) {
+          requests.push(
+            axios.get(`${API}/admin/menu/items`, { withCredentials: true }),
+            axios.get(`${API}/admin/testimonials`, { withCredentials: true })
+          );
+        }
 
+        const responses = await Promise.all(requests);
+        
         setStats({
-          orders: ordersRes.data?.length || 0,
-          menuItems: itemsRes.data?.length || 0,
-          contacts: contactsRes.data?.filter(c => !c.is_read)?.length || 0,
-          testimonials: testimonialsRes.data?.length || 0
+          orders: responses[0].data?.length || 0,
+          contacts: responses[1].data?.filter(c => !c.is_read)?.length || 0,
+          menuItems: user?.is_admin ? (responses[2]?.data?.length || 0) : 0,
+          testimonials: user?.is_admin ? (responses[3]?.data?.length || 0) : 0
         });
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -74,13 +85,17 @@ const DashboardHome = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [user]);
 
-  const statCards = [
+  // Show different stat cards based on role
+  const statCards = user?.is_admin ? [
     { label: "Total Orders", value: stats.orders, icon: ShoppingCart, color: "text-green-500" },
     { label: "Menu Items", value: stats.menuItems, icon: UtensilsCrossed, color: "text-red-400" },
     { label: "Unread Messages", value: stats.contacts, icon: MessageSquare, color: "text-yellow-500" },
     { label: "Testimonials", value: stats.testimonials, icon: Star, color: "text-red-500" },
+  ] : [
+    { label: "Total Orders", value: stats.orders, icon: ShoppingCart, color: "text-green-500" },
+    { label: "Unread Messages", value: stats.contacts, icon: MessageSquare, color: "text-yellow-500" },
   ];
 
   return (
@@ -109,33 +124,57 @@ const DashboardHome = () => {
         <div className="card-dark p-6">
           <h2 className="text-xl font-display font-bold text-white mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            <Link to="/admin/menu" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
-              <p className="text-white font-semibold">Manage Menu</p>
-              <p className="text-white/60 text-sm">Add or edit menu items</p>
-            </Link>
+            {user?.is_admin && (
+              <Link to="/admin/menu" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
+                <p className="text-white font-semibold">Manage Menu</p>
+                <p className="text-white/60 text-sm">Add or edit menu items</p>
+              </Link>
+            )}
             <Link to="/admin/orders" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
               <p className="text-white font-semibold">View Orders</p>
               <p className="text-white/60 text-sm">Check recent orders</p>
             </Link>
-            <Link to="/admin/settings" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
-              <p className="text-white font-semibold">Site Settings</p>
-              <p className="text-white/60 text-sm">Update content and design</p>
+            <Link to="/admin/contacts" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
+              <p className="text-white font-semibold">Messages</p>
+              <p className="text-white/60 text-sm">View customer messages</p>
             </Link>
+            {user?.is_admin && (
+              <Link to="/admin/settings" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
+                <p className="text-white font-semibold">Site Settings</p>
+                <p className="text-white/60 text-sm">Update content and design</p>
+              </Link>
+            )}
           </div>
         </div>
 
         <div className="card-dark p-6">
-          <h2 className="text-xl font-display font-bold text-white mb-4">Getting Started</h2>
+          <h2 className="text-xl font-display font-bold text-white mb-4">
+            {user?.is_admin ? 'Getting Started' : 'Staff Dashboard'}
+          </h2>
           <div className="space-y-4 text-white/80">
-            <p>Welcome to your restaurant admin dashboard! Here you can:</p>
-            <ul className="list-disc list-inside space-y-2 text-white/60">
-              <li>Manage your menu items and categories</li>
-              <li>View and process customer orders</li>
-              <li>Respond to contact form submissions</li>
-              <li>Update testimonials and FAQ</li>
-              <li>Write blog posts and announcements</li>
-              <li>Customize your site design and SEO</li>
-            </ul>
+            {user?.is_admin ? (
+              <>
+                <p>Welcome to your restaurant admin dashboard! Here you can:</p>
+                <ul className="list-disc list-inside space-y-2 text-white/60">
+                  <li>Manage your menu items and categories</li>
+                  <li>View and process customer orders</li>
+                  <li>Respond to contact form submissions</li>
+                  <li>Update testimonials and FAQ</li>
+                  <li>Write blog posts and announcements</li>
+                  <li>Customize your site design and SEO</li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <p>Welcome, {user?.first_name || 'Staff'}! As a staff member, you can:</p>
+                <ul className="list-disc list-inside space-y-2 text-white/60">
+                  <li>View and process customer orders</li>
+                  <li>Update order status and payment status</li>
+                  <li>Send order confirmation emails</li>
+                  <li>Respond to customer messages</li>
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -148,6 +187,14 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(AuthContext);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Filter sidebar items based on user role
+  const sidebarItems = allSidebarItems.filter(item => {
+    // Admins see everything
+    if (user?.is_admin) return true;
+    // Staff only see allowed items
+    return item.staffAllowed;
+  });
 
   const handleLogout = async () => {
     try {

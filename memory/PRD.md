@@ -12,12 +12,14 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 
 ## User Personas
 1. **Restaurant Owner/Admin (Mrterpenes@gmail.com)**: Exclusive admin who manages menu, orders, content, settings, and users via admin panel
-2. **Customers**: Browse menu, register to place orders (tracked for order history), no settings access
+2. **Staff Members**: Can manage orders and messages but cannot access settings/menu/users
+3. **Customers**: Browse menu, register to place orders (tracked for order history), no settings access
 
 ## Authentication Architecture
 - **Customers**: Register/login via email+password or Google OAuth. Redirected to homepage after auth. No account settings page - registration is purely for order tracking.
-- **Admin**: Only `Mrterpenes@gmail.com` can be admin. Login via `/admin/login` (footer link). Admin panel protected.
-- **Separation**: Customer navbar shows "Sign In" or "Hi, {name} | Sign Out". Admin login is hidden in footer.
+- **Admin**: Only `Mrterpenes@gmail.com` can be admin. Login via `/admin/login` (footer link). Full admin panel access.
+- **Staff**: Promoted by admin via User Management. Login via `/admin/login`. Limited access (Orders, Messages only).
+- **Separation**: Customer navbar shows "Sign In" or "Hi, {name} | Sign Out". Admin/Staff login is hidden in footer.
 
 ## Core Architecture
 ```
@@ -25,17 +27,18 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 ├── backend/
 │   ├── .env (ADMIN_EMAIL, ADMIN_PASSWORD, Stripe, MongoDB, etc.)
 │   ├── requirements.txt
-│   └── server.py (FastAPI - all routes ~2800 lines)
+│   └── server.py (FastAPI - all routes ~2900 lines)
 ├── frontend/
 │   └── src/
-│       ├── App.js (AuthContext, ProtectedRoute)
+│       ├── App.js (AuthContext, ProtectedRoute - allows admin OR staff)
 │       ├── pages/
 │       │   ├── LandingPage.jsx (Navbar with customer auth, Footer with admin link)
 │       │   ├── CustomerAuth.jsx (Registration/Login, redirects to homepage)
-│       │   ├── AccountPage.jsx (Redirects to homepage - no settings for customers)
+│       │   ├── OrderPage.jsx (Order history for logged-in users)
 │       │   └── admin/
-│       │       ├── AdminDashboard.jsx
-│       │       ├── UserManager.jsx (NEW - admin user management)
+│       │       ├── AdminDashboard.jsx (Filtered sidebar based on role)
+│       │       ├── AdminLogin.jsx (Allows admin AND staff login)
+│       │       ├── UserManager.jsx (Admin-only: manage users, change roles)
 │       │       └── ... (MenuManager, MediaManager, etc.)
 ```
 
@@ -52,7 +55,8 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Blog section
 - [x] Merch store
 - [x] Customer registration/login (email+password or Google)
-- [x] Simplified auth flow - customers go to homepage after login (no account page)
+- [x] Simplified auth flow - customers go to homepage after login
+- [x] **Order History** - logged-in users can view past orders on /order page (even with empty cart)
 
 ### Admin Panel
 - [x] Google OAuth + Email/Password authentication
@@ -67,36 +71,43 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Stripe/SendGrid settings
 - [x] Visitor analytics dashboard
 - [x] Page builder for custom sections
-- [x] **User Management** (NEW - view users, reset passwords, delete accounts)
+- [x] **User Management** (view users, reset passwords, delete accounts, change roles)
+- [x] **Staff Role Support** - promote users to staff for limited admin access
 
-## Admin User Management (December 2025)
-- **Exclusive Admin**: Only `Mrterpenes@gmail.com` has `is_admin: true`
-- **Admin Protection**: Cannot delete or reset password for admin account
-- **Auto-demotion**: On startup, any other users with `is_admin: true` are demoted to customer
-- **Features**: View all users, search/filter, reset customer passwords, delete customer accounts
-- **UI**: `/admin/users` route in admin panel with UserManager component
+### Staff Features (December 2025)
+- [x] Staff can login via `/admin/login`
+- [x] Staff see limited sidebar: Dashboard, Orders, Messages only
+- [x] Staff dashboard shows staff-specific quick actions and permissions list
+- [x] Staff can view/update orders and send order emails
+- [x] Staff cannot access: Menu, Settings, Users, Analytics, Media, Blog, FAQ, SEO, Page Builder
+
+## Role System
+| Role | is_admin | is_staff | Admin Panel Access |
+|------|----------|----------|-------------------|
+| Customer | false | false | None |
+| Staff | false | true | Orders, Messages |
+| Admin | true | false | Full access |
 
 ## API Endpoints Summary
 - `/api/health` - Health check
 - `/api/settings` - Site settings (GET/PUT)
 - `/api/menu/*` - Menu items and categories
 - `/api/orders/*` - Order management
+- `/api/orders/my-orders` - Customer order history (NEW)
 - `/api/track-visit` - Visitor tracking (POST)
 - `/api/admin/visitor-stats` - Analytics dashboard (GET)
 - `/api/auth/*` - Authentication (login, register, logout, me, etc.)
-- `/api/admin/users` - User management (GET, PUT, DELETE, POST reset-password)
+- `/api/admin/users` - User management (GET, PUT, DELETE)
+- `/api/admin/users/{id}/role` - Role changes (PUT) (NEW)
 - `/api/webhook/stripe` - Stripe webhooks
 
 ## Known Issues
 
 ### Resolved This Session
-- Admin User Management fully implemented and tested
-- Customer auth now properly updates navbar state after login/register
-- Removed "My Account" link - customers redirected to homepage
-- Admin login moved to footer only
+- Staff login now works via AdminLogin.jsx (was blocking non-admins)
+- Order history visible even when cart is empty for logged-in users with past orders
 
 ### P2 - Low Priority (Not Blocking)
-- Reset Password dialog doesn't show inline error for short passwords (backend validates correctly)
 - Minor a11y warnings on Radix dialogs (missing aria-describedby)
 - Data Persistence: Container restart data loss (infrastructure/volume mount issue, not code)
 
@@ -104,7 +115,7 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 
 ### P1 - High Priority
 - Verify SendGrid email integration for password resets/order notifications (currently logging to console)
-- Refactor `server.py` into modular routers (~2800 lines currently)
+- Refactor `server.py` into modular routers (~2900 lines currently)
 
 ### P2 - Medium Priority  
 - Add-ons functionality improvements
@@ -112,7 +123,7 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 
 ### P3 - Nice to Have
 - Multi-language support
-- Order status tracking for customers
+- Real-time order status tracking for customers
 - Inventory management
 
 ## Third-Party Integrations

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   Users, Search, Trash2, Key, Mail, Phone, Calendar,
-  Shield, User as UserIcon, AlertTriangle, X, Eye, EyeOff
+  Shield, User as UserIcon, AlertTriangle, Eye, EyeOff, UserCog
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -26,6 +26,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "../../components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "../../components/ui/select";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -36,7 +43,9 @@ const UserManager = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [newRole, setNewRole] = useState("customer");
   const [showPassword, setShowPassword] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -115,6 +124,37 @@ const UserManager = () => {
   const openDeleteDialog = (user) => {
     setSelectedUser(user);
     setShowDeleteDialog(true);
+  };
+
+  const openRoleDialog = (user) => {
+    setSelectedUser(user);
+    setNewRole(user.role || "customer");
+    setShowRoleDialog(true);
+  };
+
+  const handleChangeRole = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setActionLoading(true);
+      const response = await axios.put(
+        `${API}/admin/users/${selectedUser.user_id}/role`,
+        { role: newRole },
+        { withCredentials: true }
+      );
+      toast.success(`${selectedUser.email} is now a ${newRole}`);
+      // Update local state
+      setUsers(users.map(u => 
+        u.user_id === selectedUser.user_id ? response.data : u
+      ));
+      setShowRoleDialog(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Error changing role:", error);
+      toast.error(error.response?.data?.detail || "Failed to change role");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const filteredUsers = users.filter(user => {
@@ -219,7 +259,12 @@ const UserManager = () => {
                           Admin
                         </span>
                       )}
-                      {user.role === "customer" && !user.is_admin && (
+                      {user.is_staff && !user.is_admin && (
+                        <span className="px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-400 rounded-full">
+                          Staff
+                        </span>
+                      )}
+                      {user.role === "customer" && !user.is_admin && !user.is_staff && (
                         <span className="px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">
                           Customer
                         </span>
@@ -248,9 +293,20 @@ const UserManager = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 sm:flex-shrink-0">
+                <div className="flex items-center gap-2 sm:flex-shrink-0 flex-wrap">
                   {!user.is_admin && (
                     <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openRoleDialog(user)}
+                        className="btn-secondary text-sm"
+                        data-testid={`change-role-btn-${user.user_id}`}
+                      >
+                        <UserCog size={16} className="mr-1" />
+                        {user.is_staff ? 'Staff' : 'Customer'}
+                      </Button>
+                      
                       <Button
                         variant="outline"
                         size="sm"
@@ -259,7 +315,7 @@ const UserManager = () => {
                         data-testid={`reset-password-btn-${user.user_id}`}
                       >
                         <Key size={16} className="mr-1" />
-                        Reset Password
+                        Reset
                       </Button>
                       
                       <Button
@@ -377,6 +433,80 @@ const UserManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Change Role Dialog */}
+      <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+        <DialogContent className="bg-[#1A1A1A] border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCog className="text-purple-500" size={20} />
+              Change User Role
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              Update the role for {selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <label className="block text-sm font-medium text-white/80 mb-2">
+              Select Role
+            </label>
+            <Select value={newRole} onValueChange={setNewRole}>
+              <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1A1A1A] border-white/10">
+                <SelectItem value="customer" className="text-white hover:bg-white/10">
+                  Customer - Can place orders only
+                </SelectItem>
+                <SelectItem value="staff" className="text-white hover:bg-white/10">
+                  Staff - Can manage orders
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="mt-4 p-3 rounded-lg bg-white/5 text-sm text-white/60">
+              {newRole === "staff" ? (
+                <div>
+                  <strong className="text-purple-400">Staff permissions:</strong>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    <li>View and manage orders</li>
+                    <li>Update order status</li>
+                    <li>Send order emails</li>
+                  </ul>
+                </div>
+              ) : (
+                <div>
+                  <strong className="text-blue-400">Customer permissions:</strong>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    <li>Browse menu and place orders</li>
+                    <li>View order history</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowRoleDialog(false)}
+              className="btn-secondary"
+              disabled={actionLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleChangeRole}
+              className="btn-primary"
+              disabled={actionLoading}
+              data-testid="confirm-change-role-btn"
+            >
+              {actionLoading ? "Updating..." : "Update Role"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

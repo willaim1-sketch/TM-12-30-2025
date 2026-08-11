@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy, Check, Square, CheckSquare, LogIn, Loader2 } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy, Check, Square, CheckSquare, LogIn, Loader2, Clock, Package, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -73,6 +73,9 @@ const OrderPage = () => {
   const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
   const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
   const [orderPlaced, setOrderPlaced] = useState(false); // Track if order was placed successfully
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [formData, setFormData] = useState({
     customer_name: "",
     customer_email: "",
@@ -81,6 +84,25 @@ const OrderPage = () => {
     pickup_time: "",
     comments: ""
   });
+
+  // Fetch order history when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchOrderHistory();
+    }
+  }, [isAuthenticated, user]);
+
+  const fetchOrderHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const response = await axios.get(`${API}/orders/my-orders`, { withCredentials: true });
+      setOrderHistory(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch order history:", error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   // Pre-fill form with user data when authenticated
   useEffect(() => {
@@ -263,20 +285,119 @@ const OrderPage = () => {
   };
 
   // Show empty cart message only if cart is empty AND no order was placed AND not cancelled
+  // BUT also show order history for logged-in users with past orders
   if (cart.length === 0 && !searchParams.get("cancelled") && !orderPlaced && !showManualPaymentDialog) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <h2 className="text-3xl font-display font-bold text-white mb-4">Your cart is empty</h2>
-          <p className="text-white/60 mb-8">Add some delicious tamales to get started!</p>
-          <Link to="/menu">
-            <Button className="btn-primary" data-testid="browse-menu-btn">Browse Menu</Button>
-          </Link>
-        </motion.div>
+      <div className="min-h-screen bg-[#0A0A0A] px-6 py-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Order History for logged-in users even with empty cart */}
+          {isAuthenticated && orderHistory.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <button
+                onClick={() => setShowOrderHistory(!showOrderHistory)}
+                className="w-full card-dark p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                data-testid="order-history-toggle-empty"
+              >
+                <div className="flex items-center gap-3">
+                  <Package className="text-red-500" size={24} />
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold text-white">Your Order History</h3>
+                    <p className="text-white/60 text-sm">{orderHistory.length} past order{orderHistory.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                {showOrderHistory ? (
+                  <ChevronUp className="text-white/60" size={20} />
+                ) : (
+                  <ChevronDown className="text-white/60" size={20} />
+                )}
+              </button>
+              
+              {showOrderHistory && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="mt-2 space-y-3"
+                >
+                  {orderHistory.map((order) => (
+                    <div 
+                      key={order.order_id} 
+                      className="card-dark p-4"
+                      data-testid={`order-history-item-${order.order_id}`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-medium">#{order.order_id.slice(-8)}</span>
+                            <span className={`px-2 py-0.5 text-xs rounded-full ${
+                              order.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                              order.status === 'confirmed' ? 'bg-blue-500/20 text-blue-400' :
+                              order.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                              'bg-yellow-500/20 text-yellow-400'
+                            }`}>
+                              {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                            </span>
+                            <span className={`px-2 py-0.5 text-xs rounded-full ${
+                              order.payment_status === 'paid' ? 'bg-green-500/20 text-green-400' :
+                              'bg-orange-500/20 text-orange-400'
+                            }`}>
+                              {order.payment_status === 'paid' ? 'Paid' : 'Payment Pending'}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-sm text-white/60">
+                            <span className="flex items-center gap-1">
+                              <Clock size={14} />
+                              {new Date(order.created_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <div className="mt-2 text-sm text-white/80">
+                            {order.items?.slice(0, 3).map((item, idx) => (
+                              <span key={idx}>
+                                {item.quantity}x {item.name}
+                                {idx < Math.min(order.items.length - 1, 2) ? ', ' : ''}
+                              </span>
+                            ))}
+                            {order.items?.length > 3 && (
+                              <span className="text-white/40"> +{order.items.length - 3} more</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-white">${order.total?.toFixed(2)}</div>
+                          <div className="text-sm text-white/60">
+                            Pickup: {order.pickup_date} at {order.pickup_time}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Empty cart message */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <h2 className="text-3xl font-display font-bold text-white mb-4">Your cart is empty</h2>
+            <p className="text-white/60 mb-8">Add some delicious BBQ to get started!</p>
+            <Link to="/menu">
+              <Button className="btn-primary" data-testid="browse-menu-btn">Browse Menu</Button>
+            </Link>
+          </motion.div>
+        </div>
       </div>
     );
   }
@@ -341,6 +462,107 @@ const OrderPage = () => {
 
       {!authLoading && isAuthenticated && (
       <div className="max-w-6xl mx-auto px-6 py-12">
+        {/* Order History Section */}
+        {orderHistory.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <button
+              onClick={() => setShowOrderHistory(!showOrderHistory)}
+              className="w-full card-dark p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+              data-testid="order-history-toggle"
+            >
+              <div className="flex items-center gap-3">
+                <Package className="text-red-500" size={24} />
+                <div className="text-left">
+                  <h3 className="text-lg font-semibold text-white">Your Order History</h3>
+                  <p className="text-white/60 text-sm">{orderHistory.length} past order{orderHistory.length !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+              {showOrderHistory ? (
+                <ChevronUp className="text-white/60" size={20} />
+              ) : (
+                <ChevronDown className="text-white/60" size={20} />
+              )}
+            </button>
+            
+            {showOrderHistory && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="mt-2 space-y-3"
+              >
+                {loadingHistory ? (
+                  <div className="card-dark p-6 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-red-500 animate-spin" />
+                  </div>
+                ) : (
+                  orderHistory.map((order) => (
+                    <div 
+                      key={order.order_id} 
+                      className="card-dark p-4"
+                      data-testid={`order-history-item-${order.order_id}`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-medium">#{order.order_id.slice(-8)}</span>
+                            <span className={`px-2 py-0.5 text-xs rounded-full ${
+                              order.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                              order.status === 'confirmed' ? 'bg-blue-500/20 text-blue-400' :
+                              order.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                              'bg-yellow-500/20 text-yellow-400'
+                            }`}>
+                              {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                            </span>
+                            <span className={`px-2 py-0.5 text-xs rounded-full ${
+                              order.payment_status === 'paid' ? 'bg-green-500/20 text-green-400' :
+                              'bg-orange-500/20 text-orange-400'
+                            }`}>
+                              {order.payment_status === 'paid' ? 'Paid' : 'Payment Pending'}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-sm text-white/60">
+                            <span className="flex items-center gap-1">
+                              <Clock size={14} />
+                              {new Date(order.created_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <div className="mt-2 text-sm text-white/80">
+                            {order.items?.slice(0, 3).map((item, idx) => (
+                              <span key={idx}>
+                                {item.quantity}x {item.name}
+                                {idx < Math.min(order.items.length - 1, 2) ? ', ' : ''}
+                              </span>
+                            ))}
+                            {order.items?.length > 3 && (
+                              <span className="text-white/40"> +{order.items.length - 3} more</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-white">${order.total?.toFixed(2)}</div>
+                          <div className="text-sm text-white/60">
+                            Pickup: {order.pickup_date} at {order.pickup_time}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-12">
           {/* Order Form */}
           <div className="lg:col-span-2">
