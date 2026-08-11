@@ -1,0 +1,39 @@
+{
+  "summary": "Frontend-only regression test of admin login redirect-loop fix. All 5 target flows PASS: (1) /admin/login loads without redirecting when unauthenticated (GET /api/auth/me returns 401, page stays put). (2) Admin login with admin@nicnackables.com / NicNack2024! -> POST /api/auth/login 200 -> POST/GET /api/auth/me 200 -> redirected to /admin dashboard, dashboard data loaded (orders/menu/testimonials/contacts). (3) After landing on /admin, URL remains /admin over 8s of observation (no redirect loop). (4) Direct navigation to /admin while authenticated stays on /admin. (5) Logout button hits /api/auth/logout 200 and redirects back to /admin/login. (6) Non-admin login (test.customer@example.com/test1234) -> POST /api/auth/login 200 but ProtectedRoute/AdminLogin correctly blocks: user stays on /admin/login and sees error 'This account does not have admin access. Please use an admin account.' No /api/api/auth/me duplication observed in network log. Fix verified.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/admin/login non-admin error", "issues": ["Error banner uses red text on dark red background - readable but could improve contrast. Also the alert div does not use standard .error / role=alert class so error-selector queries return empty (minor testability nit)."]}
+    ]
+  },
+  "passed_tests": [
+    "GET /admin/login renders form when unauthenticated (no redirect loop)",
+    "POST /api/auth/login admin -> 200",
+    "GET /api/auth/me admin -> 200 (no /api/api/... duplication)",
+    "Admin redirected to /admin after login and stays there (no loop)",
+    "Admin dashboard loaded: /api/admin/orders, /api/admin/menu/items, /api/admin/testimonials, /api/admin/contacts all 200",
+    "Direct GET /admin while authenticated stays on /admin",
+    "Logout: POST /api/auth/logout 200 -> redirected to /admin/login",
+    "Non-admin login blocked at /admin/login with explicit 'not admin access' message"
+  ],
+  "failed_tests": [],
+  "test_report_links": [],
+  "action_items": [
+    "Optional: add role=\"alert\" or class=\"error\" to the AdminLogin error banner div for better testability/accessibility (currently plain div text - selector queries for .error/[role=alert] return empty).",
+    "Note: /register default-mode bug from iteration_11 is unrelated to this fix and still outstanding."
+  ],
+  "critical_code_review_comments": [
+    "Fix looks correct: ProtectedRoute and AdminLogin.checkAuth/handleEmailLogin now consistently use BACKEND_URL + /api/auth/me and gate on is_admin. Verified via network trace - only /api/auth/me (single /api) is called.",
+    "AdminLogin: consider clearing cookies / calling /api/auth/logout when denying a non-admin who successfully authenticated, otherwise the customer session cookie remains active and the user is silently logged in as customer if they navigate elsewhere."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only run)", "frontend": "100% (7/7 target flows)"},
+  "test_credentials": "Admin: admin@nicnackables.com / NicNack2024! (verified). Non-admin: test.customer@example.com / test1234 (verified - authenticates but blocked from admin).",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Admin redirect-loop is fully fixed. Only follow-up: (1) unrelated /register default-mode bug (see iteration_11), (2) consider auto-logout when a non-admin is denied at /admin/login so their customer cookie doesn't linger.",
+  "rca_of_the_issue": "Root cause was double /api prefixing: API constant already included /api, so calling `${API}/auth/me` produced /api/api/auth/me -> 404/401, ProtectedRoute treated the user as unauthenticated and bounced to /admin/login; AdminLogin's checkAuth then saw a valid session cookie and redirected back to /admin, creating a loop. Additionally, is_admin was not being enforced. Fix (verified): ProtectedRoute and AdminLogin now use `${BACKEND_URL}/api/auth/me` and explicitly check user.is_admin before granting/redirecting. Verified in network trace - only single-prefixed /api/auth/me appears."
+}

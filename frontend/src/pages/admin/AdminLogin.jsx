@@ -34,12 +34,20 @@ const AdminLogin = () => {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    // Check if already authenticated
+    // Check if already authenticated as admin
     const checkAuth = async () => {
       try {
-        await axios.get(`${API}/api/auth/me`, { withCredentials: true });
-        navigate('/admin');
+        const response = await axios.get(`${API}/api/auth/me`, { withCredentials: true });
+        // Only redirect if user is admin
+        if (response.data.is_admin) {
+          navigate('/admin');
+        } else {
+          // User is logged in but not admin
+          setChecking(false);
+          setError("You don't have admin access. Please login with an admin account.");
+        }
       } catch (error) {
+        // Not logged in, show login form
         setChecking(false);
       }
     };
@@ -65,7 +73,14 @@ const AdminLogin = () => {
         { withCredentials: true }
       );
       
-      toast.success(`Welcome back, ${response.data.name}!`);
+      // Check if user is admin
+      if (!response.data.is_admin) {
+        setError("This account does not have admin access. Please use an admin account.");
+        setLoading(false);
+        return;
+      }
+      
+      toast.success(`Welcome back, ${response.data.first_name || response.data.name || 'Admin'}!`);
       navigate('/admin');
     } catch (err) {
       const errorMsg = formatApiError(err.response?.data?.detail);

@@ -115,8 +115,14 @@ const AdminAuthCallback = () => {
     if (sessionIdMatch) {
       const sessionId = sessionIdMatch[1];
       
-      axios.get(`${API}/auth/session?session_id=${sessionId}`, { withCredentials: true })
+      axios.get(`${BACKEND_URL}/api/auth/session?session_id=${sessionId}`, { withCredentials: true })
         .then(response => {
+          // Check if user is admin
+          if (!response.data.is_admin) {
+            console.log("Google user is not admin");
+            navigate('/admin/login');
+            return;
+          }
           window.history.replaceState(null, '', '/admin');
           navigate('/admin', { state: { user: response.data } });
         })
@@ -136,7 +142,7 @@ const AdminAuthCallback = () => {
   );
 };
 
-// Protected Route wrapper
+// Protected Route wrapper for Admin
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [user, setUser] = useState(null);
@@ -152,10 +158,18 @@ const ProtectedRoute = ({ children }) => {
 
     const checkAuth = async () => {
       try {
-        const response = await axios.get(`${API}/auth/me`, { withCredentials: true });
+        const response = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
+        // Only allow admin users
+        if (!response.data.is_admin) {
+          console.log("User is not admin, redirecting to login");
+          setIsAuthenticated(false);
+          navigate('/admin/login');
+          return;
+        }
         setUser(response.data);
         setIsAuthenticated(true);
       } catch (error) {
+        console.log("Auth check failed:", error.response?.status);
         setIsAuthenticated(false);
         navigate('/admin/login');
       }
