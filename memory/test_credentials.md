@@ -1,29 +1,33 @@
-# Test Credentials for The Tamale Man
+# Test Credentials for Nic Nackables BBQ & More
 
-## Admin Access
-- **Authentication Method**: Google OAuth (Emergent-managed)
-- **First user to login becomes admin**
-- **Login URL**: `/admin/login`
+## Admin Account (Email/Password)
+- **Email**: admin@nicnackables.com
+- **Password**: NicNack2024!
+- **Role**: Admin
 
-## Stripe
-- **Mode**: LIVE
-- **Key Prefix**: `sk_live_` (stored in backend/.env)
-- **Testing**: Use real cards only in LIVE mode (or switch to test key for testing)
+## Authentication Methods
+1. **Email/Password Login**: POST /api/auth/login
+2. **Google OAuth**: GET /api/auth/session (Emergent-managed)
 
-## Database
-- **Type**: MongoDB
-- **Connection**: Via MONGO_URL in backend/.env
-- **DB Name**: Via DB_NAME in backend/.env
+## Auth Endpoints
+- POST /api/auth/register - Register new user
+- POST /api/auth/login - Login with email/password
+- POST /api/auth/logout - Logout
+- GET /api/auth/me - Get current user
+- POST /api/auth/refresh - Refresh access token
+- POST /api/auth/forgot-password - Request password reset
+- POST /api/auth/reset-password - Reset password with token
 
-## API Testing
-- **Base URL**: `https://tamale-man-preview.preview.emergentagent.com`
-- **Health Check**: `GET /api/health`
-- **Public Settings**: `GET /api/settings`
+## Testing Commands
+```bash
+# Login
+curl -c cookies.txt -X POST http://localhost:8001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@nicnackables.com","password":"NicNack2024!"}'
 
-## Notes
-- No hardcoded test accounts - authentication is via Google OAuth
-- Admin status is granted to the first user who signs in
-- All subsequent users are regular users unless manually promoted
+# Get current user
+curl -b cookies.txt http://localhost:8001/api/auth/me
+```
 
 ---
-*Last Updated: December 2025*
+*Last Updated: 2026-08-11T15:58:44.650550+00:00*
