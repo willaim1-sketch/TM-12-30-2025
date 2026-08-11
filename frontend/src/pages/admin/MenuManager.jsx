@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Plus, Edit, Trash2, Save, X, ImagePlus, Wand2, Info } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Wand2, Info } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { toast } from "sonner";
+import MediaPicker from "../../components/MediaPicker";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -422,36 +423,27 @@ const MenuManager = () => {
             </div>
 
             <div>
-              <Label className="text-white/70">Image</Label>
-              <ImageDimensionGuide width={600} height={450} description="4:3 ratio, food photography" />
-              <div className="mt-1 flex gap-4">
-                <Input
-                  value={itemForm.image_url}
-                  onChange={(e) => setItemForm(prev => ({ ...prev, image_url: e.target.value }))}
-                  className="input-dark flex-1"
-                  placeholder="Image URL"
-                  data-testid="item-image-input"
-                />
+              <MediaPicker
+                label="Menu Item Image"
+                value={itemForm.image_url}
+                onChange={(url) => setItemForm(prev => ({ ...prev, image_url: url }))}
+                width={600}
+                height={450}
+                description="4:3 ratio, food photography works best"
+              />
+              <div className="mt-3">
                 <Button
                   type="button"
                   onClick={handleGenerateImage}
                   disabled={generatingImage}
                   variant="outline"
-                  className="btn-secondary"
+                  className="btn-secondary w-full"
                   data-testid="generate-image-btn"
                 >
                   <Wand2 size={18} className="mr-2" />
-                  {generatingImage ? 'Generating...' : 'AI Generate'}
+                  {generatingImage ? 'Generating with AI...' : 'Generate Image with AI'}
                 </Button>
               </div>
-              {itemForm.image_url && (
-                <div className="mt-4 relative">
-                  <img src={itemForm.image_url} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
-                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    600 × 450px recommended
-                  </span>
-                </div>
-              )}
             </div>
 
             <div className="flex items-center gap-2">

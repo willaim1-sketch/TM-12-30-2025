@@ -1,0 +1,43 @@
+{
+  "summary": "Verified both fixes from the review request. Backend: POST /api/admin/media no longer leaks MongoDB _id and returns clean JSON (200) with valid media_id; GET /api/admin/media items also strip _id; admin-only guard works. Frontend: MediaPicker component is integrated in MenuManager (Add Menu Item -> 'Choose from Library' + 'Upload' visible), MerchManager (Choose from Library present), and BlogManager (Choose from Library present). Opening the picker shows all three tabs (Media Library, Upload New, Paste URL). The Media Library tab renders 6 existing images; clicking one selects it, closes the dialog, and fires an 'Image selected' toast. Admin login works with admin@nicnackables.com/NicNack2024!.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "MediaPicker dialog", "issues": ["React a11y warning: 'Missing Description or aria-describedby for DialogContent' - add DialogDescription to MediaPicker dialog for accessibility (non-blocking)."]}
+    ]
+  },
+  "passed_tests": [
+    "pytest backend/tests/test_media.py: 3/3 passed (GET list no _id, POST create no _id + persisted, unauth blocked)",
+    "Admin login flow works via UI",
+    "MenuManager -> Add Item shows MediaPicker (Choose from Library + Upload buttons)",
+    "MerchManager -> Add Product shows MediaPicker (Choose from Library present)",
+    "BlogManager -> Add Post shows MediaPicker (Choose from Library present)",
+    "MediaPicker dialog exposes three tabs: Media Library, Upload New, Paste URL",
+    "Selecting an image from library closes dialog and shows 'Image selected' toast",
+    "No 'failed' toast surfaced after selecting from library (previous bug fixed)"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_media.py",
+    "/app/test_reports/pytest/media_results.xml"
+  ],
+  "action_items": [
+    "Optional a11y fix: add DialogDescription (or aria-describedby) to MediaPicker's DialogContent to silence Radix warning.",
+    "Optional: expose a hidden file input on MediaManager list page so automated tests can upload without opening the modal (currently upload is only reachable via 'Upload Images' modal)."
+  ],
+  "critical_code_review_comments": [
+    "Backend fix at server.py:1815 (media_dict.pop('_id', None)) is correct and unit-tested. Consider using db.media_library.insert_one(media_dict) with a projection or explicit dict construction to avoid mutation-after-insert surprises in future edits.",
+    "MediaPicker.jsx also POSTs to /api/admin/media after /api/upload; because the backend now returns a clean dict, that flow will no longer trip the axios error handler for the serialization bug.",
+    "MediaPicker: data-testid is derived from label (e.g. 'media-picker-image') - good, but consider a stable prop-based testid to avoid collisions when multiple pickers with same label exist on one page."
+  ],
+  "updated_files": ["/app/backend/tests/test_media.py"],
+  "success_rate": {"backend": "100% (3/3)", "frontend": "100% (all target flows)"},
+  "test_credentials": "Admin: admin@nicnackables.com / NicNack2024! (verified working).",
+  "seed_data_creation": "One TEST_ media item was created and then deleted during pytest (cleanup handled in test).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Media serialization fix and MediaPicker integration are verified end-to-end. If revisiting, note that MediaManager's own upload uses a modal-triggered file input (not exposed on the list page), so UI upload tests need to click 'Upload Images' first to reveal the input.",
+  "rca_of_the_issue": "Original 'failed' toast on media upload was caused by POST /api/admin/media returning the just-inserted dict which still contained MongoDB's ObjectId _id (added by pymongo.insert_one), making FastAPI's JSON encoding fail on the response despite the DB write succeeding. Fix: pop '_id' from the dict before returning. Verified: response is now clean JSON without _id and axios no longer treats the response as failed."
+}

@@ -1810,6 +1810,8 @@ async def add_media_item(data: dict, user: User = Depends(require_admin)):
     media_dict = media_item.model_dump()
     media_dict["created_at"] = media_dict["created_at"].isoformat()
     await db.media_library.insert_one(media_dict)
+    # Remove _id from response (MongoDB adds it but it's not JSON serializable)
+    media_dict.pop("_id", None)
     return media_dict
 
 @api_router.put("/admin/media/{media_id}")

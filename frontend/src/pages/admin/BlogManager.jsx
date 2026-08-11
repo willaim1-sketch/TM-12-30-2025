@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Plus, Edit, Trash2, Save, Eye, EyeOff, Info } from "lucide-react";
+import { Plus, Edit, Trash2, Save, Eye, EyeOff } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -10,19 +10,9 @@ import { Switch } from "../../components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Badge } from "../../components/ui/badge";
 import { toast } from "sonner";
+import MediaPicker from "../../components/MediaPicker";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-
-// Image dimension guide component
-const ImageDimensionGuide = ({ width, height, description }) => (
-  <div className="flex items-center gap-2 mt-1 text-xs">
-    <Info size={12} className="text-red-500" />
-    <span className="text-white/50">
-      Recommended: <span className="text-red-400 font-mono">{width} × {height}px</span>
-      {description && <span className="text-white/40"> • {description}</span>}
-    </span>
-  </div>
-);
 
 const BlogManager = () => {
   const [posts, setPosts] = useState([]);
@@ -268,23 +258,14 @@ const BlogManager = () => {
             </div>
 
             <div>
-              <Label className="text-white/70">Featured Image URL</Label>
-              <ImageDimensionGuide width={1200} height={630} description="Social share optimized (OG image)" />
-              <Input
+              <MediaPicker
+                label="Featured Image"
                 value={form.featured_image}
-                onChange={(e) => setForm(prev => ({ ...prev, featured_image: e.target.value }))}
-                className="input-dark mt-1"
-                placeholder="https://..."
-                data-testid="post-image-input"
+                onChange={(url) => setForm(prev => ({ ...prev, featured_image: url }))}
+                width={1200}
+                height={630}
+                description="Social share optimized (OG image)"
               />
-              {form.featured_image && (
-                <div className="mt-4 relative">
-                  <img src={form.featured_image} alt="Featured preview" className="w-full h-40 object-cover rounded-lg" />
-                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    1200 × 630px recommended
-                  </span>
-                </div>
-              )}
             </div>
 
             <div className="border-t border-white/10 pt-6">
