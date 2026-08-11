@@ -577,7 +577,7 @@ const SettingsManager = () => {
             <Alert className="bg-[#2A2A2A] border-white/10">
               <Info size={16} className="text-red-500" />
               <AlertDescription className="text-white/70">
-                <strong>Tip:</strong> Use PNG format with transparent background for best results. After uploading, click "Save Changes" to apply.
+                <strong>Tip:</strong> Use PNG format with transparent background for best results. After uploading, click &quot;Save Changes&quot; to apply.
               </AlertDescription>
             </Alert>
           </div>
@@ -603,29 +603,27 @@ const SettingsManager = () => {
                 data-testid="setting-hero-subtitle"
               />
             </div>
-            <div>
-              <Label className="text-white/70">Hero Background Image</Label>
-              <ImageGuide 
-                label="Hero Background" 
-                width="1920" 
-                height="1080" 
-                description="Full-width background. Use high-quality restaurant interior or signature dish photo."
+            
+            {/* Hero Background Image */}
+            <ImageUploader
+              label="Hero Background Image"
+              value={settings.hero_image}
+              onChange={(val) => updateSettings("hero_image", val)}
+              width={1920}
+              height={1080}
+              description="Full-width background. Use high-quality restaurant interior or signature dish photo."
+            />
+            
+            {/* Mascot/Character Image */}
+            <div className="border-t border-white/10 pt-6">
+              <ImageUploader
+                label="Mascot/Character Image (Hero Section)"
+                value={settings.mascot_image}
+                onChange={(val) => updateSettings("mascot_image", val)}
+                width={400}
+                height={500}
+                description="Your mascot or character image that appears in the hero section. If not set, a default silhouette will be shown."
               />
-              <Input
-                value={settings.hero_image || ""}
-                onChange={(e) => updateSettings("hero_image", e.target.value)}
-                className="input-dark mt-2"
-                placeholder="https://..."
-                data-testid="setting-hero-image"
-              />
-              {settings.hero_image && (
-                <div className="mt-4 relative">
-                  <img src={settings.hero_image} alt="Hero preview" className="w-full h-48 object-cover rounded-lg" />
-                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    1920 x 1080px recommended
-                  </span>
-                </div>
-              )}
             </div>
             
             {/* Homepage Video Section */}
@@ -746,30 +744,16 @@ const SettingsManager = () => {
                 data-testid="setting-chef-name"
               />
             </div>
-            <div>
-              <Label className="text-white/70">Chef Image</Label>
-              <ImageGuide 
-                label="Chef/Team Photo" 
-                width="800" 
-                height="1000" 
-                description="Portrait orientation. Show chef cooking or team in kitchen."
-              />
-              <Input
-                value={settings.chef_image || ""}
-                onChange={(e) => updateSettings("chef_image", e.target.value)}
-                className="input-dark mt-2"
-                placeholder="https://..."
-                data-testid="setting-chef-image"
-              />
-              {settings.chef_image && (
-                <div className="mt-4 relative w-48">
-                  <img src={settings.chef_image} alt="Chef preview" className="w-full h-60 object-cover rounded-lg" />
-                  <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    800 x 1000px
-                  </span>
-                </div>
-              )}
-            </div>
+            
+            {/* Chef Image */}
+            <ImageUploader
+              label="Chef/Owner Photo"
+              value={settings.chef_image}
+              onChange={(val) => updateSettings("chef_image", val)}
+              width={800}
+              height={1000}
+              description="Portrait orientation photo. Shows chef cooking or owner at the restaurant."
+            />
           </div>
         </TabsContent>
 
@@ -806,32 +790,33 @@ const SettingsManager = () => {
             </div>
 
             <div className="mt-8 p-4 bg-[#2A2A2A] rounded-lg">
-              <h4 className="text-white font-medium mb-3">Quick Image URLs</h4>
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-white/60 text-sm">Hero Image</Label>
-                  <div className="flex gap-2 mt-1">
-                    <Input
-                      value={settings.hero_image || ""}
-                      onChange={(e) => updateSettings("hero_image", e.target.value)}
-                      className="input-dark flex-1"
-                      placeholder="https://..."
-                    />
-                    <Button onClick={handleSave} size="sm" className="btn-primary">Update</Button>
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white/60 text-sm">Chef Image</Label>
-                  <div className="flex gap-2 mt-1">
-                    <Input
-                      value={settings.chef_image || ""}
-                      onChange={(e) => updateSettings("chef_image", e.target.value)}
-                      className="input-dark flex-1"
-                      placeholder="https://..."
-                    />
-                    <Button onClick={handleSave} size="sm" className="btn-primary">Update</Button>
-                  </div>
-                </div>
+              <h4 className="text-white font-medium mb-3">Quick Image Upload</h4>
+              <p className="text-white/50 text-sm mb-4">Upload images directly or paste URLs. Changes are saved when you click &quot;Save Changes&quot; at the top.</p>
+              <div className="space-y-6">
+                <ImageUploader
+                  label="Hero Background Image"
+                  value={settings.hero_image}
+                  onChange={(val) => updateSettings("hero_image", val)}
+                  width={1920}
+                  height={1080}
+                  description="Main hero section background"
+                />
+                <ImageUploader
+                  label="Chef/Owner Photo"
+                  value={settings.chef_image}
+                  onChange={(val) => updateSettings("chef_image", val)}
+                  width={800}
+                  height={1000}
+                  description="Shows in the About section"
+                />
+                <ImageUploader
+                  label="Mascot/Character Image"
+                  value={settings.mascot_image}
+                  onChange={(val) => updateSettings("mascot_image", val)}
+                  width={400}
+                  height={500}
+                  description="Character image in hero section"
+                />
               </div>
             </div>
           </div>
@@ -1027,7 +1012,7 @@ const SettingsManager = () => {
                   Notifications are sent from: <span className="text-red-400">{settings.email || "noreply@nicnackables.com"}</span>
                 </p>
                 <p className="text-white/50 text-xs mt-2">
-                  To change the sender email, update the "Email" field in the Contact tab.
+                  To change the sender email, update the &quot;Email&quot; field in the Contact tab.
                 </p>
               </div>
             </div>
@@ -1611,7 +1596,7 @@ const SettingsManager = () => {
                   SendGrid Dashboard → Settings → API Keys
                 </a>
                 <br />
-                <span className="text-blue-300/70 text-xs">Make sure to give the key "Full Access" or at least "Mail Send" permissions</span>
+                <span className="text-blue-300/70 text-xs">Make sure to give the key &quot;Full Access&quot; or at least &quot;Mail Send&quot; permissions</span>
               </AlertDescription>
             </Alert>
 

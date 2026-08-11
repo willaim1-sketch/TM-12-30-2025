@@ -1,0 +1,44 @@
+{
+  "summary": "Verified admin SettingsManager ImageUploader integration for hero_image, mascot_image, and chef_image via static code review and public endpoint testing. Full interactive admin UI testing is blocked by Google OAuth (no automatable credentials). Backend /api/upload and /api/settings endpoints work correctly. LandingPage.jsx correctly consumes settings.hero_image, settings.mascot_image (with SVG fallback), and settings.chef_image.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET /api/settings returns hero_image, chef_image, mascot_image fields",
+    "POST /api/upload with an image returns {url: '/api/uploads/<hash>.png'} (HTTP 200)",
+    "SettingsManager.jsx Hero tab (lines 586-661) contains ImageUploader for hero_image (line 608) and mascot_image (line 619)",
+    "SettingsManager.jsx About tab (lines 718-758) contains ImageUploader for chef_image (line 749)",
+    "SettingsManager.jsx Images tab Quick Image Upload section (lines 792-821) contains 3 ImageUploader components for hero_image, chef_image, mascot_image",
+    "ImageUploader component (lines 30-121) supports both file upload (POST /api/upload with withCredentials) and pasting image URLs; shows preview, Upload button, Remove button, and URL input",
+    "LandingPage.jsx correctly reads settings.hero_image (line 132), settings.mascot_image (line 168-176 with SVG fallback) and settings.chef_image (line 361)",
+    "Public landing page renders correctly with fallback images when settings values are empty/null",
+    "Admin login page loads and requires Google OAuth (no accessible bypass)"
+  ],
+  "not_tested_due_to_oauth": [
+    "End-to-end file upload from Admin UI -> preview update -> Save Changes -> visible on landing page (requires authenticated admin session)",
+    "Save Changes button actually persists mascot_image via PATCH/PUT to /api/settings"
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "Main agent can self-verify by logging in as admin and performing an upload+save round trip on mascot_image, hero_image, chef_image in Hero/About/Images tabs to confirm the uploaded URL is persisted and reflected on the landing page.",
+    "Consider making the returned upload URL absolute (using REACT_APP_BACKEND_URL) or documenting reliance on same-origin /api ingress. Currently backend returns '/api/uploads/<hash>.png' which resolves correctly via ingress but could break if frontend and backend are ever on different origins."
+  ],
+  "critical_code_review_comments": [
+    "ImageUploader error handling silently logs; consider surfacing error.response?.data?.detail in toast for easier debugging (line 55-57 of SettingsManager.jsx).",
+    "SettingsManager.jsx is 1693 lines - exceeds 700 line guideline. Consider splitting into per-tab subcomponents for maintainability.",
+    "hero_image, chef_image, mascot_image all appear duplicated in both dedicated tabs (Hero/About) and the Images 'Quick Image Upload' section, which is fine but could confuse admins - both share state so edits sync correctly."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (upload + settings endpoints)", "frontend": "code-review verified; interactive admin flows not runnable without OAuth"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Google OAuth blocks automated admin login. Static code + public API verification confirms ImageUploader components are wired correctly for mascot_image, hero_image, chef_image in SettingsManager.jsx (Hero tab, About tab, Images tab). LandingPage.jsx consumes them correctly. To test upload-save-display end-to-end, either bypass auth in a test mode or perform manual verification.",
+  "rca of the issue": "Original bug (admin image changes not showing on frontend) was caused by mascot_image having no ImageUploader/Input in admin UI, and hero_image/chef_image being plain Input fields (URL-only, no upload button). Fix adds ImageUploader components to all three fields in Hero tab (hero_image, mascot_image), About tab (chef_image), and Images tab (all three). Code review confirms the fix is applied correctly."
+}

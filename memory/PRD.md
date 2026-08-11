@@ -10,6 +10,10 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - YouTube video section on homepage
 - Visitor tracking system for SEO performance monitoring
 
+## Recent Changes (December 2025)
+- **Rebranding**: Changed from "The Tamale Man" to "Nic Nackables BBQ & More" across all code
+- **Image Upload Fix**: Added ImageUploader components for mascot_image, hero_image, and chef_image in admin settings
+
 ## User Personas
 1. **Restaurant Owner/Admin**: Manages menu, orders, content, and settings via admin panel
 2. **Customers**: Browse menu, place orders, make payments
