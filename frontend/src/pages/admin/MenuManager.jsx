@@ -92,7 +92,7 @@ const MenuManager = () => {
 
   const handleSaveItem = async () => {
     if (!itemForm.name || !itemForm.price || !itemForm.category_id) {
-      toast.error("Please fill in all required fields");
+      toast.error("Please fill in all required fields (name, price, category)");
       return;
     }
 
@@ -114,7 +114,15 @@ const MenuManager = () => {
       resetItemForm();
       fetchData();
     } catch (error) {
-      toast.error("Failed to save item");
+      console.error("Save item error:", error.response?.data || error);
+      const detail = error.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        toast.error(detail.map(e => e.msg).join(", "));
+      } else if (typeof detail === "string") {
+        toast.error(detail);
+      } else {
+        toast.error("Failed to save item");
+      }
     }
   };
 

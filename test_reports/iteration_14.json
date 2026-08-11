@@ -1,0 +1,45 @@
+{
+  "summary": "Verified the MongoDB _id serialization fix on admin menu item / category creation. Backend pytest (5/5) confirms POST /api/admin/menu/items and /api/admin/menu/categories return clean JSON without _id and data is persisted, updatable, and deletable. Unauthenticated create is blocked (401). Frontend E2E via Playwright: admin login OK; navigated to Menu Manager; opened Add Item dialog; filled Name/Price/Category/Description; clicked Save Item -> POST returned 200 with no _id, 'Item created' toast displayed, new item appeared in the list; Edit dialog opens successfully for existing items. Delete verified via API cleanup. MediaPicker (Choose from Library + Upload + Generate Image with AI) is integrated in the Add Item dialog.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Add Menu Item dialog", "issues": ["Radix a11y warning still present: 'Missing Description or aria-describedby for DialogContent'. Non-blocking but should be fixed by adding <DialogDescription> or aria-describedby to MenuManager Add/Edit dialog and MediaPicker dialog."]},
+      {"screen": "Add Menu Item dialog (first-open state)", "issues": ["When opening the Add Item dialog freshly after page load, the Name and Price fields sometimes pre-populate with values from the first menu item (e.g. 'Pork Carnitas Tamale' / 4.99) instead of being empty. Form state is not reset when switching from edit -> add or on initial open. This is confusing UX but does not block creation (fields are overwritable). Reset form state to defaults when opening Add Item."]}
+    ]
+  },
+  "passed_tests": [
+    "pytest backend/tests/test_menu_admin.py: 5/5 passed (login, list categories, create category no _id, create+update+delete item no _id + persistence, unauth blocked)",
+    "Admin login via UI (email/password) succeeds and sets cookies",
+    "Navigate to /admin/menu -> Menu Manager renders with Add Item / Add Category buttons",
+    "Add Item dialog opens with Name, Price, Category select, Description, MediaPicker (Choose from Library, Upload, Generate Image with AI), and Save Item",
+    "Fill form + select category + click Save Item -> POST /api/admin/menu/items 200",
+    "Response body contains item_id, name, price, category_id and does NOT contain _id",
+    "Success toast 'Item created' rendered after save",
+    "New item appears in the menu list without page reload",
+    "Edit button on an existing item opens the edit dialog"
+  ],
+  "failed_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_menu_admin.py",
+    "/app/test_reports/pytest/menu_admin_results.xml"
+  ],
+  "action_items": [
+    "Optional: reset MenuManager item form state (name/price/description/category/image) whenever opening the Add Item dialog fresh - currently reuses last state which shows stale data on first open.",
+    "Optional a11y: add <DialogDescription> (or aria-describedby) to the Add/Edit Menu Item dialog and MediaPicker dialog to silence Radix warning.",
+    "Consider applying the same _id-strip pattern to any remaining admin POST endpoints (merch, blog, testimonials, faq, page_seo) via a small helper to avoid future regressions."
+  ],
+  "critical_code_review_comments": [
+    "server.py:1454-1461 create_menu_item and 1430-1435 create_category correctly pop '_id' after insert_one. Pattern is fine but repetitive across many admin POST endpoints; recommend a helper like `def clean(doc): doc.pop('_id', None); return doc` to reduce risk of missing an endpoint.",
+    "MenuItemCreate does not validate price >= 0 or name non-empty beyond pydantic defaults; consider Field(gt=0) on price and Field(min_length=1) on name for defensive input validation.",
+    "server.py has grown well past 700 lines - consider splitting admin/menu, admin/media, auth into separate routers for maintainability."
+  ],
+  "updated_files": ["/app/backend/tests/test_menu_admin.py"],
+  "success_rate": {"backend": "100% (5/5)", "frontend": "100% (all target flows)"},
+  "test_credentials": "Admin: admin@nicnackables.com / NicNack2024! (verified working).",
+  "seed_data_creation": "Created TEST_UI_PW_Item via UI and TEST_CAT_pytest / TEST_ITEM_pytest via pytest; all cleaned up after test.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The _id serialization fix for admin menu item creation is fully verified end-to-end. Minor UX bug found: Add Item dialog opens with stale pre-populated values (looks like last edited item's data) on first open - not part of the reported bug fix but worth flagging. Radix DialogContent a11y warning still present."
+}

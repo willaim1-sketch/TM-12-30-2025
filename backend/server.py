@@ -1426,12 +1426,13 @@ async def logout(request: Request):
 # =============================================================================
 
 # Menu Management (Admin)
-@api_router.post("/admin/menu/categories", response_model=MenuCategory)
+@api_router.post("/admin/menu/categories")
 async def create_category(category: MenuCategoryCreate, user: User = Depends(require_admin)):
     cat = MenuCategory(**category.model_dump())
     cat_dict = cat.model_dump()
     await db.menu_categories.insert_one(cat_dict)
-    return cat
+    cat_dict.pop("_id", None)
+    return cat_dict
 
 @api_router.put("/admin/menu/categories/{category_id}")
 async def update_category(category_id: str, data: dict, user: User = Depends(require_admin)):
@@ -1448,14 +1449,16 @@ async def delete_category(category_id: str, user: User = Depends(require_admin))
     await db.menu_categories.delete_one({"category_id": category_id})
     return {"status": "deleted"}
 
-@api_router.post("/admin/menu/items", response_model=MenuItem)
+@api_router.post("/admin/menu/items")
 async def create_menu_item(item: MenuItemCreate, user: User = Depends(require_admin)):
     menu_item = MenuItem(**item.model_dump())
     item_dict = menu_item.model_dump()
     item_dict["created_at"] = item_dict["created_at"].isoformat()
     item_dict["updated_at"] = item_dict["updated_at"].isoformat()
     await db.menu_items.insert_one(item_dict)
-    return menu_item
+    # Remove _id from response (MongoDB adds it)
+    item_dict.pop("_id", None)
+    return item_dict
 
 @api_router.put("/admin/menu/items/{item_id}")
 async def update_menu_item(item_id: str, data: MenuItemUpdate, user: User = Depends(require_admin)):
@@ -1684,13 +1687,14 @@ async def update_site_settings(data: SiteSettingsUpdate, user: User = Depends(re
     return {"status": "updated"}
 
 # Testimonials (Admin)
-@api_router.post("/admin/testimonials", response_model=Testimonial)
+@api_router.post("/admin/testimonials")
 async def create_testimonial(testimonial: TestimonialCreate, user: User = Depends(require_admin)):
     test = Testimonial(**testimonial.model_dump())
     test_dict = test.model_dump()
     test_dict["created_at"] = test_dict["created_at"].isoformat()
     await db.testimonials.insert_one(test_dict)
-    return test
+    test_dict.pop("_id", None)
+    return test_dict
 
 @api_router.get("/admin/testimonials")
 async def get_all_testimonials(user: User = Depends(require_admin)):
@@ -1711,12 +1715,13 @@ async def delete_testimonial(testimonial_id: str, user: User = Depends(require_a
     return {"status": "deleted"}
 
 # FAQ (Admin)
-@api_router.post("/admin/faq", response_model=FAQItem)
+@api_router.post("/admin/faq")
 async def create_faq(faq: FAQItemCreate, user: User = Depends(require_admin)):
     faq_item = FAQItem(**faq.model_dump())
     faq_dict = faq_item.model_dump()
     await db.faq_items.insert_one(faq_dict)
-    return faq_item
+    faq_dict.pop("_id", None)
+    return faq_dict
 
 @api_router.get("/admin/faq")
 async def get_all_faq(user: User = Depends(require_admin)):
@@ -1737,14 +1742,15 @@ async def delete_faq(faq_id: str, user: User = Depends(require_admin)):
     return {"status": "deleted"}
 
 # Blog (Admin)
-@api_router.post("/admin/blog/posts", response_model=BlogPost)
+@api_router.post("/admin/blog/posts")
 async def create_blog_post(post: BlogPostCreate, user: User = Depends(require_admin)):
     blog_post = BlogPost(**post.model_dump(), author_id=user.user_id)
     post_dict = blog_post.model_dump()
     post_dict["created_at"] = post_dict["created_at"].isoformat()
     post_dict["updated_at"] = post_dict["updated_at"].isoformat()
     await db.blog_posts.insert_one(post_dict)
-    return blog_post
+    post_dict.pop("_id", None)
+    return post_dict
 
 @api_router.get("/admin/blog/posts")
 async def get_all_blog_posts(user: User = Depends(require_admin)):
@@ -1938,13 +1944,14 @@ async def get_all_merch_items(user: User = Depends(require_admin)):
     items = await db.merch_items.find({}, {"_id": 0}).to_list(100)
     return items
 
-@api_router.post("/admin/merch/items", response_model=MerchItem)
+@api_router.post("/admin/merch/items")
 async def create_merch_item(item: MerchItemCreate, user: User = Depends(require_admin)):
     merch_item = MerchItem(**item.model_dump())
     item_dict = merch_item.model_dump()
     item_dict["created_at"] = item_dict["created_at"].isoformat()
     await db.merch_items.insert_one(item_dict)
-    return merch_item
+    item_dict.pop("_id", None)
+    return item_dict
 
 @api_router.put("/admin/merch/items/{item_id}")
 async def update_merch_item(item_id: str, data: dict, user: User = Depends(require_admin)):
