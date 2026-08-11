@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy, Check, Square, CheckSquare } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Minus, CreditCard, CheckCircle, Copy, Check, Square, CheckSquare, LogIn, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
+import { useAuth } from "../App";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -64,6 +65,7 @@ const getPaymentUrl = (type, info) => {
 const OrderPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -79,6 +81,18 @@ const OrderPage = () => {
     pickup_time: "",
     comments: ""
   });
+
+  // Pre-fill form with user data when authenticated
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        customer_name: user.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : (user.name || prev.customer_name),
+        customer_email: user.email || prev.customer_email,
+        customer_phone: user.phone || prev.customer_phone
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     // Load cart from localStorage
@@ -277,10 +291,55 @@ const OrderPage = () => {
             <span>Back to Menu</span>
           </Link>
           <h1 className="text-xl font-display font-bold text-white">Checkout</h1>
-          <div className="w-24"></div>
+          {isAuthenticated ? (
+            <Link to="/account" className="text-white/60 hover:text-white text-sm">
+              Hi, {user?.first_name || user?.name || 'there'}
+            </Link>
+          ) : (
+            <div className="w-24"></div>
+          )}
         </div>
       </header>
 
+      {/* Login Required Banner */}
+      {!authLoading && !isAuthenticated && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-600/20 border-b border-red-600/30"
+        >
+          <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <LogIn className="text-red-400" size={24} />
+              <div>
+                <p className="text-white font-medium">Sign in to place your order</p>
+                <p className="text-white/60 text-sm">Create an account to track orders and get exclusive deals</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Link to="/login" state={{ redirectTo: "/order" }}>
+                <Button className="btn-primary" data-testid="login-to-order-btn">
+                  <LogIn size={18} className="mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register" state={{ redirectTo: "/order" }}>
+                <Button variant="outline" className="btn-secondary">
+                  Create Account
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {authLoading && (
+        <div className="max-w-6xl mx-auto px-6 py-12 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
+        </div>
+      )}
+
+      {!authLoading && isAuthenticated && (
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="grid lg:grid-cols-3 gap-12">
           {/* Order Form */}
@@ -736,6 +795,7 @@ const OrderPage = () => {
           </DialogContent>
         </Dialog>
       </div>
+      )}
     </div>
   );
 };

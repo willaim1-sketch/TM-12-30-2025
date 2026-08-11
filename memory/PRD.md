@@ -21,6 +21,14 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
   - Reset password with token
   - Brute force protection (5 attempts = 15 min lockout)
   - Admin user auto-seeded on startup
+- **Customer Registration System**: Separate customer auth flow for website users
+  - Customer registration at /register with first name, last name, email, phone, newsletter subscription
+  - Customer login at /login
+  - Account page at /account for profile management
+  - Order page requires login - shows login banner when not authenticated
+  - User menu in navbar with account link and logout
+  - Newsletter subscriber management in admin panel
+  - Google OAuth works for both customers and admins
 
 ## User Personas
 1. **Restaurant Owner/Admin**: Manages menu, orders, content, and settings via admin panel

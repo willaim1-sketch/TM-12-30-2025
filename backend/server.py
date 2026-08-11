@@ -470,12 +470,31 @@ class FAQItemCreate(BaseModel):
 class User(BaseModel):
     user_id: str
     email: str
-    name: str
+    first_name: Optional[str] = ""
+    last_name: Optional[str] = ""
+    name: Optional[str] = ""  # Legacy field for backward compatibility
+    phone: Optional[str] = None
     picture: Optional[str] = None
+    role: str = "customer"  # customer, admin
     is_admin: bool = False
+    newsletter_subscribed: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    @property
+    def full_name(self) -> str:
+        if self.first_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        return self.name or ""
 
 # Auth Request/Response Models
+class CustomerRegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    first_name: str
+    last_name: str
+    phone: Optional[str] = None
+    newsletter_subscribed: bool = True
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
@@ -997,7 +1016,64 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks):
 # AUTH ROUTES
 # =============================================================================
 
-# Email/Password Registration
+# Customer Registration (for website users who want to order)
+@api_router.post("/auth/customer/register")
+async def customer_register(data: CustomerRegisterRequest, request: Request):
+    """Register a new customer account"""
+    email = data.email.lower().strip()
+    
+    # Check if email already exists
+    existing = await db.users.find_one({"email": email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered. Please login instead.")
+    
+    # Validate password
+    if len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Create customer
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    hashed = hash_password(data.password)
+    
+    new_user = {
+        "user_id": user_id,
+        "email": email,
+        "first_name": data.first_name.strip(),
+        "last_name": data.last_name.strip(),
+        "phone": data.phone.strip() if data.phone else None,
+        "password_hash": hashed,
+        "role": "customer",
+        "is_admin": False,
+        "newsletter_subscribed": data.newsletter_subscribed,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(new_user)
+    
+    # Create tokens
+    access_token = create_access_token(user_id, email)
+    refresh_token = create_refresh_token(user_id)
+    
+    # Prepare response
+    user_response = {
+        "user_id": user_id,
+        "email": email,
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "name": f"{data.first_name} {data.last_name}",
+        "phone": data.phone,
+        "role": "customer",
+        "is_admin": False,
+        "newsletter_subscribed": data.newsletter_subscribed
+    }
+    
+    response = JSONResponse(content=user_response)
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=3600, path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
+    
+    logger.info(f"New customer registered: {email}")
+    return response
+
+# Admin Registration (legacy, keeps first user as admin)
 @api_router.post("/auth/register")
 async def register(data: RegisterRequest, request: Request):
     """Register a new user with email and password"""
@@ -1085,13 +1161,23 @@ async def login(data: LoginRequest, request: Request):
     access_token = create_access_token(user["user_id"], email)
     refresh_token = create_refresh_token(user["user_id"])
     
+    # Build name from first_name/last_name or fall back to name field
+    name = user.get("name", "")
+    if user.get("first_name"):
+        name = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+    
     # Prepare response (exclude password_hash)
     user_response = {
         "user_id": user["user_id"],
         "email": user["email"],
-        "name": user.get("name", ""),
+        "first_name": user.get("first_name", ""),
+        "last_name": user.get("last_name", ""),
+        "name": name,
+        "phone": user.get("phone"),
         "picture": user.get("picture"),
-        "is_admin": user.get("is_admin", False)
+        "role": user.get("role", "customer"),
+        "is_admin": user.get("is_admin", False),
+        "newsletter_subscribed": user.get("newsletter_subscribed", True)
     }
     
     response = JSONResponse(content=user_response)
@@ -1271,7 +1357,56 @@ async def get_current_user_info(request: Request):
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    return user.model_dump()
+    
+    # Return user data with computed name
+    user_dict = user.model_dump()
+    if user.first_name:
+        user_dict["name"] = f"{user.first_name} {user.last_name}".strip()
+    return user_dict
+
+# Update Customer Profile
+class UpdateProfileRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: Optional[str] = None
+    newsletter_subscribed: Optional[bool] = None
+
+@api_router.put("/auth/profile")
+async def update_profile(data: UpdateProfileRequest, request: Request):
+    """Update customer profile information"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    update_data = {}
+    if data.first_name is not None:
+        update_data["first_name"] = data.first_name.strip()
+    if data.last_name is not None:
+        update_data["last_name"] = data.last_name.strip()
+    if data.phone is not None:
+        update_data["phone"] = data.phone.strip() if data.phone else None
+    if data.newsletter_subscribed is not None:
+        update_data["newsletter_subscribed"] = data.newsletter_subscribed
+    
+    if update_data:
+        await db.users.update_one(
+            {"user_id": user.user_id},
+            {"$set": update_data}
+        )
+    
+    # Return updated user
+    updated_user = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password_hash": 0})
+    return updated_user
+
+# Get newsletter subscribers (admin only)
+@api_router.get("/admin/newsletter-subscribers")
+async def get_newsletter_subscribers(request: Request, user: User = Depends(require_admin)):
+    """Get list of users subscribed to newsletter"""
+    subscribers = await db.users.find(
+        {"newsletter_subscribed": True},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(length=None)
+    return {"subscribers": subscribers, "count": len(subscribers)}
 
 @api_router.post("/auth/logout")
 async def logout(request: Request):
@@ -2432,21 +2567,41 @@ async def startup_event():
         admin_user = {
             "user_id": f"user_{uuid.uuid4().hex[:12]}",
             "email": admin_email,
+            "first_name": "Admin",
+            "last_name": "",
             "name": "Admin",
+            "role": "admin",
             "password_hash": hashed,
             "is_admin": True,
+            "newsletter_subscribed": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(admin_user)
         logger.info(f"Admin user created: {admin_email}")
-    elif not verify_password(admin_password, existing.get("password_hash", "")):
-        # Update password if changed in .env
-        if existing.get("password_hash"):  # Only update if has password (not OAuth only)
-            await db.users.update_one(
-                {"email": admin_email},
-                {"$set": {"password_hash": hash_password(admin_password)}}
-            )
-            logger.info(f"Admin password updated for: {admin_email}")
+    else:
+        # Migrate existing admin to have first_name/last_name if missing
+        update_fields = {}
+        if not existing.get("first_name"):
+            # Split the legacy 'name' field
+            name = existing.get("name", "Admin")
+            name_parts = name.split(" ", 1)
+            update_fields["first_name"] = name_parts[0]
+            update_fields["last_name"] = name_parts[1] if len(name_parts) > 1 else ""
+        if not existing.get("role"):
+            update_fields["role"] = "admin"
+        
+        if update_fields:
+            await db.users.update_one({"email": admin_email}, {"$set": update_fields})
+            logger.info(f"Admin user migrated with new fields: {admin_email}")
+        
+        # Update password if changed
+        if not verify_password(admin_password, existing.get("password_hash", "")):
+            if existing.get("password_hash"):
+                await db.users.update_one(
+                    {"email": admin_email},
+                    {"$set": {"password_hash": hash_password(admin_password)}}
+                )
+                logger.info(f"Admin password updated for: {admin_email}")
     
     # Write test credentials
     credentials_path = Path("/app/memory/test_credentials.md")

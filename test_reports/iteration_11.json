@@ -1,0 +1,66 @@
+{
+  "summary": "Tested customer registration/auth system end-to-end. Backend: 7/8 pytest passing (customer register creates user with role=customer & is_admin=false; duplicate email 400; short password 400; customer can login; PUT /auth/profile updates first_name/last_name/phone/newsletter and persists via GET /me; profile update without auth returns 401; non-admin cannot list newsletter subscribers). Frontend: /register and /login routes render CustomerAuth form, register form has first_name/last_name/phone/email/password/newsletter checkbox with data-testid attributes, register submit creates account and sets cookies, /account page shows profile info with editable fields (verified Alice/Wonder/phone/newsletter), navbar shows user first name (Bob) and dropdown correctly displays 'My Account' and 'Sign Out'. CRITICAL REGRESSION FOUND: seeded admin document has legacy 'name' field but User pydantic model now requires first_name/last_name -> /api/auth/me returns 500 for admin, which breaks admin dashboard, require_admin, and /api/admin/newsletter-subscribers.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "/api/auth/me and any endpoint using require_admin (e.g. /api/admin/newsletter-subscribers)",
+        "issue": "500 Internal Server Error for the seeded admin (admin@nicnackables.com). User pydantic model requires first_name & last_name, but seed_admin writes only 'name'. get_current_user does `User(**user)` and raises ValidationError. Repro: POST /api/auth/login as admin -> 200; GET /api/auth/me -> 500. Log: `pydantic_core._pydantic_core.ValidationError: 2 validation errors for User first_name/last_name Field required`.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "CustomerAuth.jsx",
+        "issue": "/register route defaults to 'Welcome Back' Sign-In mode instead of Sign-Up. `useLocation` is imported but never used to initialize `isLogin` based on pathname. Users must click 'Sign Up' toggle to reach the register form. Requirement states /register should load the registration page.",
+        "selector": "[data-testid=\"toggle-auth-mode\"]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "POST /api/auth/customer/register -> 200, returns role=customer/is_admin=false, sets httpOnly access_token+refresh_token cookies",
+    "POST /api/auth/customer/register duplicate email -> 400",
+    "POST /api/auth/customer/register password<6 -> 400",
+    "POST /api/auth/login with customer credentials -> 200, is_admin=false",
+    "PUT /api/auth/profile updates first_name/last_name/phone/newsletter_subscribed and persists (verified via /api/auth/me)",
+    "PUT /api/auth/profile without cookies -> 401",
+    "GET /api/admin/newsletter-subscribers as customer -> 401/403",
+    "UI /register -> Sign Up toggle -> submit form -> new customer created, cookies stored, redirected to home",
+    "UI /account shows first_name, last_name, email (readonly), phone, newsletter checkbox with Save Changes",
+    "UI navbar shows customer's first name and user dropdown contains 'My Account' + 'Sign Out'",
+    "UI /login route renders CustomerAuth email+password form"
+  ],
+  "failed_tests": [
+    "GET /api/admin/newsletter-subscribers as admin -> 500 (blocked by admin /auth/me 500 regression)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_customer_auth.py",
+    "/app/test_reports/pytest/customer_auth_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Fix the User model / admin seed mismatch. Either (a) make first_name/last_name Optional with default '' on User pydantic model and derive them from 'name' when missing in get_current_user, or (b) migrate seed_admin (and any existing admin doc) to write first_name/last_name (split from 'name'). Without this, admin dashboard and /api/admin/newsletter-subscribers are broken.",
+    "MEDIUM: In CustomerAuth.jsx, initialize `isLogin` from `useLocation().pathname` so /register defaults to Sign-Up mode and /login to Sign-In mode (currently useLocation is imported but unused).",
+    "Optional: verify /order 'login required' banner path. During testing the empty-cart state ('Your cart is empty') was shown first regardless of auth, so the banner could not be reproduced without items in cart. Consider showing the login-required banner as the primary gate before cart-empty state, or verifying the intended UX."
+  ],
+  "critical_code_review_comments": [
+    "server.py User model: made first_name & last_name REQUIRED (lines 473-474) after existing admin docs already exist with only 'name' -> immediate production-breaking regression for anyone with pre-existing user docs. Need a backfill/migration or make them Optional.",
+    "get_current_user does `return User(**user)` without try/except -> a single malformed doc in DB causes 500 across all authenticated endpoints. Wrap in try/except and log offending user_id.",
+    "seed_admin was not updated to write first_name/last_name when the User schema was changed.",
+    "CustomerAuth.jsx: `useLocation` import present but not used. Register route (/register) does not surface the register form by default, contradicting the feature spec."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_customer_auth.py"
+  ],
+  "success_rate": {"backend": "87.5% (7/8 pytest); 4/5 spec endpoints working", "frontend": "~85% (register/login/account/navbar working; /register default mode wrong)"},
+  "test_credentials": "Admin: admin@nicnackables.com / NicNack2024! (login OK but /auth/me 500). Fresh customers registered during tests via /api/auth/customer/register.",
+  "seed_data_creation": "Several TEST_cust_*@example.com customer accounts created via /api/auth/customer/register during pytest and UI runs.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend test file /app/backend/tests/test_customer_auth.py covers customer register/login/profile/newsletter. The single failing test (admin can list subscribers) will pass once the User model / seed_admin regression is fixed. Do not use admin@nicnackables.com for anything requiring /auth/me until fixed. /register route bug: `isLogin` not derived from pathname in CustomerAuth.jsx.",
+  "rca_of_the_issue": "Root cause: User pydantic model was extended with required first_name & last_name (server.py:473-474), but the seed_admin routine (and any pre-existing admin document in Mongo) still stores only a legacy `name` field. In get_current_user (server.py:563-567) the raw Mongo document is unpacked directly into User(**user) with no fallback, so pydantic raises ValidationError -> FastAPI returns 500. Mitigation options: (1) make first_name/last_name Optional[str]=''  on User and split legacy 'name' in a helper before instantiating; (2) run a one-off migration in seed_admin: `if not doc.get('first_name'): split doc['name']` and $set first_name/last_name."
+}

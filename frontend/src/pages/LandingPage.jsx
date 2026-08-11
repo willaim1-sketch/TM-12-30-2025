@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { MapPin, Phone, Mail, Clock, Star, ChevronDown, Menu, X, Facebook, Instagram, Twitter, Youtube, Linkedin, ShoppingBag } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Star, ChevronDown, Menu, X, Facebook, Instagram, Twitter, Youtube, Linkedin, ShoppingBag, User, LogOut } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
 import PageRenderer from "../components/PageRenderer";
 import SEO from "../components/SEO";
+import { useAuth } from "../App";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -25,6 +26,8 @@ const staggerContainer = {
 const Navbar = ({ settings }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -72,7 +75,45 @@ const Navbar = ({ settings }) => {
           ))}
         </div>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-4">
+          {/* User Menu */}
+          {isAuthenticated ? (
+            <div className="relative">
+              <button 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+                data-testid="user-menu-btn"
+              >
+                <User size={20} />
+                <span className="text-sm">{user?.first_name || user?.name || 'Account'}</span>
+                <ChevronDown size={16} className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              </button>
+              {showUserMenu && (
+                <div className="absolute right-0 top-full mt-2 w-48 glass rounded-lg border border-white/10 py-2 z-50">
+                  <Link 
+                    to="/account" 
+                    className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <User size={16} />
+                    My Account
+                  </Link>
+                  <button 
+                    onClick={() => { logout(); setShowUserMenu(false); }}
+                    className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition-colors w-full text-left"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login" className="text-white/70 hover:text-white transition-colors text-sm" data-testid="nav-login-btn">
+              Sign In
+            </Link>
+          )}
+          
           <Link to="/order">
             <Button className="btn-primary" data-testid="nav-order-btn">Order Online</Button>
           </Link>
@@ -112,6 +153,31 @@ const Navbar = ({ settings }) => {
                 </Link>
               )
             ))}
+            
+            {/* Mobile User Options */}
+            <div className="border-t border-white/10 pt-4 mt-2">
+              {isAuthenticated ? (
+                <>
+                  <Link to="/account" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg">
+                    <User size={20} />
+                    My Account
+                  </Link>
+                  <button 
+                    onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                    className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg w-full"
+                  >
+                    <LogOut size={20} />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link to="/login" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg">
+                  <User size={20} />
+                  Sign In / Register
+                </Link>
+              )}
+            </div>
+            
             <Link to="/order">
               <Button className="btn-primary w-full mt-2" data-testid="mobile-order-btn">Order Online</Button>
             </Link>
