@@ -1,33 +1,55 @@
 # Test Credentials for Nic Nackables BBQ & More
 
-## Admin Account (Email/Password)
-- **Email**: admin@nicnackables.com
+## Admin Account (Exclusive)
+- **Email**: Mrterpenes@gmail.com
 - **Password**: NicNack2024!
-- **Role**: Admin
+- **Role**: Admin (only this account can be admin)
+- **Access**: /admin/login (link in footer)
+
+## Customer Test Accounts
+Customers register via /register or /login page. Sample test accounts created:
+- testuser1734032685@example.com / Test123!
+- newuser1734032685@example.com / Test123!
 
 ## Authentication Methods
 1. **Email/Password Login**: POST /api/auth/login
-2. **Google OAuth**: GET /api/auth/session (Emergent-managed)
+2. **Customer Registration**: POST /api/auth/customer/register
+3. **Google OAuth**: Emergent-managed (GET /api/auth/session)
 
 ## Auth Endpoints
-- POST /api/auth/register - Register new user
+- POST /api/auth/customer/register - Register new customer
 - POST /api/auth/login - Login with email/password
 - POST /api/auth/logout - Logout
 - GET /api/auth/me - Get current user
-- POST /api/auth/refresh - Refresh access token
 - POST /api/auth/forgot-password - Request password reset
 - POST /api/auth/reset-password - Reset password with token
 
+## Admin User Management Endpoints
+- GET /api/admin/users - List all users (admin only)
+- GET /api/admin/users/{user_id} - Get specific user
+- PUT /api/admin/users/{user_id} - Update user info
+- POST /api/admin/users/{user_id}/reset-password - Reset user password
+- DELETE /api/admin/users/{user_id} - Delete user account
+
 ## Testing Commands
 ```bash
-# Login
-curl -c cookies.txt -X POST http://localhost:8001/api/auth/login \
+# Admin Login
+curl -c cookies.txt -X POST https://tamale-man-preview.preview.emergentagent.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@nicnackables.com","password":"NicNack2024!"}'
+  -d '{"email":"Mrterpenes@gmail.com","password":"NicNack2024!"}'
 
 # Get current user
-curl -b cookies.txt http://localhost:8001/api/auth/me
+curl -b cookies.txt https://tamale-man-preview.preview.emergentagent.com/api/auth/me
+
+# List all users (admin only)
+curl -b cookies.txt https://tamale-man-preview.preview.emergentagent.com/api/admin/users
 ```
 
+## Important Notes
+- Only Mrterpenes@gmail.com can have admin privileges
+- Admin account is protected from deletion and password reset via admin panel
+- On startup, server demotes any other users from admin status
+- Customers are redirected to homepage after login (no account settings page)
+
 ---
-*Last Updated: 2026-08-11T17:51:07.560296+00:00*
+*Last Updated: December 2025*

@@ -26,7 +26,6 @@ const staggerContainer = {
 const Navbar = ({ settings }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
@@ -78,35 +77,16 @@ const Navbar = ({ settings }) => {
         <div className="hidden md:flex items-center gap-4">
           {/* User Menu */}
           {isAuthenticated ? (
-            <div className="relative">
+            <div className="flex items-center gap-3">
+              <span className="text-white/70 text-sm">Hi, {user?.first_name || user?.name || 'there'}</span>
               <button 
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-                data-testid="user-menu-btn"
+                onClick={logout}
+                className="flex items-center gap-1 text-white/70 hover:text-white transition-colors text-sm"
+                data-testid="nav-signout-btn"
               >
-                <User size={20} />
-                <span className="text-sm">{user?.first_name || user?.name || 'Account'}</span>
-                <ChevronDown size={16} className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                <LogOut size={16} />
+                Sign Out
               </button>
-              {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 glass rounded-lg border border-white/10 py-2 z-50">
-                  <Link 
-                    to="/account" 
-                    className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition-colors"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    <User size={16} />
-                    My Account
-                  </Link>
-                  <button 
-                    onClick={() => { logout(); setShowUserMenu(false); }}
-                    className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition-colors w-full text-left"
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
             <Link to="/login" className="text-white/70 hover:text-white transition-colors text-sm" data-testid="nav-login-btn">
@@ -157,19 +137,13 @@ const Navbar = ({ settings }) => {
             {/* Mobile User Options */}
             <div className="border-t border-white/10 pt-4 mt-2">
               {isAuthenticated ? (
-                <>
-                  <Link to="/account" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg">
-                    <User size={20} />
-                    My Account
-                  </Link>
-                  <button 
-                    onClick={() => { logout(); setIsMobileMenuOpen(false); }}
-                    className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg w-full"
-                  >
-                    <LogOut size={20} />
-                    Sign Out
-                  </button>
-                </>
+                <button 
+                  onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg w-full"
+                >
+                  <LogOut size={20} />
+                  Sign Out ({user?.first_name || 'User'})
+                </button>
               ) : (
                 <Link to="/login" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors py-2 text-lg">
                   <User size={20} />

@@ -8,12 +8,14 @@ import { Label } from "../components/ui/label";
 import { Checkbox } from "../components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowLeft } from "lucide-react";
+import { useAuth } from "../App";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
 const CustomerAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { checkAuth } = useAuth();
   const redirectTo = location.state?.redirectTo || "/";
   
   // Initialize isLogin based on the current path
@@ -72,6 +74,7 @@ const CustomerAuth = () => {
       );
       
       toast.success(`Welcome back, ${response.data.first_name || response.data.name}!`);
+      await checkAuth(); // Refresh auth state in context
       navigate(redirectTo);
     } catch (err) {
       const errorMsg = err.response?.data?.detail || "Login failed. Please try again.";
@@ -113,6 +116,7 @@ const CustomerAuth = () => {
       );
       
       toast.success(`Welcome, ${response.data.first_name}! Your account has been created.`);
+      await checkAuth(); // Refresh auth state in context
       navigate(redirectTo);
     } catch (err) {
       const errorMsg = err.response?.data?.detail || "Registration failed. Please try again.";

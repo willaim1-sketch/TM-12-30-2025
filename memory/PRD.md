@@ -10,58 +10,34 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - YouTube video section on homepage
 - Visitor tracking system for SEO performance monitoring
 
-## Recent Changes (December 2025)
-- **Rebranding**: Changed from "The Tamale Man" to "Nic Nackables BBQ & More" across all code
-- **Image Upload Fix**: Added ImageUploader components for mascot_image, hero_image, and chef_image in admin settings
-- **Media Manager Rewrite**: Complete rewrite with improved error handling, loading states, proper URL construction, and data-testid attributes for testing
-- **Email/Password Authentication**: Added JWT-based email/password login alongside existing Google OAuth
-  - Login with email & password
-  - User registration
-  - Forgot password flow
-  - Reset password with token
-  - Brute force protection (5 attempts = 15 min lockout)
-  - Admin user auto-seeded on startup
-- **Customer Registration System**: Separate customer auth flow for website users
-  - Customer registration at /register with first name, last name, email, phone, newsletter subscription
-  - Customer login at /login
-  - Account page at /account for profile management
-  - Order page requires login - shows login banner when not authenticated
-  - User menu in navbar with account link and logout
-  - Newsletter subscriber management in admin panel
-  - Google OAuth works for both customers and admins
-
 ## User Personas
-1. **Restaurant Owner/Admin**: Manages menu, orders, content, and settings via admin panel
-2. **Customers**: Browse menu, place orders, make payments
+1. **Restaurant Owner/Admin (Mrterpenes@gmail.com)**: Exclusive admin who manages menu, orders, content, settings, and users via admin panel
+2. **Customers**: Browse menu, register to place orders (tracked for order history), no settings access
+
+## Authentication Architecture
+- **Customers**: Register/login via email+password or Google OAuth. Redirected to homepage after auth. No account settings page - registration is purely for order tracking.
+- **Admin**: Only `Mrterpenes@gmail.com` can be admin. Login via `/admin/login` (footer link). Admin panel protected.
+- **Separation**: Customer navbar shows "Sign In" or "Hi, {name} | Sign Out". Admin login is hidden in footer.
 
 ## Core Architecture
 ```
 /app/
 ├── backend/
-│   ├── .env (Stripe LIVE key, MongoDB, etc.)
+│   ├── .env (ADMIN_EMAIL, ADMIN_PASSWORD, Stripe, MongoDB, etc.)
 │   ├── requirements.txt
-│   └── server.py (FastAPI - all routes)
+│   └── server.py (FastAPI - all routes ~2800 lines)
 ├── frontend/
-│   ├── package.json
 │   └── src/
-│       ├── App.js
-│       ├── components/ui/ (shadcn)
-│       └── pages/
-│           ├── LandingPage.jsx
-│           ├── MenuPage.jsx
-│           ├── OrderPage.jsx
-│           └── admin/
-│               ├── AdminDashboard.jsx
-│               ├── VisitorStats.jsx
-│               └── SettingsManager.jsx
+│       ├── App.js (AuthContext, ProtectedRoute)
+│       ├── pages/
+│       │   ├── LandingPage.jsx (Navbar with customer auth, Footer with admin link)
+│       │   ├── CustomerAuth.jsx (Registration/Login, redirects to homepage)
+│       │   ├── AccountPage.jsx (Redirects to homepage - no settings for customers)
+│       │   └── admin/
+│       │       ├── AdminDashboard.jsx
+│       │       ├── UserManager.jsx (NEW - admin user management)
+│       │       └── ... (MenuManager, MediaManager, etc.)
 ```
-
-## Tech Stack
-- **Frontend**: React, Tailwind CSS, Framer Motion, shadcn/ui
-- **Backend**: FastAPI (Python)
-- **Database**: MongoDB (Motor async driver)
-- **Payments**: Stripe Checkout Sessions (LIVE)
-- **Auth**: Emergent-managed Google OAuth
 
 ## Key Features Implemented
 
@@ -75,9 +51,11 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Order success page
 - [x] Blog section
 - [x] Merch store
+- [x] Customer registration/login (email+password or Google)
+- [x] Simplified auth flow - customers go to homepage after login (no account page)
 
 ### Admin Panel
-- [x] Google OAuth authentication
+- [x] Google OAuth + Email/Password authentication
 - [x] Menu management (categories, items, toppings)
 - [x] Order management
 - [x] Contact form submissions
@@ -87,8 +65,16 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] FAQ management
 - [x] SEO management per page
 - [x] Stripe/SendGrid settings
-- [x] Visitor analytics dashboard (NEW)
+- [x] Visitor analytics dashboard
 - [x] Page builder for custom sections
+- [x] **User Management** (NEW - view users, reset passwords, delete accounts)
+
+## Admin User Management (December 2025)
+- **Exclusive Admin**: Only `Mrterpenes@gmail.com` has `is_admin: true`
+- **Admin Protection**: Cannot delete or reset password for admin account
+- **Auto-demotion**: On startup, any other users with `is_admin: true` are demoted to customer
+- **Features**: View all users, search/filter, reset customer passwords, delete customer accounts
+- **UI**: `/admin/users` route in admin panel with UserManager component
 
 ## API Endpoints Summary
 - `/api/health` - Health check
@@ -97,49 +83,43 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - `/api/orders/*` - Order management
 - `/api/track-visit` - Visitor tracking (POST)
 - `/api/admin/visitor-stats` - Analytics dashboard (GET)
-- `/api/auth/*` - Authentication
+- `/api/auth/*` - Authentication (login, register, logout, me, etc.)
+- `/api/admin/users` - User management (GET, PUT, DELETE, POST reset-password)
 - `/api/webhook/stripe` - Stripe webhooks
 
 ## Known Issues
 
-### P0 - Critical
-- **Data Persistence**: User reported data loss on container restarts. 
-  - Investigation: Seed function is safe (checks before seeding)
-  - Root cause: Likely platform infrastructure (volume mounting)
-  - Status: Requires platform-level investigation
+### Resolved This Session
+- Admin User Management fully implemented and tested
+- Customer auth now properly updates navbar state after login/register
+- Removed "My Account" link - customers redirected to homepage
+- Admin login moved to footer only
 
-### P2 - Low Priority
-- **App.js Linting**: ESLint shows no issues currently - was resolved
-
-## Completed This Session (Dec 2025)
-1. Stripe LIVE key configuration verified (`cs_live_` prefix)
-2. Stripe LIVE/TEST status indicator in admin
-3. CashApp/Venmo/PayPal QR code flow fixed
-4. YouTube video embed added to homepage
-5. Image dimension guides across admin uploaders
-6. Visitor tracking API and dashboard implemented
-7. Stripe checkout redirect UI ("Redirecting to Stripe...")
+### P2 - Low Priority (Not Blocking)
+- Reset Password dialog doesn't show inline error for short passwords (backend validates correctly)
+- Minor a11y warnings on Radix dialogs (missing aria-describedby)
+- Data Persistence: Container restart data loss (infrastructure/volume mount issue, not code)
 
 ## Future Backlog
 
 ### P1 - High Priority
-- Refactor `SettingsManager.jsx` into smaller components
-- Add email notifications for manual payments
+- Verify SendGrid email integration for password resets/order notifications (currently logging to console)
+- Refactor `server.py` into modular routers (~2800 lines currently)
 
-### P2 - Medium Priority
+### P2 - Medium Priority  
 - Add-ons functionality improvements
-- Order status tracking for customers
+- Refactor `SettingsManager.jsx` into smaller components
 
 ### P3 - Nice to Have
 - Multi-language support
-- Customer accounts and order history
+- Order status tracking for customers
 - Inventory management
 
 ## Third-Party Integrations
 | Service | Status | Notes |
 |---------|--------|-------|
 | Stripe | LIVE | Live key configured |
-| SendGrid | Optional | For email notifications |
+| SendGrid | MOCKED | Logs to console, needs verification |
 | Google OAuth | Active | Emergent-managed |
 | YouTube | Active | Embed on homepage |
 

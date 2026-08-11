@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "../App";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -10,6 +11,7 @@ const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(null);
+  const { checkAuth } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -31,6 +33,9 @@ const AuthCallback = () => {
         if (response.data) {
           toast.success(`Welcome, ${response.data.first_name || response.data.name || 'there'}!`);
           
+          // Refresh auth state in context
+          await checkAuth();
+          
           // Check where to redirect
           const redirectTo = sessionStorage.getItem("authRedirect") || "/";
           sessionStorage.removeItem("authRedirect");
@@ -51,7 +56,7 @@ const AuthCallback = () => {
     };
 
     handleCallback();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, checkAuth]);
 
   if (error) {
     return (

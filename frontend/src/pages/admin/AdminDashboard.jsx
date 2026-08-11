@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { 
   LayoutDashboard, UtensilsCrossed, ShoppingCart, MessageSquare, 
   Settings, Image, FileText, HelpCircle, LogOut, Menu, X,
-  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp
+  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp, Users
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { AuthContext } from "../../App";
@@ -23,6 +23,7 @@ import TestimonialManager from "./TestimonialManager";
 import SEOManager from "./SEOManager";
 import PageBuilder from "./PageBuilder";
 import VisitorStats from "./VisitorStats";
+import UserManager from "./UserManager";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -39,6 +40,7 @@ const sidebarItems = [
   { path: "/admin/faq", icon: HelpCircle, label: "FAQ" },
   { path: "/admin/media", icon: Image, label: "Media" },
   { path: "/admin/seo", icon: Globe, label: "SEO" },
+  { path: "/admin/users", icon: Users, label: "Users" },
   { path: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -281,6 +283,7 @@ const AdminDashboard = () => {
             <Route path="/faq/*" element={<FAQManager />} />
             <Route path="/media/*" element={<MediaManager />} />
             <Route path="/seo/*" element={<SEOManager />} />
+            <Route path="/users/*" element={<UserManager />} />
             <Route path="/settings/*" element={<SettingsManager />} />
           </Routes>
         </div>

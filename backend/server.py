@@ -2245,6 +2245,151 @@ async def update_cashapp_settings(data: dict, user: User = Depends(require_admin
     )
     return {"status": "updated"}
 
+
+# ==================== Admin User Management ====================
+
+class UserUpdateRequest(BaseModel):
+    """Request model for updating user data"""
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: Optional[str] = None
+
+class PasswordResetByAdminRequest(BaseModel):
+    """Request model for admin-initiated password reset"""
+    new_password: str
+
+@api_router.get("/admin/users")
+async def get_all_users(current_user: User = Depends(get_current_user)):
+    """Get all registered users (admin only)"""
+    if not current_user or not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    users = await db.users.find(
+        {},
+        {"_id": 0, "password_hash": 0}  # Exclude sensitive data
+    ).to_list(1000)
+    
+    return users
+
+@api_router.get("/admin/users/{user_id}")
+async def get_user_by_id(user_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific user by ID (admin only)"""
+    if not current_user or not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = await db.users.find_one(
+        {"user_id": user_id},
+        {"_id": 0, "password_hash": 0}
+    )
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return user
+
+@api_router.put("/admin/users/{user_id}")
+async def update_user(
+    user_id: str, 
+    user_data: UserUpdateRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Update user details (admin only) - NOT for role changes"""
+    if not current_user or not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Don't allow modifying the main admin account's core info
+    admin_email = os.environ.get("ADMIN_EMAIL", "").lower()
+    if user.get("email", "").lower() == admin_email:
+        raise HTTPException(status_code=403, detail="Cannot modify the primary admin account")
+    
+    update_fields = {}
+    if user_data.first_name is not None:
+        update_fields["first_name"] = user_data.first_name
+    if user_data.last_name is not None:
+        update_fields["last_name"] = user_data.last_name
+    if user_data.phone is not None:
+        update_fields["phone"] = user_data.phone
+    
+    if update_fields:
+        # Update name field for backward compatibility
+        if "first_name" in update_fields or "last_name" in update_fields:
+            fn = update_fields.get("first_name", user.get("first_name", ""))
+            ln = update_fields.get("last_name", user.get("last_name", ""))
+            update_fields["name"] = f"{fn} {ln}".strip()
+        
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$set": update_fields}
+        )
+    
+    updated_user = await db.users.find_one(
+        {"user_id": user_id},
+        {"_id": 0, "password_hash": 0}
+    )
+    return updated_user
+
+@api_router.post("/admin/users/{user_id}/reset-password")
+async def admin_reset_user_password(
+    user_id: str,
+    password_data: PasswordResetByAdminRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Reset a user's password (admin only)"""
+    if not current_user or not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Don't allow resetting the main admin's password through this endpoint
+    admin_email = os.environ.get("ADMIN_EMAIL", "").lower()
+    if user.get("email", "").lower() == admin_email:
+        raise HTTPException(
+            status_code=403, 
+            detail="Cannot reset primary admin password. Use environment variables."
+        )
+    
+    # Validate password
+    if len(password_data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Hash and update password
+    hashed = hash_password(password_data.new_password)
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"password_hash": hashed}}
+    )
+    
+    logger.info(f"Admin reset password for user: {user.get('email')}")
+    return {"status": "success", "message": "Password reset successfully"}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
+    """Delete a user account (admin only)"""
+    if not current_user or not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Prevent deleting the main admin account
+    admin_email = os.environ.get("ADMIN_EMAIL", "").lower()
+    if user.get("email", "").lower() == admin_email:
+        raise HTTPException(status_code=403, detail="Cannot delete the primary admin account")
+    
+    # Delete user
+    await db.users.delete_one({"user_id": user_id})
+    
+    logger.info(f"Admin deleted user: {user.get('email')}")
+    return {"status": "success", "message": "User deleted successfully"}
+
+
 # Get all enabled payment methods (public)
 @api_router.get("/payment-methods")
 async def get_payment_methods():
@@ -2569,6 +2714,12 @@ async def startup_event():
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
     
+    # First, demote any other admins (only ADMIN_EMAIL should be admin)
+    await db.users.update_many(
+        {"email": {"$ne": admin_email}, "is_admin": True},
+        {"$set": {"is_admin": False, "role": "customer"}}
+    )
+    
     existing = await db.users.find_one({"email": admin_email})
     if existing is None:
         # Create admin user
@@ -2588,29 +2739,24 @@ async def startup_event():
         await db.users.insert_one(admin_user)
         logger.info(f"Admin user created: {admin_email}")
     else:
-        # Migrate existing admin to have first_name/last_name if missing
-        update_fields = {}
+        # Ensure admin has correct privileges
+        update_fields = {"is_admin": True, "role": "admin"}
         if not existing.get("first_name"):
-            # Split the legacy 'name' field
             name = existing.get("name", "Admin")
             name_parts = name.split(" ", 1)
             update_fields["first_name"] = name_parts[0]
             update_fields["last_name"] = name_parts[1] if len(name_parts) > 1 else ""
-        if not existing.get("role"):
-            update_fields["role"] = "admin"
         
-        if update_fields:
-            await db.users.update_one({"email": admin_email}, {"$set": update_fields})
-            logger.info(f"Admin user migrated with new fields: {admin_email}")
+        await db.users.update_one({"email": admin_email}, {"$set": update_fields})
         
-        # Update password if changed
-        if not verify_password(admin_password, existing.get("password_hash", "")):
-            if existing.get("password_hash"):
-                await db.users.update_one(
-                    {"email": admin_email},
-                    {"$set": {"password_hash": hash_password(admin_password)}}
-                )
-                logger.info(f"Admin password updated for: {admin_email}")
+        # Ensure admin always has a password hash for email/password login
+        current_hash = existing.get("password_hash", "")
+        if not current_hash or not verify_password(admin_password, current_hash):
+            await db.users.update_one(
+                {"email": admin_email},
+                {"$set": {"password_hash": hash_password(admin_password)}}
+            )
+            logger.info(f"Admin password set/updated for: {admin_email}")
     
     # Write test credentials
     credentials_path = Path("/app/memory/test_credentials.md")
