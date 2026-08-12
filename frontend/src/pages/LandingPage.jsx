@@ -185,10 +185,6 @@ const HeroSection = ({ settings }) => {
           variants={staggerContainer}
           className="space-y-8"
         >
-          <motion.p variants={fadeInUp} className="text-red-500 uppercase tracking-[0.3em] text-base md:text-lg font-bold">
-            Home-Style Fast Food Since 1998
-          </motion.p>
-          
           <motion.h1 variants={fadeInUp} className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-white leading-tight">
             <span className="text-white">{settings?.hero_title || "Big, Bold Tamales"}</span>
           </motion.h1>
