@@ -30,4 +30,4 @@ curl -b cookies.txt http://localhost:8001/api/auth/me
 ```
 
 ---
-*Last Updated: 2026-08-12T07:34:16.013533+00:00*
+*Last Updated: 2026-08-12T13:34:51.827357+00:00*
