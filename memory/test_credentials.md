@@ -1,32 +1,33 @@
 # Test Credentials for Nic Nackables BBQ & More
 
-## Admin Account (Exclusive)
-- **Email**: Mrterpenes@gmail.com
+## Admin Account (Email/Password)
+- **Email**: mrterpenes@gmail.com
 - **Password**: NicNack2024!
-- **Role**: Admin (only this account can be admin)
-- **Access**: /admin/login (link in footer)
-- **Permissions**: Full access to all admin features
-
-## Staff Account
-- **Email**: admin@nicnackables.com
-- **Password**: NicNack2024!
-- **Role**: Staff
-- **Access**: /admin/login
-- **Permissions**: Orders, Messages only (no Menu, Settings, Users, Analytics, etc.)
-
-## Customer Test Accounts
-Customers register via /register or /login page.
+- **Role**: Admin
 
 ## Authentication Methods
 1. **Email/Password Login**: POST /api/auth/login
-2. **Customer Registration**: POST /api/auth/customer/register
-3. **Google OAuth**: Emergent-managed (GET /api/auth/session)
+2. **Google OAuth**: GET /api/auth/session (Emergent-managed)
 
-## Security Notes (December 2025)
-- Password reset tokens are NO LONGER returned in API responses (security fix)
-- New OAuth users are created as customers by default, NOT admins
-- Order prices are validated against database prices, not client-submitted prices
-- Only ADMIN_EMAIL env var can have admin privileges
+## Auth Endpoints
+- POST /api/auth/register - Register new user
+- POST /api/auth/login - Login with email/password
+- POST /api/auth/logout - Logout
+- GET /api/auth/me - Get current user
+- POST /api/auth/refresh - Refresh access token
+- POST /api/auth/forgot-password - Request password reset
+- POST /api/auth/reset-password - Reset password with token
+
+## Testing Commands
+```bash
+# Login
+curl -c cookies.txt -X POST http://localhost:8001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"mrterpenes@gmail.com","password":"NicNack2024!"}'
+
+# Get current user
+curl -b cookies.txt http://localhost:8001/api/auth/me
+```
 
 ---
-*Last Updated: December 2025*
+*Last Updated: 2026-08-12T17:25:52.056539+00:00*

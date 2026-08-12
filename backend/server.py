@@ -72,6 +72,87 @@ def create_refresh_token(user_id: str) -> str:
     return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
 
 # =============================================================================
+# EMERGENT OBJECT STORAGE HELPERS
+# =============================================================================
+import requests
+
+STORAGE_BASE = (os.environ.get("INTEGRATION_PROXY_URL") or "").strip() or "https://integrations.emergentagent.com"
+STORAGE_URL = STORAGE_BASE.rstrip("/") + "/objstore/api/v1/storage"
+EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
+APP_NAME = "nicnackables-bbq"  # Prefix for all storage paths
+
+_storage_key = None  # Module-level cached storage key
+
+def init_storage(force: bool = False) -> str:
+    """Initialize storage and get session key. Call once at startup."""
+    global _storage_key
+    if _storage_key and not force:
+        return _storage_key
+    
+    if not EMERGENT_KEY:
+        logger.warning("EMERGENT_LLM_KEY not set, object storage disabled")
+        return None
+    
+    try:
+        resp = requests.post(
+            f"{STORAGE_URL}/init",
+            json={"emergent_key": EMERGENT_KEY},
+            timeout=30
+        )
+        resp.raise_for_status()
+        _storage_key = resp.json()["storage_key"]
+        logger.info("Emergent Object Storage initialized successfully")
+        return _storage_key
+    except Exception as e:
+        logger.error(f"Failed to initialize object storage: {e}")
+        return None
+
+def put_object(path: str, data: bytes, content_type: str) -> dict:
+    """Upload file to object storage. Returns {"path": "...", "size": 123}"""
+    key = init_storage()
+    if not key:
+        raise Exception("Object storage not initialized")
+    
+    resp = requests.put(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key, "Content-Type": content_type},
+        data=data,
+        timeout=300  # 5 min for large videos
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+def get_object(path: str) -> tuple:
+    """Download file from object storage. Returns (content_bytes, content_type)"""
+    key = init_storage()
+    if not key:
+        raise Exception("Object storage not initialized")
+    
+    resp = requests.get(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key},
+        timeout=120
+    )
+    resp.raise_for_status()
+    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
+
+# MIME type mapping
+MIME_TYPES = {
+    "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png",
+    "gif": "image/gif", "webp": "image/webp", "svg": "image/svg+xml",
+    "mp4": "video/mp4", "mov": "video/quicktime", "webm": "video/webm",
+    "avi": "video/x-msvideo", "mkv": "video/x-matroska",
+    "pdf": "application/pdf", "json": "application/json",
+}
+
+def get_mime_type(filename: str) -> str:
+    """Get MIME type from filename extension"""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "bin"
+    return MIME_TYPES.get(ext, "application/octet-stream")
+
+
+
+# =============================================================================
 # EMAIL NOTIFICATION HELPER (SendGrid)
 # =============================================================================
 
@@ -2632,32 +2713,72 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 @api_router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    """Upload an image file and return its URL"""
+    """Upload an image or video file - uses Emergent Object Storage for persistence"""
     try:
         # Validate file type
-        allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"]
-        if file.content_type not in allowed_types:
-            raise HTTPException(status_code=400, detail="Invalid file type. Only images allowed.")
+        allowed_image_types = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"]
+        allowed_video_types = ["video/mp4", "video/quicktime", "video/webm", "video/x-msvideo"]
+        allowed_types = allowed_image_types + allowed_video_types
         
-        # Validate file size (5MB max)
+        content_type = file.content_type or get_mime_type(file.filename)
+        if content_type not in allowed_types:
+            raise HTTPException(status_code=400, detail="Invalid file type. Only images and videos allowed.")
+        
+        # Read file contents
         contents = await file.read()
-        if len(contents) > 5 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="File too large. Maximum size is 5MB.")
+        
+        # Validate file size (100MB max for videos, 5MB for images)
+        is_video = content_type in allowed_video_types
+        max_size = 100 * 1024 * 1024 if is_video else 5 * 1024 * 1024
+        if len(contents) > max_size:
+            max_mb = max_size // (1024 * 1024)
+            raise HTTPException(status_code=400, detail=f"File too large. Maximum size is {max_mb}MB.")
         
         # Generate unique filename
-        file_ext = file.filename.split(".")[-1] if "." in file.filename else "png"
+        file_ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ("mp4" if is_video else "png")
         unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
-        file_path = UPLOAD_DIR / unique_filename
         
-        # Save file
+        # Try to upload to Emergent Object Storage first
+        storage_key = init_storage()
+        if storage_key:
+            try:
+                storage_path = f"{APP_NAME}/uploads/{unique_filename}"
+                result = put_object(storage_path, contents, content_type)
+                
+                # Store reference in database
+                await db.uploaded_files.insert_one({
+                    "file_id": f"file_{uuid.uuid4().hex[:12]}",
+                    "storage_path": result["path"],
+                    "original_filename": file.filename,
+                    "content_type": content_type,
+                    "size": result.get("size", len(contents)),
+                    "is_video": is_video,
+                    "is_deleted": False,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+                
+                logger.info(f"Uploaded to object storage: {storage_path}")
+                
+                # Return URL for serving via our endpoint
+                return {
+                    "url": f"/api/storage/{result['path']}", 
+                    "filename": unique_filename,
+                    "file_size": len(contents),
+                    "storage": "cloud"
+                }
+            except Exception as e:
+                logger.warning(f"Object storage upload failed, falling back to local: {e}")
+        
+        # Fallback to local storage
+        file_path = UPLOAD_DIR / unique_filename
         with open(file_path, "wb") as buffer:
             buffer.write(contents)
         
-        # Return URL - use relative URL that works with ingress routing
         return {
             "url": f"/api/uploads/{unique_filename}", 
             "filename": unique_filename,
-            "file_size": len(contents)
+            "file_size": len(contents),
+            "storage": "local"
         }
     except HTTPException:
         raise
@@ -2665,7 +2786,41 @@ async def upload_file(file: UploadFile = File(...)):
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail="Failed to upload file")
 
-# Serve uploaded files
+# Serve files from Emergent Object Storage
+@api_router.get("/storage/{path:path}")
+async def serve_storage_file(path: str):
+    """Serve files from Emergent Object Storage"""
+    try:
+        # Check if file exists in our database
+        file_record = await db.uploaded_files.find_one({
+            "storage_path": path,
+            "is_deleted": False
+        })
+        
+        if not file_record:
+            # Try to serve anyway (for files uploaded before DB tracking)
+            pass
+        
+        # Get file from object storage
+        data, content_type = get_object(path)
+        
+        # Use stored content type if available
+        if file_record and file_record.get("content_type"):
+            content_type = file_record["content_type"]
+        
+        return Response(
+            content=data,
+            media_type=content_type,
+            headers={
+                "Cache-Control": "public, max-age=31536000",  # Cache for 1 year
+                "Content-Disposition": f"inline; filename=\"{path.split('/')[-1]}\""
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error serving storage file {path}: {e}")
+        raise HTTPException(status_code=404, detail="File not found")
+
+# Serve uploaded files from local storage (legacy/fallback)
 from fastapi.staticfiles import StaticFiles
 
 # =============================================================================
@@ -2840,11 +2995,18 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    """Seed admin user and create indexes on startup"""
+    """Seed admin user, create indexes, and initialize storage on startup"""
+    # Initialize Emergent Object Storage
+    try:
+        init_storage()
+    except Exception as e:
+        logger.warning(f"Object storage init failed (uploads will use local): {e}")
+    
     # Create indexes
     await db.users.create_index("email", unique=True)
     await db.login_attempts.create_index("identifier")
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
+    await db.uploaded_files.create_index("storage_path")  # Index for file lookups
     
     # Seed admin user
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com").lower()

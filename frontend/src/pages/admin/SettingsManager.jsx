@@ -630,15 +630,63 @@ const SettingsManager = () => {
             <div className="border-t border-white/10 pt-6">
               <Label className="text-white/70">Homepage Video (Below Hero)</Label>
               <p className="text-white/50 text-sm mb-2">
-                Add a YouTube URL or direct video link. YouTube videos will autoplay on loop (muted).
+                Add a YouTube URL, direct video link, or upload a video file. Videos will autoplay on loop (muted).
               </p>
+              
+              {/* Video URL Input */}
               <Input
                 value={settings.homepage_video || ""}
                 onChange={(e) => updateSettings("homepage_video", e.target.value)}
                 className="input-dark mt-1"
-                placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+                placeholder="https://youtube.com/watch?v=... or paste video URL"
                 data-testid="setting-homepage-video"
               />
+              
+              {/* Video Upload Button */}
+              <div className="mt-3">
+                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/quicktime,video/webm"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      // Check file size (100MB max)
+                      if (file.size > 100 * 1024 * 1024) {
+                        toast.error("Video must be under 100MB");
+                        return;
+                      }
+                      
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      
+                      toast.info("Uploading video... This may take a moment.");
+                      
+                      try {
+                        const response = await axios.post(`${API}/upload`, formData, {
+                          withCredentials: true,
+                          headers: { "Content-Type": "multipart/form-data" }
+                        });
+                        
+                        // Use the full URL for the video
+                        const videoUrl = response.data.url.startsWith('http') 
+                          ? response.data.url 
+                          : `${process.env.REACT_APP_BACKEND_URL}${response.data.url}`;
+                        
+                        updateSettings("homepage_video", videoUrl);
+                        toast.success(`Video uploaded! Storage: ${response.data.storage === 'cloud' ? 'Cloud (persistent)' : 'Local'}`);
+                      } catch (error) {
+                        console.error("Video upload failed:", error);
+                        toast.error("Failed to upload video");
+                      }
+                    }}
+                  />
+                  <span className="text-white/80 text-sm">Upload Video (MP4, MOV, WebM - max 100MB)</span>
+                </label>
+              </div>
+              
               {settings.homepage_video && (
                 <div className="mt-4">
                   {settings.homepage_video.includes('youtube') || settings.homepage_video.includes('youtu.be') ? (
@@ -646,9 +694,14 @@ const SettingsManager = () => {
                       <span className="text-green-400">✓</span>
                       <span className="text-white/80 text-sm">YouTube video will autoplay on loop (muted)</span>
                     </div>
+                  ) : settings.homepage_video.includes('/api/storage/') ? (
+                    <div className="bg-green-900/30 border border-green-600/50 rounded-lg p-3 flex items-center gap-2">
+                      <span className="text-green-400">✓</span>
+                      <span className="text-white/80 text-sm">Cloud-stored video - persists across deployments</span>
+                    </div>
                   ) : (
                     <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3">
-                      <span className="text-yellow-400 text-sm">Direct video URL detected. For best results, use YouTube.</span>
+                      <span className="text-yellow-400 text-sm">External video URL detected. For persistence, upload directly or use YouTube.</span>
                     </div>
                   )}
                 </div>
