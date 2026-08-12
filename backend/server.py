@@ -87,8 +87,8 @@ async def send_order_notification_emails(order: dict):
             logger.warning("SendGrid API key not configured, skipping email notification")
             return False
         
-        # Get notification emails from settings
-        settings = await db.site_settings.find_one({"settings_id": "main"}, {"_id": 0})
+        # Get notification emails from settings (use correct settings_id)
+        settings = await db.site_settings.find_one({"settings_id": "main_settings"}, {"_id": 0})
         notification_emails = settings.get("notification_emails", []) if settings else []
         
         # Also include the main email if no notification emails are set
@@ -254,6 +254,7 @@ class OrderItem(BaseModel):
     quantity: int
     toppings: List[ToppingItem] = []
     meat_choice: Optional[str] = None
+    special_instructions: Optional[str] = None
 
 class Order(BaseModel):
     order_id: str = Field(default_factory=lambda: f"order_{uuid.uuid4().hex[:12]}")
@@ -367,6 +368,7 @@ class SiteSettings(BaseModel):
     youtube_url: Optional[str] = None
     linkedin_url: Optional[str] = None
     opening_hours: List[OpeningHours] = []
+    show_hours: bool = True  # Toggle to show/hide hours on website
 
 class SiteSettingsUpdate(BaseModel):
     site_name: Optional[str] = None
@@ -407,6 +409,7 @@ class SiteSettingsUpdate(BaseModel):
     youtube_url: Optional[str] = None
     linkedin_url: Optional[str] = None
     opening_hours: Optional[List[OpeningHours]] = None
+    show_hours: Optional[bool] = None  # Toggle to show/hide hours on website
 
 class BlogPost(BaseModel):
     post_id: str = Field(default_factory=lambda: f"post_{uuid.uuid4().hex[:12]}")
@@ -853,8 +856,42 @@ async def submit_contact_form(submission: ContactSubmissionCreate, background_ta
 
 @api_router.post("/orders/create")
 async def create_order(order_data: OrderCreate, request: Request):
-    # Calculate totals
-    subtotal = sum(item.price * item.quantity for item in order_data.items)
+    # SECURITY: Calculate totals using DB prices, not client-supplied prices
+    verified_items = []
+    subtotal = 0.0
+    
+    for item in order_data.items:
+        # Look up the actual menu item price from database
+        menu_item = await db.menu_items.find_one({"item_id": item.item_id})
+        if menu_item:
+            actual_price = float(menu_item.get("price", 0))
+            # Calculate toppings price if any
+            toppings_total = 0.0
+            if item.toppings:
+                for topping in item.toppings:
+                    # Find topping price from menu item's toppings
+                    for menu_topping in menu_item.get("toppings", []):
+                        if menu_topping.get("name") == topping.get("name"):
+                            toppings_total += float(menu_topping.get("price", 0))
+                            break
+            
+            item_total = (actual_price + toppings_total) * item.quantity
+            subtotal += item_total
+            
+            # Store verified item with DB price
+            verified_items.append({
+                "item_id": item.item_id,
+                "name": item.name,
+                "price": actual_price,
+                "quantity": item.quantity,
+                "toppings": item.toppings,
+                "special_instructions": item.special_instructions
+            })
+        else:
+            # Item not found in DB - use submitted price as fallback (for merch, etc.)
+            subtotal += item.price * item.quantity
+            verified_items.append(item.model_dump())
+    
     tax = round(subtotal * 0.0825, 2)  # 8.25% tax
     total = round(subtotal + tax, 2)
     
@@ -882,7 +919,7 @@ async def create_order(order_data: OrderCreate, request: Request):
     
     order_dict = order.model_dump()
     order_dict["created_at"] = order_dict["created_at"].isoformat()
-    order_dict["items"] = [item.model_dump() for item in order_data.items]
+    order_dict["items"] = verified_items  # Use DB-verified prices, not client prices
     order_dict["payment_method"] = payment_method
     
     # Handle different payment methods
@@ -1283,9 +1320,14 @@ async def forgot_password(data: ForgotPasswordRequest):
     
     # Log the reset link (in production, would send email)
     reset_url = f"{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token={reset_token}"
-    logger.info(f"Password reset link for {email}: {reset_url}")
+    logger.info(f"Password reset requested for {email}")
     
-    return {"message": "If this email is registered, you will receive a password reset link.", "reset_url": reset_url}
+    # TODO: Send email via SendGrid when configured
+    # For now, log the URL (remove in production)
+    logger.info(f"Password reset link (DEV ONLY): {reset_url}")
+    
+    # SECURITY: Never return the token/URL in the response - only send via email
+    return {"message": "If this email is registered, you will receive a password reset link."}
 
 # Reset Password
 @api_router.post("/auth/reset-password")
@@ -1353,12 +1395,20 @@ async def process_session(session_id: str, request: Request):
         )
     else:
         user_id = f"user_{uuid.uuid4().hex[:12]}"
+        # SECURITY: New OAuth users are customers by default, NOT admins
+        # Admin is only assigned via ADMIN_EMAIL env var at startup
+        admin_email = os.environ.get("ADMIN_EMAIL", "").lower()
+        is_admin = user_data["email"].lower() == admin_email
         new_user = {
             "user_id": user_id,
             "email": user_data["email"],
             "name": user_data["name"],
+            "first_name": user_data["name"].split()[0] if user_data["name"] else "",
+            "last_name": " ".join(user_data["name"].split()[1:]) if user_data["name"] and len(user_data["name"].split()) > 1 else "",
             "picture": user_data.get("picture"),
-            "is_admin": True,  # First user is admin
+            "role": "admin" if is_admin else "customer",
+            "is_admin": is_admin,
+            "is_staff": False,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(new_user)

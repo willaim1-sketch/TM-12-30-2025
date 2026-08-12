@@ -1,0 +1,74 @@
+{
+  "summary": "Verified 4/5 requested items. Opening Hours removed from landing page (confirmed on preview URL). /api/auth/forgot-password no longer leaks token/reset_url in response. New email-registered users default to is_admin=false, is_staff=false. Admin Settings > Hours tab contains 'Show Hours on Website' toggle (SettingsManager.jsx L1042). HOWEVER: found CRITICAL regression introduced by the security fix in /api/orders/create - AttributeError crashes ALL order creation with HTTP 500.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/orders/create",
+        "issue": "The DB-price validation code at server.py line 885 accesses `item.special_instructions` but the OrderItem Pydantic model (server.py L250-256) has NO such field. Every order create request now raises AttributeError -> 500 Internal Server Error. This BREAKS all customer orders (Stripe, PayPal, Venmo, CashApp, pay-on-pickup) on the site. Reproduced with a real menu item and tampered price of $0.01 -> 500. Backend log: `AttributeError: 'OrderItem' object has no attribute 'special_instructions'` at /app/backend/server.py:885.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "POST /api/orders/create",
+        "issue": "Even after fixing the AttributeError, the code builds `verified_items` with server-side prices but never uses it: line 919 does `order_dict['items'] = [item.model_dump() for item in order_data.items]` which re-writes items using the CLIENT-submitted OrderItem objects (which still carry the tampered per-item price). Subtotal/tax/total are recomputed correctly from DB (good), but individual line-item.price stored in Mongo is still the client value. Persist `verified_items` (or overwrite each item.price with actual_price) so admin/reporting reflects real prices."
+      },
+      {
+        "endpoint": "GET /api/settings, PUT /api/admin/settings",
+        "issue": "`show_hours` field is not declared in SiteSettings (L330) or SiteSettingsUpdate (L371) Pydantic models. Round-trip currently works because Mongo update stores it and GET returns raw doc, but the field is not part of the schema/defaults. Add `show_hours: bool = True` to both models for correctness, OpenAPI docs, and to guarantee the default when unset. Also update the LandingPage Location section to read `settings.show_hours` if you want a dynamic toggle instead of hard-removal."
+      },
+      {
+        "endpoint": "POST /api/auth/forgot-password",
+        "issue": "Response no longer leaks token (verified). However, server still logs full reset URL with token at INFO level (server.py L1324). If logs are shipped to a third-party aggregator this remains a token-exposure vector. Consider logging only the email + a hash of the token."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Customer checkout (any payment method)",
+        "issue": "Because POST /api/orders/create now returns 500 for every order (see backend critical bug), the checkout flow is completely broken on the preview site. Users clicking 'Place Order' / 'Pay' will see an error toast or blank success page. Must be fixed before shipping the security patch.",
+        "affected_selectors": ["OrderPage submit button", "checkout summary"]
+      }
+    ],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET / landing page: 'Opening Hours' string absent; 0/7 day-of-week labels present in Location section",
+    "POST /api/auth/forgot-password (known email): 200 with generic message only, no reset_url/token/http URL in body",
+    "POST /api/auth/forgot-password (unknown email): 200 with same generic message",
+    "POST /api/auth/register -> GET /api/auth/me: is_admin=false, is_staff=false",
+    "PUT /api/admin/settings {show_hours:false} then GET /api/settings: show_hours=false persisted (functional even though schema lacks field)",
+    "SettingsManager.jsx L1042 has 'Show Hours on Website' toggle with data path settings.show_hours"
+  ],
+  "failed_tests": [
+    "POST /api/orders/create with valid menu item -> HTTP 500 (AttributeError: OrderItem.special_instructions)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_security_fixes.py",
+    "/app/test_reports/pytest/security_fixes_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Fix /app/backend/server.py L885. Either (a) add `special_instructions: Optional[str] = None` to OrderItem model (L250), or (b) change L885 to `getattr(item, 'special_instructions', None)`. Option (a) is cleaner and enables front-end to persist per-item notes.",
+    "HIGH: After fixing the crash, also use `verified_items` when building order_dict so DB-verified prices are what gets stored: replace L919 `order_dict['items'] = [item.model_dump() for item in order_data.items]` with `order_dict['items'] = verified_items` (or ensure each order_data.items[i].price is overwritten with actual_price before dump).",
+    "MEDIUM: Add `show_hours: bool = True` to SiteSettings and `show_hours: Optional[bool] = None` to SiteSettingsUpdate (server.py L330 & L371). Consider gating the LandingPage Location Opening Hours block on `settings?.show_hours !== false` instead of the current hard-delete, so the admin toggle can actually control visibility going forward.",
+    "LOW: Stop logging full reset URL with token in server.py L1324 - log only email or a token hash."
+  ],
+  "critical_code_review_comments": [
+    "Security fix in create_order recomputes totals correctly from DB (subtotal/tax/total) - good. But it never persists the verified prices onto the stored items (verified_items built but discarded at L919), and it crashes on OrderItem.special_instructions which doesn't exist. This is exactly the kind of regression that a smoke test on the endpoint would have caught before commit.",
+    "forgot_password response is now safe. Nice defensive default 'If this email is registered...' for both branches. Still logs the reset URL - fine for dev, remove for prod log shipping.",
+    "OAuth session handler correctly derives is_admin from ADMIN_EMAIL env var only. is_staff explicitly false. Good.",
+    "LandingPage.jsx removed Opening Hours block but left a stray `<div className='text-center mb-12'>` above and no schema-driven visibility, meaning admin toggle is currently a no-op end-to-end even though backend persists show_hours. Recommend wiring settings.show_hours to a conditional render of a real OpeningHours component."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_security_fixes.py"
+  ],
+  "success_rate": {"backend": "80% (4/5)", "frontend": "100% (opening hours removal verified)"},
+  "test_credentials": "Admin: mrterpenes@gmail.com / NicNack2024! (login verified). Created disposable TEST_reg_*@example.com accounts during pytest.",
+  "seed_data_creation": "One TEST_reg_*@example.com user per pytest run via /api/auth/register. Safe to leave.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "After main agent fixes OrderItem.special_instructions (or the L885 access), re-run pytest backend/tests/test_security_fixes.py - the price-tamper test should then show subtotal recomputed from DB. Also verify persisted order items in Mongo carry DB prices, not client prices. The show_hours schema addition is optional but should be wired into LandingPage for the admin toggle to be functional.",
+  "rca of the issue": "The security patch at server.py L854-890 was written assuming OrderItem had a special_instructions field, but the Pydantic model (L250-256) only declares item_id, name, price, quantity, toppings, meat_choice. Pydantic v2 raises AttributeError on undeclared attribute access. The fix was not tested against a live order-create call before commit. Reproduction: POST /api/orders/create with any valid menu item_id -> 500. Mitigation options in action_items."
+}
