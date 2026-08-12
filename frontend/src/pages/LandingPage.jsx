@@ -421,9 +421,6 @@ const AboutSection = ({ settings }) => {
             <p className="text-white/80 text-lg leading-relaxed">
               {settings?.about_content || "Started in a small kitchen with big dreams, Nic Nackables BBQ & More has been serving up home-style comfort food for years. No fancy stuff here - just real food, big portions, and flavors that remind you of mom's cooking."}
             </p>
-            <p className="text-white/60 leading-relaxed text-lg">
-              Our Super Dooper Dooper Tamale isn't just a menu item - it's a legend. Packed with seasoned meat, wrapped in love, and big enough to make you say "WOW!" Every tamale, every plate of beans and rice, every scoop of guac is made fresh daily.
-            </p>
             <div className="pt-4">
               <p className="text-white font-display text-xl italic">— {settings?.chef_name || "Nic Nackables"}</p>
               <p className="text-white/50 text-base">Founder & Head Cook</p>
