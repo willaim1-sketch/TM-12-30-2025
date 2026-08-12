@@ -287,7 +287,7 @@ const VideoSection = ({ settings }) => {
   const [videoLoaded, setVideoLoaded] = React.useState(false);
   const [videoError, setVideoError] = React.useState(false);
   const videoRef = React.useRef(null);
-  const videoUrl = settings?.homepage_video || "https://youtu.be/ViMoTwVF-FI";
+  const videoUrl = settings?.homepage_video || "https://masteraibots.com/wp-content/uploads/2026/08/Header-video-Nic-Nackables-BBQ.mov";
   
   if (!videoUrl) return null;
   
