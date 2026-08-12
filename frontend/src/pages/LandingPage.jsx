@@ -706,41 +706,7 @@ const LocationSection = ({ settings }) => {
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">Find Us Here</h2>
           </div>
 
-          {/* Opening Hours Block - Cute Card (can be toggled off in admin) */}
-          {settings?.show_hours !== false && (
-          <motion.div variants={fadeInUp} className="mb-12">
-            <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-8 max-w-3xl mx-auto shadow-2xl">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <Clock className="text-white" size={28} />
-                <h3 className="text-2xl font-display font-bold text-white">Opening Hours</h3>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {(settings?.opening_hours || []).slice(0, 7).map((hour, idx) => (
-                  <div key={idx} className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-                    <p className="text-white/80 text-sm font-medium mb-1">{hour.day?.slice(0, 3)}</p>
-                    {hour.is_closed ? (
-                      <p className="text-white/60 text-sm">Closed</p>
-                    ) : (
-                      <p className="text-white font-bold text-lg">
-                        {formatTime(hour.open_time)}<br/>
-                        <span className="text-white/70 text-sm">to</span><br/>
-                        {formatTime(hour.close_time)}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              {(!settings?.opening_hours || settings.opening_hours.length === 0) && (
-                <div className="text-center text-white/80">
-                  <p className="text-lg">Mon - Sat: 10:00 AM - 8:00 PM</p>
-                  <p className="text-lg">Sunday: 11:00 AM - 6:00 PM</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-          )}
+          {/* Opening Hours Block - DISABLED per user request */}
 
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Info */}
