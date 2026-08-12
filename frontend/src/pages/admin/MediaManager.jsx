@@ -5,7 +5,8 @@ import {
   Plus, Trash2, Copy, Image, Wand2, Upload, Search, Filter, Grid, List, 
   X, Check, Download, Eye, Edit2, FolderOpen, Calendar, HardDrive, 
   Maximize2, Link2, RefreshCw, ChevronDown, ImageIcon, AlertCircle,
-  Home, ShoppingBag, UtensilsCrossed, MapPin, FileImage, Settings, Loader2
+  Home, ShoppingBag, UtensilsCrossed, MapPin, FileImage, Settings, Loader2,
+  Cloud, CloudOff, Database, ArrowUpCircle, CheckCircle2
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
 import { toast } from "sonner";
+import { Progress } from "../../components/ui/progress";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -155,13 +157,197 @@ const UploadZone = ({ onUpload, uploading }) => {
   );
 };
 
+// Storage Dashboard Component
+const StorageDashboard = ({ onMigrateAll, onRefresh }) => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [migrating, setMigrating] = useState(false);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API}/api/admin/storage/stats`, { withCredentials: true });
+      setStats(response.data);
+    } catch (error) {
+      console.error("Failed to fetch storage stats:", error);
+      toast.error("Failed to load storage statistics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleMigrateAll = async () => {
+    if (!window.confirm("Migrate all local files to cloud storage? This may take a while.")) return;
+    
+    setMigrating(true);
+    try {
+      const response = await axios.post(`${API}/api/admin/storage/migrate`, {}, { withCredentials: true });
+      toast.success(response.data.message);
+      fetchStats();
+      onRefresh?.();
+    } catch (error) {
+      console.error("Migration failed:", error);
+      toast.error("Migration failed. Check console for details.");
+    } finally {
+      setMigrating(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="card-dark p-6 flex items-center justify-center">
+        <Loader2 className="animate-spin text-red-500" size={24} />
+      </div>
+    );
+  }
+
+  if (!stats) return null;
+
+  const cloudPercentage = stats.total_media_items > 0 
+    ? Math.round((stats.cloud_media_count / stats.total_media_items) * 100) 
+    : 0;
+
+  return (
+    <div className="card-dark p-6 space-y-6" data-testid="storage-dashboard">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Database className="text-red-500" size={24} />
+          <div>
+            <h3 className="text-lg font-semibold text-white">Storage Dashboard</h3>
+            <p className="text-white/60 text-sm">Manage your media storage</p>
+          </div>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={fetchStats}
+          className="btn-secondary"
+        >
+          <RefreshCw size={14} className="mr-1" /> Refresh
+        </Button>
+      </div>
+
+      {/* Storage Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-[#2A2A2A] rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Cloud className="text-green-500" size={18} />
+            <span className="text-white/60 text-sm">Cloud Storage</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{stats.cloud_media_count}</p>
+          <p className="text-white/40 text-xs">{stats.cloud_size_formatted}</p>
+        </div>
+        
+        <div className="bg-[#2A2A2A] rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <HardDrive className="text-yellow-500" size={18} />
+            <span className="text-white/60 text-sm">Local Storage</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{stats.local_media_count}</p>
+          <p className="text-white/40 text-xs">{stats.local_size_formatted}</p>
+        </div>
+        
+        <div className="bg-[#2A2A2A] rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <ImageIcon className="text-blue-500" size={18} />
+            <span className="text-white/60 text-sm">Total Media</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{stats.total_media_items}</p>
+          <p className="text-white/40 text-xs">files</p>
+        </div>
+        
+        <div className="bg-[#2A2A2A] rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <ArrowUpCircle className="text-purple-500" size={18} />
+            <span className="text-white/60 text-sm">Migration Status</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{cloudPercentage}%</p>
+          <p className="text-white/40 text-xs">in cloud</p>
+        </div>
+      </div>
+
+      {/* Migration Progress */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-white/60">Cloud Migration Progress</span>
+          <span className="text-white">{stats.cloud_media_count} / {stats.total_media_items}</span>
+        </div>
+        <Progress value={cloudPercentage} className="h-2" />
+      </div>
+
+      {/* Migration Action */}
+      {stats.local_media_count > 0 && (
+        <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-yellow-500 flex-shrink-0 mt-0.5" size={20} />
+            <div className="flex-1">
+              <h4 className="text-yellow-400 font-medium">Local Files Detected</h4>
+              <p className="text-white/60 text-sm mt-1">
+                You have {stats.local_media_count} files stored locally that will be lost on redeploy. 
+                Migrate them to cloud storage for persistence.
+              </p>
+              <Button 
+                className="mt-3 btn-primary"
+                onClick={handleMigrateAll}
+                disabled={migrating}
+              >
+                {migrating ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={16} />
+                    Migrating...
+                  </>
+                ) : (
+                  <>
+                    <Cloud className="mr-2" size={16} />
+                    Migrate All to Cloud
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {stats.local_media_count === 0 && stats.total_media_items > 0 && (
+        <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-4 flex items-center gap-3">
+          <CheckCircle2 className="text-green-500" size={20} />
+          <div>
+            <h4 className="text-green-400 font-medium">All Files in Cloud</h4>
+            <p className="text-white/60 text-sm">Your media is safely stored and will persist across deployments.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
 // Image Card Component
-const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selected }) => {
+const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, onMigrate, selected }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageDimensions, setImageDimensions] = useState(null);
+  const [migrating, setMigrating] = useState(false);
   
   const imageUrl = getFullUrl(item.url);
+  const isCloud = item.url?.startsWith('/api/storage/') || item.storage === 'cloud';
+  const isLocal = item.url?.startsWith('/api/uploads/') && !isCloud;
+  const isExternal = item.url?.startsWith('http');
+
+  const handleMigrate = async (e) => {
+    e.stopPropagation();
+    setMigrating(true);
+    try {
+      await onMigrate?.(item);
+    } finally {
+      setMigrating(false);
+    }
+  };
 
   useEffect(() => {
     if (imageUrl) {
@@ -258,6 +444,30 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
           />
         )}
         
+        {/* Storage indicator badge */}
+        <div className="absolute top-2 left-2">
+          {isCloud && (
+            <div className="bg-green-600/90 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1" title="Stored in cloud - persists across deployments">
+              <Cloud size={12} /> Cloud
+            </div>
+          )}
+          {isLocal && (
+            <div 
+              className="bg-yellow-600/90 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 cursor-pointer hover:bg-yellow-500"
+              title="Stored locally - will be lost on redeploy. Click to migrate."
+              onClick={handleMigrate}
+            >
+              {migrating ? <Loader2 size={12} className="animate-spin" /> : <HardDrive size={12} />}
+              {migrating ? 'Moving...' : 'Local'}
+            </div>
+          )}
+          {isExternal && (
+            <div className="bg-blue-600/90 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1" title="External URL">
+              <Link2 size={12} /> External
+            </div>
+          )}
+        </div>
+        
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
           <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -269,6 +479,18 @@ const ImageCard = ({ item, viewMode, onSelect, onDelete, onCopy, onEdit, selecte
                 <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="bg-white/10 hover:bg-white/20 text-white">
                   <Edit2 size={14} />
                 </Button>
+                {isLocal && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={handleMigrate}
+                    disabled={migrating}
+                    className="bg-green-600/20 hover:bg-green-600/40 text-green-400"
+                    title="Migrate to cloud storage"
+                  >
+                    {migrating ? <Loader2 size={14} className="animate-spin" /> : <Cloud size={14} />}
+                  </Button>
+                )}
               </div>
               <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onDelete(item); }} className="bg-red-600/20 hover:bg-red-600/40 text-red-400">
                 <Trash2 size={14} />
@@ -630,6 +852,8 @@ const MediaManager = () => {
   const [generating, setGenerating] = useState(false);
   const [selectingFor, setSelectingFor] = useState(null);
   const [error, setError] = useState(null);
+  const [showStorageDashboard, setShowStorageDashboard] = useState(false);
+  const [storageRefreshKey, setStorageRefreshKey] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -739,6 +963,28 @@ const MediaManager = () => {
     setSelectedItems([]);
     fetchData();
   };
+
+  const handleMigrateSingle = async (item) => {
+    try {
+      const response = await axios.post(
+        `${API}/api/admin/storage/migrate-single/${item.media_id}`,
+        {},
+        { withCredentials: true }
+      );
+      
+      if (response.data.status === 'migrated') {
+        toast.success("File migrated to cloud storage!");
+        setStorageRefreshKey(prev => prev + 1);
+        fetchData();
+      } else if (response.data.status === 'already_cloud') {
+        toast.info("This file is already in cloud storage");
+      }
+    } catch (error) {
+      console.error("Migration error:", error);
+      toast.error(error.response?.data?.detail || "Failed to migrate file");
+    }
+  };
+
 
   const handleSaveDetails = async (mediaId, data) => {
     try {
@@ -922,6 +1168,10 @@ const MediaManager = () => {
             <Maximize2 size={16} className="mr-2" />
             Size Guide
           </TabsTrigger>
+          <TabsTrigger value="storage" className="data-[state=active]:bg-red-600" data-testid="tab-storage">
+            <Cloud size={16} className="mr-2" />
+            Storage
+          </TabsTrigger>
         </TabsList>
 
         {/* Media Library Tab */}
@@ -1059,6 +1309,7 @@ const MediaManager = () => {
                     onDelete={handleDelete}
                     onCopy={copyUrl}
                     onEdit={setDetailItem}
+                    onMigrate={handleMigrateSingle}
                   />
                 ))}
               </AnimatePresence>
@@ -1085,6 +1336,7 @@ const MediaManager = () => {
                     onDelete={handleDelete}
                     onCopy={copyUrl}
                     onEdit={setDetailItem}
+                    onMigrate={handleMigrateSingle}
                   />
                 ))}
               </AnimatePresence>
@@ -1126,6 +1378,15 @@ const MediaManager = () => {
               ))}
             </div>
           </div>
+        </TabsContent>
+
+        {/* Storage Tab */}
+        <TabsContent value="storage" className="space-y-4">
+          <StorageDashboard 
+            key={storageRefreshKey}
+            onMigrateAll={() => {}}
+            onRefresh={fetchData}
+          />
         </TabsContent>
       </Tabs>
 

@@ -2821,6 +2821,234 @@ async def serve_storage_file(path: str):
         raise HTTPException(status_code=404, detail="File not found")
 
 # Serve uploaded files from local storage (legacy/fallback)
+
+
+# =============================================================================
+# CLOUD STORAGE MANAGEMENT ENDPOINTS
+# =============================================================================
+
+@api_router.get("/admin/storage/stats")
+async def get_storage_stats(user: User = Depends(require_admin)):
+    """Get cloud storage usage statistics"""
+    try:
+        # Count files in cloud storage
+        cloud_files = await db.uploaded_files.count_documents({"is_deleted": False})
+        
+        # Get total size of cloud files
+        pipeline = [
+            {"$match": {"is_deleted": False}},
+            {"$group": {"_id": None, "total_size": {"$sum": "$size"}}}
+        ]
+        size_result = await db.uploaded_files.aggregate(pipeline).to_list(1)
+        total_cloud_size = size_result[0]["total_size"] if size_result else 0
+        
+        # Count media library items
+        total_media = await db.media_library.count_documents({})
+        
+        # Count media items with cloud URLs vs local URLs
+        cloud_media = await db.media_library.count_documents({"url": {"$regex": "^/api/storage/"}})
+        local_media = total_media - cloud_media
+        
+        # Get local uploads folder size
+        local_size = 0
+        if UPLOAD_DIR.exists():
+            for f in UPLOAD_DIR.iterdir():
+                if f.is_file():
+                    local_size += f.stat().st_size
+        
+        return {
+            "cloud_files": cloud_files,
+            "cloud_size_bytes": total_cloud_size,
+            "cloud_size_formatted": format_bytes(total_cloud_size),
+            "local_files": local_media,
+            "local_size_bytes": local_size,
+            "local_size_formatted": format_bytes(local_size),
+            "total_media_items": total_media,
+            "cloud_media_count": cloud_media,
+            "local_media_count": local_media,
+            "migration_pending": local_media
+        }
+    except Exception as e:
+        logger.error(f"Error getting storage stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get storage stats")
+
+def format_bytes(bytes_val):
+    """Format bytes to human readable string"""
+    if bytes_val < 1024:
+        return f"{bytes_val} B"
+    elif bytes_val < 1024 * 1024:
+        return f"{bytes_val / 1024:.1f} KB"
+    elif bytes_val < 1024 * 1024 * 1024:
+        return f"{bytes_val / (1024 * 1024):.2f} MB"
+    else:
+        return f"{bytes_val / (1024 * 1024 * 1024):.2f} GB"
+
+@api_router.post("/admin/storage/migrate")
+async def migrate_to_cloud(user: User = Depends(require_admin)):
+    """Migrate local media files to cloud storage"""
+    storage_key = init_storage()
+    if not storage_key:
+        raise HTTPException(status_code=500, detail="Cloud storage not available")
+    
+    migrated = 0
+    failed = 0
+    already_cloud = 0
+    
+    # Get all media items with local URLs
+    media_items = await db.media_library.find({}).to_list(1000)
+    
+    for item in media_items:
+        url = item.get("url", "")
+        
+        # Skip if already cloud storage
+        if url.startswith("/api/storage/"):
+            already_cloud += 1
+            continue
+        
+        # Skip if external URL
+        if url.startswith("http://") or url.startswith("https://"):
+            continue
+        
+        # Try to read local file
+        if url.startswith("/api/uploads/"):
+            filename = url.replace("/api/uploads/", "")
+            local_path = UPLOAD_DIR / filename
+            
+            if local_path.exists():
+                try:
+                    # Read file
+                    with open(local_path, "rb") as f:
+                        data = f.read()
+                    
+                    # Determine content type
+                    content_type = get_mime_type(filename)
+                    
+                    # Upload to cloud
+                    storage_path = f"{APP_NAME}/uploads/{filename}"
+                    result = put_object(storage_path, data, content_type)
+                    
+                    # Update media library entry
+                    new_url = f"/api/storage/{result['path']}"
+                    await db.media_library.update_one(
+                        {"media_id": item["media_id"]},
+                        {"$set": {"url": new_url, "storage": "cloud"}}
+                    )
+                    
+                    # Track in uploaded_files
+                    await db.uploaded_files.update_one(
+                        {"storage_path": result["path"]},
+                        {"$set": {
+                            "file_id": f"file_{uuid.uuid4().hex[:12]}",
+                            "storage_path": result["path"],
+                            "original_filename": item.get("filename", filename),
+                            "content_type": content_type,
+                            "size": len(data),
+                            "is_deleted": False,
+                            "created_at": datetime.now(timezone.utc).isoformat()
+                        }},
+                        upsert=True
+                    )
+                    
+                    migrated += 1
+                    logger.info(f"Migrated {filename} to cloud storage")
+                    
+                    # Delete local file after successful migration
+                    try:
+                        local_path.unlink()
+                        logger.info(f"Deleted local file after migration: {filename}")
+                    except Exception as del_e:
+                        logger.warning(f"Failed to delete local file {filename}: {del_e}")
+                except Exception as e:
+                    logger.error(f"Failed to migrate {filename}: {e}")
+                    failed += 1
+            else:
+                logger.warning(f"Local file not found: {local_path}")
+                failed += 1
+    
+    return {
+        "migrated": migrated,
+        "failed": failed,
+        "already_cloud": already_cloud,
+        "message": f"Migration complete. {migrated} files migrated, {failed} failed, {already_cloud} already in cloud."
+    }
+
+@api_router.post("/admin/storage/migrate-single/{media_id}")
+async def migrate_single_to_cloud(media_id: str, user: User = Depends(require_admin)):
+    """Migrate a single media item to cloud storage"""
+    storage_key = init_storage()
+    if not storage_key:
+        raise HTTPException(status_code=500, detail="Cloud storage not available")
+    
+    # Get media item
+    item = await db.media_library.find_one({"media_id": media_id})
+    if not item:
+        raise HTTPException(status_code=404, detail="Media not found")
+    
+    url = item.get("url", "")
+    
+    # Check if already cloud
+    if url.startswith("/api/storage/"):
+        return {"status": "already_cloud", "message": "Already in cloud storage"}
+    
+    # Handle local files
+    if url.startswith("/api/uploads/"):
+        filename = url.replace("/api/uploads/", "")
+        local_path = UPLOAD_DIR / filename
+        
+        if not local_path.exists():
+            raise HTTPException(status_code=404, detail="Local file not found")
+        
+        # Read and upload
+        with open(local_path, "rb") as f:
+            data = f.read()
+        
+        content_type = get_mime_type(filename)
+        storage_path = f"{APP_NAME}/uploads/{filename}"
+        result = put_object(storage_path, data, content_type)
+        
+        # Update media library
+        new_url = f"/api/storage/{result['path']}"
+        await db.media_library.update_one(
+            {"media_id": media_id},
+            {"$set": {"url": new_url, "storage": "cloud"}}
+        )
+        
+        # Delete local file after successful migration
+        try:
+            local_path.unlink()
+            logger.info(f"Deleted local file after single migration: {filename}")
+        except Exception as del_e:
+            logger.warning(f"Failed to delete local file {filename}: {del_e}")
+        
+        return {"status": "migrated", "url": new_url, "message": "Successfully migrated to cloud"}
+    
+    # Handle external URLs - download and upload
+    if url.startswith("http://") or url.startswith("https://"):
+        try:
+            resp = requests.get(url, timeout=30)
+            resp.raise_for_status()
+            data = resp.content
+            
+            # Generate filename
+            filename = f"{uuid.uuid4().hex}.{url.split('.')[-1].split('?')[0][:10]}"
+            content_type = resp.headers.get("Content-Type", get_mime_type(filename))
+            
+            storage_path = f"{APP_NAME}/uploads/{filename}"
+            result = put_object(storage_path, data, content_type)
+            
+            new_url = f"/api/storage/{result['path']}"
+            await db.media_library.update_one(
+                {"media_id": media_id},
+                {"$set": {"url": new_url, "storage": "cloud"}}
+            )
+            
+            return {"status": "migrated", "url": new_url, "message": "Successfully migrated external URL to cloud"}
+        except Exception as e:
+            logger.error(f"Failed to migrate external URL: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to download and migrate: {str(e)}")
+    
+    raise HTTPException(status_code=400, detail="Unknown URL format")
+
 from fastapi.staticfiles import StaticFiles
 
 # =============================================================================
