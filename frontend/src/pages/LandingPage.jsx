@@ -241,7 +241,7 @@ const HeroSection = ({ settings }) => {
               {/* Glow effect */}
               <div className="absolute inset-0 bg-red-600/20 blur-3xl rounded-full"></div>
             </div>
-            <p className="text-white/60 text-lg mt-4 italic font-semibold">The Legend Behind the Tamale</p>
+            <p className="text-white/60 text-lg mt-4 italic font-semibold">(310) 617-7885</p>
           </motion.div>
           
           <motion.p variants={fadeInUp} className="text-white/80 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
