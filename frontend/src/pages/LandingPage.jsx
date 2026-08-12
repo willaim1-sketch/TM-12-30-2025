@@ -706,7 +706,8 @@ const LocationSection = ({ settings }) => {
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-white">Find Us Here</h2>
           </div>
 
-          {/* Opening Hours Block - Cute Card */}
+          {/* Opening Hours Block - Cute Card (can be toggled off in admin) */}
+          {settings?.show_hours !== false && (
           <motion.div variants={fadeInUp} className="mb-12">
             <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-8 max-w-3xl mx-auto shadow-2xl">
               <div className="flex items-center justify-center gap-3 mb-6">
@@ -739,6 +740,7 @@ const LocationSection = ({ settings }) => {
               )}
             </div>
           </motion.div>
+          )}
 
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Info */}

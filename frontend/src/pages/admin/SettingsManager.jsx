@@ -1036,6 +1036,23 @@ const SettingsManager = () => {
               </div>
             </div>
             
+            {/* Toggle to show/hide hours on website */}
+            <div className="flex items-center justify-between p-4 bg-[#2A2A2A] rounded-lg mb-6">
+              <div>
+                <p className="text-white font-medium">Show Hours on Website</p>
+                <p className="text-white/60 text-sm">Toggle off to hide hours section (useful for mobile food trucks)</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={settings.show_hours !== false}
+                  onChange={(e) => updateSettings("show_hours", e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+              </label>
+            </div>
+            
             {/* Initialize days if empty */}
             {(!settings.opening_hours || settings.opening_hours.length === 0) && (
               <div className="text-center p-6 bg-[#2A2A2A] rounded-lg mb-6">
