@@ -817,6 +817,14 @@ const SettingsManager = () => {
                   height={500}
                   description="Character image in hero section"
                 />
+                <ImageUploader
+                  label="Location/Map Image"
+                  value={settings.location_image}
+                  onChange={(val) => updateSettings("location_image", val)}
+                  width={708}
+                  height={945}
+                  description="Image shown in the Location section (next to address & hours)"
+                />
               </div>
             </div>
           </div>

@@ -768,7 +768,7 @@ const LocationSection = ({ settings }) => {
             {/* Map placeholder */}
             <motion.div variants={fadeInUp} className="h-[350px] lg:h-auto rounded-2xl overflow-hidden shadow-xl">
               <img 
-                src="https://images.unsplash.com/photo-1744928869793-3908b4649ad6?w=800"
+                src={settings?.location_image || "https://masteraibots.com/wp-content/uploads/2026/08/Map-Nic-Nacables-BBQ-708x945-1.png"}
                 alt="Restaurant location"
                 className="w-full h-full object-cover"
               />
