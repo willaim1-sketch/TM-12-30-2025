@@ -288,8 +288,8 @@ const VideoSection = ({ settings }) => {
   const [videoError, setVideoError] = React.useState(false);
   const videoRef = React.useRef(null);
   
-  // Default video - local uploads
-  const defaultVideo = "/api/uploads/nic-nackables-header-video.mp4";
+  // Default video - Emergent CDN (URL encoded)
+  const defaultVideo = "https://customer-assets-0z36b82j.emergentagent.net/job_df175a16-41d0-451b-88d8-ff076a4b992e/artifacts/5b1l2wtp_Adobe%20Express%20-%20Header-video-Nic-Nackables-BBQ%20%281%29.mp4";
   const videoUrl = settings?.homepage_video || defaultVideo;
   
   if (!videoUrl) return null;
