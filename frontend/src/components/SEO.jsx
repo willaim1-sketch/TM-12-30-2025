@@ -12,8 +12,8 @@ const SEO = ({
 }) => {
   // Use settings as fallbacks if available
   const siteTitle = title || settings?.meta_title || settings?.site_name || "Nic Nackables BBQ & More";
-  const siteDescription = description || settings?.meta_description || "Authentic homestyle tamales made with love. Big portions, bold flavors!";
-  const siteKeywords = keywords || "BBQ, barbecue, smoked meats, homestyle cooking, Nic Nackables";
+  const siteDescription = description || settings?.meta_description || "Los Angeles, California Food Catering Service. BBQ, comfort food, and more!";
+  const siteKeywords = keywords || "BBQ, barbecue, catering, Los Angeles, California, Nic Nackables, food service";
   
   return (
     <Helmet>
