@@ -450,6 +450,11 @@ class SiteSettings(BaseModel):
     linkedin_url: Optional[str] = None
     opening_hours: List[OpeningHours] = []
     show_hours: bool = True  # Toggle to show/hide hours on website
+    # Homepage Media Section (Video or Image)
+    show_media_section: bool = True  # Toggle to show/hide the media section
+    media_section_type: str = "video"  # "video" or "image"
+    homepage_video: Optional[str] = None  # YouTube URL or direct video URL
+    homepage_media_image: Optional[str] = None  # Image to display instead of video
 
 class SiteSettingsUpdate(BaseModel):
     site_name: Optional[str] = None
@@ -491,6 +496,11 @@ class SiteSettingsUpdate(BaseModel):
     linkedin_url: Optional[str] = None
     opening_hours: Optional[List[OpeningHours]] = None
     show_hours: Optional[bool] = None  # Toggle to show/hide hours on website
+    # Homepage Media Section (Video or Image)
+    show_media_section: Optional[bool] = None  # Toggle to show/hide the media section
+    media_section_type: Optional[str] = None  # "video" or "image"
+    homepage_video: Optional[str] = None  # YouTube URL or direct video URL
+    homepage_media_image: Optional[str] = None  # Image to display instead of video
 
 class BlogPost(BaseModel):
     post_id: str = Field(default_factory=lambda: f"post_{uuid.uuid4().hex[:12]}")

@@ -626,88 +626,175 @@ const SettingsManager = () => {
               />
             </div>
             
-            {/* Homepage Video Section */}
+            {/* Homepage Media Section (Video or Image) */}
             <div className="border-t border-white/10 pt-6">
-              <Label className="text-white/70">Homepage Video (Below Hero)</Label>
-              <p className="text-white/50 text-sm mb-2">
-                Add a YouTube URL, direct video link, or upload a video file. Videos will autoplay on loop (muted).
-              </p>
-              
-              {/* Video URL Input */}
-              <Input
-                value={settings.homepage_video || ""}
-                onChange={(e) => updateSettings("homepage_video", e.target.value)}
-                className="input-dark mt-1"
-                placeholder="https://youtube.com/watch?v=... or paste video URL"
-                data-testid="setting-homepage-video"
-              />
-              
-              {/* Video Upload Button */}
-              <div className="mt-3">
-                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                  <input
-                    type="file"
-                    accept="video/mp4,video/quicktime,video/webm"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      
-                      // Check file size (100MB max)
-                      if (file.size > 100 * 1024 * 1024) {
-                        toast.error("Video must be under 100MB");
-                        return;
-                      }
-                      
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      
-                      toast.info("Uploading video... This may take a moment.");
-                      
-                      try {
-                        const response = await axios.post(`${API}/upload`, formData, {
-                          withCredentials: true,
-                          headers: { "Content-Type": "multipart/form-data" }
-                        });
-                        
-                        // Use the full URL for the video
-                        const videoUrl = response.data.url.startsWith('http') 
-                          ? response.data.url 
-                          : `${process.env.REACT_APP_BACKEND_URL}${response.data.url}`;
-                        
-                        updateSettings("homepage_video", videoUrl);
-                        toast.success(`Video uploaded! Storage: ${response.data.storage === 'cloud' ? 'Cloud (persistent)' : 'Local'}`);
-                      } catch (error) {
-                        console.error("Video upload failed:", error);
-                        toast.error("Failed to upload video");
-                      }
-                    }}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <Label className="text-white text-lg font-semibold">Homepage Media Section</Label>
+                  <p className="text-white/50 text-sm">Display a video or image below the hero section</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-white/60 text-sm">Show Section</span>
+                  <Switch
+                    checked={settings.show_media_section !== false}
+                    onCheckedChange={(checked) => updateSettings("show_media_section", checked)}
+                    data-testid="toggle-media-section"
                   />
-                  <span className="text-white/80 text-sm">Upload Video (MP4, MOV, WebM - max 100MB)</span>
-                </label>
+                </div>
               </div>
               
-              {settings.homepage_video && (
-                <div className="mt-4">
-                  {settings.homepage_video.includes('youtube') || settings.homepage_video.includes('youtu.be') ? (
-                    <div className="bg-green-900/30 border border-green-600/50 rounded-lg p-3 flex items-center gap-2">
-                      <span className="text-green-400">✓</span>
-                      <span className="text-white/80 text-sm">YouTube video will autoplay on loop (muted)</span>
+              {settings.show_media_section !== false && (
+                <div className="space-y-4">
+                  {/* Media Type Selector */}
+                  <div className="bg-[#1A1A1A] rounded-lg p-4">
+                    <Label className="text-white/70 mb-3 block">Display Type</Label>
+                    <div className="flex gap-4">
+                      <label 
+                        className={`flex-1 cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                          (settings.media_section_type || 'video') === 'video' 
+                            ? 'border-red-500 bg-red-500/10' 
+                            : 'border-white/20 hover:border-white/40'
+                        }`}
+                      >
+                        <input 
+                          type="radio" 
+                          name="media_type" 
+                          value="video"
+                          checked={(settings.media_section_type || 'video') === 'video'}
+                          onChange={() => updateSettings("media_section_type", "video")}
+                          className="sr-only"
+                        />
+                        <div className="text-center">
+                          <span className="text-2xl">🎬</span>
+                          <p className="text-white font-medium mt-2">Video</p>
+                          <p className="text-white/50 text-xs">YouTube or uploaded video</p>
+                        </div>
+                      </label>
+                      <label 
+                        className={`flex-1 cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                          settings.media_section_type === 'image' 
+                            ? 'border-red-500 bg-red-500/10' 
+                            : 'border-white/20 hover:border-white/40'
+                        }`}
+                      >
+                        <input 
+                          type="radio" 
+                          name="media_type" 
+                          value="image"
+                          checked={settings.media_section_type === 'image'}
+                          onChange={() => updateSettings("media_section_type", "image")}
+                          className="sr-only"
+                        />
+                        <div className="text-center">
+                          <span className="text-2xl">🖼️</span>
+                          <p className="text-white font-medium mt-2">Image</p>
+                          <p className="text-white/50 text-xs">Static banner image</p>
+                        </div>
+                      </label>
                     </div>
-                  ) : settings.homepage_video.includes('/api/storage/') ? (
-                    <div className="bg-green-900/30 border border-green-600/50 rounded-lg p-3 flex items-center gap-2">
-                      <span className="text-green-400">✓</span>
-                      <span className="text-white/80 text-sm">Cloud-stored video - persists across deployments</span>
+                  </div>
+                  
+                  {/* Video Settings */}
+                  {(settings.media_section_type || 'video') === 'video' && (
+                    <div className="bg-[#1A1A1A] rounded-lg p-4 space-y-3">
+                      <Label className="text-white/70">Video URL or YouTube Link</Label>
+                      <p className="text-white/50 text-sm">
+                        Paste a YouTube URL, direct video link, or upload a video file. Videos autoplay on loop (muted).
+                      </p>
+                      
+                      <Input
+                        value={settings.homepage_video || ""}
+                        onChange={(e) => updateSettings("homepage_video", e.target.value)}
+                        className="input-dark"
+                        placeholder="https://youtube.com/watch?v=... or paste video URL"
+                        data-testid="setting-homepage-video"
+                      />
+                      
+                      {/* Video Upload Button */}
+                      <div>
+                        <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
+                          <input
+                            type="file"
+                            accept="video/mp4,video/quicktime,video/webm"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              
+                              if (file.size > 100 * 1024 * 1024) {
+                                toast.error("Video must be under 100MB");
+                                return;
+                              }
+                              
+                              const formData = new FormData();
+                              formData.append("file", file);
+                              
+                              toast.info("Uploading video... This may take a moment.");
+                              
+                              try {
+                                const response = await axios.post(`${API}/upload`, formData, {
+                                  withCredentials: true,
+                                  headers: { "Content-Type": "multipart/form-data" }
+                                });
+                                
+                                const videoUrl = response.data.url.startsWith('http') 
+                                  ? response.data.url 
+                                  : `${process.env.REACT_APP_BACKEND_URL}${response.data.url}`;
+                                
+                                updateSettings("homepage_video", videoUrl);
+                                toast.success(`Video uploaded! Storage: ${response.data.storage === 'cloud' ? 'Cloud (persistent)' : 'Local'}`);
+                              } catch (error) {
+                                console.error("Video upload failed:", error);
+                                toast.error("Failed to upload video");
+                              }
+                            }}
+                          />
+                          <span className="text-white/80 text-sm">Upload Video (MP4, MOV, WebM - max 100MB)</span>
+                        </label>
+                      </div>
+                      
+                      {settings.homepage_video && (
+                        <div className="mt-2">
+                          {settings.homepage_video.includes('youtube') || settings.homepage_video.includes('youtu.be') ? (
+                            <div className="bg-green-900/30 border border-green-600/50 rounded-lg p-3 flex items-center gap-2">
+                              <span className="text-green-400">✓</span>
+                              <span className="text-white/80 text-sm">YouTube video will autoplay on loop (muted)</span>
+                            </div>
+                          ) : settings.homepage_video.includes('/api/storage/') ? (
+                            <div className="bg-green-900/30 border border-green-600/50 rounded-lg p-3 flex items-center gap-2">
+                              <span className="text-green-400">✓</span>
+                              <span className="text-white/80 text-sm">Cloud-stored video - persists across deployments</span>
+                            </div>
+                          ) : (
+                            <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3">
+                              <span className="text-yellow-400 text-sm">External video URL detected. For persistence, upload directly or use YouTube.</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3">
-                      <span className="text-yellow-400 text-sm">External video URL detected. For persistence, upload directly or use YouTube.</span>
+                  )}
+                  
+                  {/* Image Settings */}
+                  {settings.media_section_type === 'image' && (
+                    <div className="bg-[#1A1A1A] rounded-lg p-4">
+                      <ImageUploader
+                        label="Homepage Banner Image"
+                        value={settings.homepage_media_image}
+                        onChange={(val) => updateSettings("homepage_media_image", val)}
+                        width={1920}
+                        height={800}
+                        description="Full-width banner image (recommended: 1920x800px or wider). This image will replace the video section."
+                      />
                     </div>
                   )}
                 </div>
               )}
-              {!settings.homepage_video && (
-                <p className="text-white/40 text-xs mt-2">Leave empty to hide the video section</p>
+              
+              {settings.show_media_section === false && (
+                <div className="bg-white/5 rounded-lg p-4 text-center">
+                  <p className="text-white/50">Media section is hidden. Toggle on to show video or image below the hero.</p>
+                </div>
               )}
             </div>
           </div>

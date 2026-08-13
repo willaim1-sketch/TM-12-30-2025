@@ -282,12 +282,52 @@ const HeroSection = ({ settings }) => {
   );
 };
 
-// Video Section - Full Width Autoplay Loop (YouTube or Direct Video)
-const VideoSection = ({ settings }) => {
+// Media Section - Full Width (Video or Image based on admin settings)
+const MediaSection = ({ settings }) => {
   const [videoLoaded, setVideoLoaded] = React.useState(false);
   const [videoError, setVideoError] = React.useState(false);
   const videoRef = React.useRef(null);
   
+  // Check if section should be shown
+  if (settings?.show_media_section === false) {
+    return null;
+  }
+  
+  const mediaType = settings?.media_section_type || "video";
+  
+  // IMAGE MODE
+  if (mediaType === "image") {
+    const imageUrl = settings?.homepage_media_image;
+    if (!imageUrl) {
+      return null; // No image set, hide section
+    }
+    
+    const fullImageUrl = imageUrl.startsWith('/api') 
+      ? `${process.env.REACT_APP_BACKEND_URL}${imageUrl}`
+      : imageUrl;
+    
+    return (
+      <section className="w-full bg-black">
+        <div className="relative w-full overflow-hidden" style={{ maxHeight: '80vh' }}>
+          <img 
+            src={fullImageUrl}
+            alt="Nic Nackables BBQ"
+            className="w-full h-auto object-cover"
+            style={{ maxHeight: '80vh', width: '100%', objectFit: 'cover' }}
+          />
+          {settings?.video_overlay_text && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <h2 className="text-white text-3xl md:text-5xl font-display font-bold text-center px-4">
+                {settings.video_overlay_text}
+              </h2>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+  
+  // VIDEO MODE (default)
   // Default video - Emergent CDN (URL encoded)
   const defaultVideo = "https://customer-assets-0z36b82j.emergentagent.net/job_df175a16-41d0-451b-88d8-ff076a4b992e/artifacts/5b1l2wtp_Adobe%20Express%20-%20Header-video-Nic-Nackables-BBQ%20%281%29.mp4";
   const videoUrl = settings?.homepage_video || defaultVideo;
@@ -662,7 +702,7 @@ const TestimonialsSection = ({ testimonials }) => {
                   <Star key={i} size={18} className="text-red-500 fill-red-500" />
                 ))}
               </div>
-              <p className="text-white/80 italic mb-6">"{testimonial.content}"</p>
+              <p className="text-white/80 italic mb-6">&ldquo;{testimonial.content}&rdquo;</p>
               <div>
                 <p className="text-white font-semibold">{testimonial.author_name}</p>
                 {testimonial.author_title && (
@@ -955,7 +995,7 @@ const LandingPage = () => {
       
       {/* Default Page Content */}
       <HeroSection settings={settings} />
-      <VideoSection settings={settings} />
+      <MediaSection settings={settings} />
       <AboutSection settings={settings} />
       <FeaturedMenuSection items={featuredItems} />
       <MerchPromoSection settings={settings} />

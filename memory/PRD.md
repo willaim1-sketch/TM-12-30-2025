@@ -88,6 +88,13 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Single-file migration via clicking Local badge or cloud button
 - [x] Local files deleted after successful migration to reclaim disk space
 
+### Homepage Media Section Controls (December 2025)
+- [x] **Toggle** to show/hide the entire media section below hero
+- [x] **Display Type selector** - switch between Video or Image mode
+- [x] **Video mode** - YouTube URL, direct video link, or upload video
+- [x] **Image mode** - Upload custom banner image (1920x800px recommended)
+- [x] Section gracefully hidden when no media is uploaded
+
 ## Role System
 | Role | is_admin | is_staff | Admin Panel Access |
 |------|----------|----------|-------------------|
