@@ -448,7 +448,7 @@ const SettingsManager = () => {
           <div className="card-dark p-6 space-y-6">
             <div>
               <h3 className="text-xl font-semibold text-white mb-2">Navigation Menu</h3>
-              <p className="text-white/60">Add, remove, and reorder menu items. These will appear in the navigation bar.</p>
+              <p className="text-white/60">Manage your main navigation menu. Add, remove, reorder, and toggle visibility of menu items.</p>
             </div>
             
             {/* Add new menu item */}
@@ -467,9 +467,12 @@ const SettingsManager = () => {
                 <Input
                   value={newNavItem.url}
                   onChange={(e) => setNewNavItem({ ...newNavItem, url: e.target.value })}
-                  placeholder="e.g., /catering or https://..."
+                  placeholder="/page, #section, or https://..."
                   className="input-dark mt-1"
                 />
+                <p className="text-white/40 text-xs mt-1">
+                  Use # for page sections (e.g., #about), / for pages (e.g., /menu), or full URL for external links
+                </p>
               </div>
               <div className="flex items-end">
                 <Button onClick={addNavItem} className="btn-primary w-full">
@@ -479,27 +482,76 @@ const SettingsManager = () => {
               </div>
             </div>
             
-            {/* Default menu items info */}
-            <div className="p-4 bg-[#1A1A1A] rounded-lg border border-white/10">
-              <p className="text-white/60 text-sm mb-2">📌 <strong className="text-white">Default items</strong> (always shown):</p>
-              <div className="flex flex-wrap gap-2">
-                {["About", "Menu", "Merch", "Reviews", "Location"].map(item => (
-                  <span key={item} className="px-3 py-1 bg-[#2A2A2A] rounded text-white/70 text-sm">{item}</span>
-                ))}
+            {/* Quick add defaults button */}
+            {(settings.nav_menu || []).length === 0 && (
+              <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-white/70 text-sm mb-3">
+                  <strong className="text-white">Get started quickly:</strong> Add the default menu items with one click.
+                </p>
+                <Button 
+                  onClick={() => {
+                    const defaultItems = [
+                      { id: 'about', label: 'About', url: '#about', visible: true },
+                      { id: 'menu', label: 'Menu', url: '/menu', visible: true },
+                      { id: 'merch', label: 'Merch', url: '/merch', visible: true },
+                      { id: 'reviews', label: 'Reviews', url: '#testimonials', visible: true },
+                      { id: 'location', label: 'Location', url: '#location', visible: true },
+                    ];
+                    updateSettings("nav_menu", defaultItems);
+                    toast.success("Default menu items added!");
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Default Menu Items
+                </Button>
               </div>
-            </div>
+            )}
             
-            {/* Custom menu items */}
+            {/* Menu items list */}
             <div>
-              <Label className="text-white/70 mb-3 block">Custom Menu Items ({(settings.nav_menu || []).length})</Label>
+              <Label className="text-white/70 mb-3 block">
+                Menu Items ({(settings.nav_menu || []).length})
+                {(settings.nav_menu || []).length === 0 && <span className="text-white/40 ml-2">(Using defaults: About, Menu, Merch, Reviews, Location)</span>}
+              </Label>
               {(settings.nav_menu || []).length === 0 ? (
                 <div className="p-6 bg-[#2A2A2A] rounded-lg text-center">
-                  <p className="text-white/50">No custom menu items. Add items above.</p>
+                  <p className="text-white/50 mb-2">No custom menu items configured.</p>
+                  <p className="text-white/40 text-sm">The default menu items will be shown. Add items above to customize.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {(settings.nav_menu || []).map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-3 bg-[#2A2A2A] rounded-lg">
+                  {(settings.nav_menu || []).map((item, index) => (
+                    <div key={item.id} className="flex items-center gap-4 p-3 bg-[#2A2A2A] rounded-lg group">
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => {
+                            if (index === 0) return;
+                            const items = [...(settings.nav_menu || [])];
+                            [items[index], items[index - 1]] = [items[index - 1], items[index]];
+                            updateSettings("nav_menu", items);
+                          }}
+                          disabled={index === 0}
+                          className="p-1 text-white/30 hover:text-white disabled:opacity-30"
+                          title="Move up"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          onClick={() => {
+                            const items = settings.nav_menu || [];
+                            if (index === items.length - 1) return;
+                            const newItems = [...items];
+                            [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+                            updateSettings("nav_menu", newItems);
+                          }}
+                          disabled={index === (settings.nav_menu || []).length - 1}
+                          className="p-1 text-white/30 hover:text-white disabled:opacity-30"
+                          title="Move down"
+                        >
+                          ▼
+                        </button>
+                      </div>
                       <div className="flex-1">
                         <Input
                           value={item.label}
@@ -535,6 +587,16 @@ const SettingsManager = () => {
                   ))}
                 </div>
               )}
+            </div>
+            
+            {/* Help text */}
+            <div className="p-4 bg-[#1A1A1A] rounded-lg border border-white/10">
+              <p className="text-white/60 text-sm">
+                <strong className="text-white">URL Tips:</strong><br/>
+                • <code className="text-red-400">#about</code> - Scrolls to section on homepage<br/>
+                • <code className="text-red-400">/menu</code> - Goes to a page on your site<br/>
+                • <code className="text-red-400">https://...</code> - Opens external link in new tab
+              </p>
             </div>
           </div>
         </TabsContent>
