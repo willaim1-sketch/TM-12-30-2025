@@ -159,9 +159,9 @@ const ProtectedRoute = ({ children }) => {
     const checkAuth = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/api/auth/me`, { withCredentials: true });
-        // Allow admin or staff users to access admin panel
-        if (!response.data.is_admin && !response.data.is_staff) {
-          console.log("User is not admin or staff, redirecting to login");
+        // Allow admin, staff, or store_owner users to access admin panel
+        if (!response.data.is_admin && !response.data.is_staff && !response.data.is_store_owner) {
+          console.log("User is not admin, staff, or store owner, redirecting to login");
           setIsAuthenticated(false);
           navigate('/admin/login');
           return;

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail, DollarSign, CheckCircle } from "lucide-react";
+import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail, DollarSign, CheckCircle, Percent, Lock } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -9,6 +9,7 @@ import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { toast } from "sonner";
+import { AuthContext } from "../../App";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -121,9 +122,11 @@ const ImageUploader = ({ label, value, onChange, width, height, description }) =
 };
 
 const SettingsManager = () => {
+  const { user } = useContext(AuthContext);
   const [settings, setSettings] = useState(null);
   const [stripeSettings, setStripeSettings] = useState({ stripe_api_key: "", stripe_webhook_secret: "" });
   const [sendgridSettings, setSendgridSettings] = useState({ sendgrid_api_key: "", from_email: "", from_name: "" });
+  const [platformEarnings, setPlatformEarnings] = useState(null);
   const [paypalSettings, setPaypalSettings] = useState({ 
     enabled: false, 
     mode: "sandbox", 
@@ -154,7 +157,17 @@ const SettingsManager = () => {
     fetchStripeSettings();
     fetchSendgridSettings();
     fetchPaymentSettings();
+    fetchPlatformEarnings();
   }, []);
+
+  const fetchPlatformEarnings = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/platform-earnings`, { withCredentials: true });
+      setPlatformEarnings(response.data);
+    } catch (error) {
+      // Only admins can access this
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -400,6 +413,12 @@ const SettingsManager = () => {
             <Mail size={16} className="mr-1" />
             SendGrid
           </TabsTrigger>
+          {user?.is_admin && (
+            <TabsTrigger value="platform" className="data-[state=active]:bg-red-600">
+              <Lock size={16} className="mr-1" />
+              Platform Fees
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="general">
@@ -1911,6 +1930,158 @@ const SettingsManager = () => {
             </div>
           </div>
         </TabsContent>
+
+        {/* Platform Fees Tab - Admin Only */}
+        {user?.is_admin && (
+          <TabsContent value="platform">
+            <div className="card-dark p-6 space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-red-500/20 rounded-lg">
+                  <Lock className="text-red-500" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white">Platform Fees</h3>
+                  <p className="text-white/60 text-sm">Configure fees charged per order. Only you (platform admin) can see this.</p>
+                </div>
+              </div>
+              
+              <Alert className="bg-yellow-500/10 border-yellow-500/30">
+                <AlertCircle className="text-yellow-500" size={18} />
+                <AlertDescription className="text-white/70">
+                  Platform fees are hidden from store owners and customers. They are calculated on each order and shown only in your admin reports.
+                </AlertDescription>
+              </Alert>
+              
+              {/* Fee Type Selection */}
+              <div className="space-y-4">
+                <Label className="text-white text-lg">Fee Type</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label 
+                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                      (settings.platform_fee_type || 'none') === 'none' 
+                        ? 'border-red-500 bg-red-500/10' 
+                        : 'border-white/20 hover:border-white/40'
+                    }`}
+                  >
+                    <input 
+                      type="radio" 
+                      name="fee_type" 
+                      value="none"
+                      checked={(settings.platform_fee_type || 'none') === 'none'}
+                      onChange={() => updateSettings("platform_fee_type", "none")}
+                      className="sr-only"
+                    />
+                    <div className="text-center">
+                      <X size={32} className="mx-auto text-white/60 mb-2" />
+                      <p className="text-white font-medium">No Fee</p>
+                      <p className="text-white/50 text-xs">Orders pass through without platform fees</p>
+                    </div>
+                  </label>
+                  
+                  <label 
+                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                      settings.platform_fee_type === 'flat' 
+                        ? 'border-red-500 bg-red-500/10' 
+                        : 'border-white/20 hover:border-white/40'
+                    }`}
+                  >
+                    <input 
+                      type="radio" 
+                      name="fee_type" 
+                      value="flat"
+                      checked={settings.platform_fee_type === 'flat'}
+                      onChange={() => updateSettings("platform_fee_type", "flat")}
+                      className="sr-only"
+                    />
+                    <div className="text-center">
+                      <DollarSign size={32} className="mx-auto text-green-400 mb-2" />
+                      <p className="text-white font-medium">Flat Fee per Item</p>
+                      <p className="text-white/50 text-xs">Charge a fixed amount for each item sold</p>
+                    </div>
+                  </label>
+                  
+                  <label 
+                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                      settings.platform_fee_type === 'percentage' 
+                        ? 'border-red-500 bg-red-500/10' 
+                        : 'border-white/20 hover:border-white/40'
+                    }`}
+                  >
+                    <input 
+                      type="radio" 
+                      name="fee_type" 
+                      value="percentage"
+                      checked={settings.platform_fee_type === 'percentage'}
+                      onChange={() => updateSettings("platform_fee_type", "percentage")}
+                      className="sr-only"
+                    />
+                    <div className="text-center">
+                      <Percent size={32} className="mx-auto text-blue-400 mb-2" />
+                      <p className="text-white font-medium">Percentage of Order</p>
+                      <p className="text-white/50 text-xs">Charge a percentage of the order subtotal</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              {/* Fee Amount */}
+              {settings.platform_fee_type && settings.platform_fee_type !== 'none' && (
+                <div className="p-4 bg-[#1A1A1A] rounded-lg">
+                  <Label className="text-white/70">
+                    {settings.platform_fee_type === 'flat' ? 'Fee per Item ($)' : 'Fee Percentage (%)'}
+                  </Label>
+                  <div className="flex items-center gap-2 mt-2">
+                    {settings.platform_fee_type === 'flat' && (
+                      <span className="text-white/50 text-xl">$</span>
+                    )}
+                    <Input
+                      type="number"
+                      step={settings.platform_fee_type === 'flat' ? '0.01' : '0.1'}
+                      min="0"
+                      value={settings.platform_fee_amount || 0}
+                      onChange={(e) => updateSettings("platform_fee_amount", parseFloat(e.target.value) || 0)}
+                      className="input-dark w-32"
+                      placeholder="0.00"
+                    />
+                    {settings.platform_fee_type === 'percentage' && (
+                      <span className="text-white/50 text-xl">%</span>
+                    )}
+                  </div>
+                  <p className="text-white/40 text-sm mt-2">
+                    {settings.platform_fee_type === 'flat' 
+                      ? `You will earn $${(settings.platform_fee_amount || 0).toFixed(2)} for each item sold.`
+                      : `You will earn ${(settings.platform_fee_amount || 0).toFixed(1)}% of each order's subtotal.`
+                    }
+                  </p>
+                </div>
+              )}
+              
+              {/* Earnings Summary */}
+              {platformEarnings && (
+                <div className="border-t border-white/10 pt-6">
+                  <h4 className="text-white font-semibold mb-4">Platform Earnings Summary</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <p className="text-green-400 text-sm">Completed Earnings</p>
+                      <p className="text-white text-2xl font-bold">${platformEarnings.completed_earnings?.toFixed(2) || '0.00'}</p>
+                    </div>
+                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                      <p className="text-yellow-400 text-sm">Pending Earnings</p>
+                      <p className="text-white text-2xl font-bold">${platformEarnings.pending_earnings?.toFixed(2) || '0.00'}</p>
+                    </div>
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                      <p className="text-blue-400 text-sm">Total Earnings</p>
+                      <p className="text-white text-2xl font-bold">${platformEarnings.total_earnings?.toFixed(2) || '0.00'}</p>
+                    </div>
+                  </div>
+                  <p className="text-white/40 text-sm mt-4">
+                    Based on {platformEarnings.total_orders_with_fees || 0} orders with platform fees.
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

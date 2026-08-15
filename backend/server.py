@@ -455,6 +455,9 @@ class SiteSettings(BaseModel):
     media_section_type: str = "video"  # "video" or "image"
     homepage_video: Optional[str] = None  # YouTube URL or direct video URL
     homepage_media_image: Optional[str] = None  # Image to display instead of video
+    # Platform Fee Settings (Admin only - hidden from store owners and customers)
+    platform_fee_type: str = "none"  # "none", "flat", "percentage"
+    platform_fee_amount: float = 0.0  # Flat amount in dollars OR percentage (e.g., 5.0 = 5%)
 
 class SiteSettingsUpdate(BaseModel):
     site_name: Optional[str] = None
@@ -501,6 +504,9 @@ class SiteSettingsUpdate(BaseModel):
     media_section_type: Optional[str] = None  # "video" or "image"
     homepage_video: Optional[str] = None  # YouTube URL or direct video URL
     homepage_media_image: Optional[str] = None  # Image to display instead of video
+    # Platform Fee Settings (Admin only)
+    platform_fee_type: Optional[str] = None  # "none", "flat", "percentage"
+    platform_fee_amount: Optional[float] = None
 
 class BlogPost(BaseModel):
     post_id: str = Field(default_factory=lambda: f"post_{uuid.uuid4().hex[:12]}")
@@ -573,6 +579,7 @@ class User(BaseModel):
     role: str = "customer"  # customer, staff, admin
     is_admin: bool = False
     is_staff: bool = False  # Staff can manage orders but not settings/users
+    is_store_owner: bool = False  # Store owner can manage orders, messages, menu but not platform fees
     newsletter_subscribed: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
@@ -701,6 +708,15 @@ async def require_staff_or_admin(request: Request) -> User:
         raise HTTPException(status_code=401, detail="Not authenticated")
     if not user.is_admin and not user.is_staff:
         raise HTTPException(status_code=403, detail="Staff or admin access required")
+    return user
+
+async def require_store_owner_or_admin(request: Request) -> User:
+    """Allow store owners or admin to access most store management features (not platform fees)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    if not user.is_admin and not user.is_store_owner and not user.is_staff:
+        raise HTTPException(status_code=403, detail="Store owner or admin access required")
     return user
 
 async def check_brute_force(identifier: str) -> bool:
@@ -886,7 +902,7 @@ async def get_testimonials(featured: Optional[bool] = None):
 
 # Site Settings (Public)
 @api_router.get("/settings")
-async def get_site_settings():
+async def get_site_settings(request: Request):
     settings = await db.site_settings.find_one({"settings_id": "main_settings"}, {"_id": 0})
     
     # Create default settings with all fields
@@ -895,12 +911,19 @@ async def get_site_settings():
     
     if not settings:
         await db.site_settings.insert_one(default_dict)
-        return default_dict
+        settings = default_dict
+    else:
+        # Merge existing settings with defaults to ensure new fields exist
+        for key, value in default_dict.items():
+            if key not in settings:
+                settings[key] = value
     
-    # Merge existing settings with defaults to ensure new fields exist
-    for key, value in default_dict.items():
-        if key not in settings:
-            settings[key] = value
+    # Hide platform fee settings from public (non-admin users)
+    # Check if current user is admin
+    current_user = await get_current_user(request)
+    if not current_user or not current_user.is_admin:
+        settings.pop("platform_fee_type", None)
+        settings.pop("platform_fee_amount", None)
     
     return settings
 
@@ -986,6 +1009,20 @@ async def create_order(order_data: OrderCreate, request: Request):
     tax = round(subtotal * 0.0825, 2)  # 8.25% tax
     total = round(subtotal + tax, 2)
     
+    # Calculate platform fee (hidden from customer, admin only)
+    settings = await db.settings.find_one({"settings_id": "main_settings"})
+    platform_fee = 0.0
+    platform_fee_type = settings.get("platform_fee_type", "none") if settings else "none"
+    platform_fee_amount = float(settings.get("platform_fee_amount", 0)) if settings else 0.0
+    
+    if platform_fee_type == "flat":
+        # Flat fee per item
+        total_items = sum(item.quantity for item in order_data.items)
+        platform_fee = round(platform_fee_amount * total_items, 2)
+    elif platform_fee_type == "percentage":
+        # Percentage of subtotal
+        platform_fee = round(subtotal * (platform_fee_amount / 100), 2)
+    
     # Get payment method (default to stripe)
     payment_method = getattr(order_data, 'payment_method', 'stripe') or 'stripe'
     
@@ -1012,6 +1049,7 @@ async def create_order(order_data: OrderCreate, request: Request):
     order_dict["created_at"] = order_dict["created_at"].isoformat()
     order_dict["items"] = verified_items  # Use DB-verified prices, not client prices
     order_dict["payment_method"] = payment_method
+    order_dict["platform_fee"] = platform_fee  # Hidden from customer, visible to admin only
     
     # Handle different payment methods
     if payment_method == 'stripe':
@@ -1343,6 +1381,7 @@ async def login(data: LoginRequest, request: Request):
         "role": user.get("role", "customer"),
         "is_admin": user.get("is_admin", False),
         "is_staff": user.get("is_staff", False),
+        "is_store_owner": user.get("is_store_owner", False),
         "newsletter_subscribed": user.get("newsletter_subscribed", True)
     }
     
@@ -1670,12 +1709,55 @@ async def get_all_categories(user: User = Depends(require_admin)):
 
 # Orders Management (Admin and Staff)
 @api_router.get("/admin/orders")
-async def get_orders(status: Optional[str] = None, user: User = Depends(require_staff_or_admin)):
+async def get_orders(request: Request, status: Optional[str] = None, user: User = Depends(require_staff_or_admin)):
     query = {}
     if status:
         query["status"] = status
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    
+    # Hide platform_fee from non-admin users (store owners and staff can't see it)
+    if not user.is_admin:
+        for order in orders:
+            order.pop("platform_fee", None)
+    
     return orders
+
+@api_router.get("/admin/platform-earnings")
+async def get_platform_earnings(user: User = Depends(require_admin)):
+    """Get platform fee earnings summary (admin only)"""
+    # Get all orders with platform fees
+    orders = await db.orders.find(
+        {"platform_fee": {"$exists": True, "$gt": 0}},
+        {"_id": 0, "order_id": 1, "total": 1, "platform_fee": 1, "status": 1, "created_at": 1}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Calculate totals
+    total_earnings = sum(order.get("platform_fee", 0) for order in orders)
+    completed_earnings = sum(
+        order.get("platform_fee", 0) 
+        for order in orders 
+        if order.get("status") in ["completed", "ready", "paid"]
+    )
+    pending_earnings = sum(
+        order.get("platform_fee", 0) 
+        for order in orders 
+        if order.get("status") in ["pending", "confirmed", "preparing"]
+    )
+    
+    # Get current fee settings
+    settings = await db.site_settings.find_one({"settings_id": "main_settings"}, {"_id": 0})
+    fee_type = settings.get("platform_fee_type", "none") if settings else "none"
+    fee_amount = settings.get("platform_fee_amount", 0) if settings else 0
+    
+    return {
+        "total_earnings": round(total_earnings, 2),
+        "completed_earnings": round(completed_earnings, 2),
+        "pending_earnings": round(pending_earnings, 2),
+        "total_orders_with_fees": len(orders),
+        "current_fee_type": fee_type,
+        "current_fee_amount": fee_amount,
+        "recent_orders": orders[:20]  # Last 20 orders with fees
+    }
 
 @api_router.put("/admin/orders/{order_id}")
 async def update_order(order_id: str, data: dict, user: User = Depends(require_staff_or_admin)):
@@ -2579,13 +2661,14 @@ async def update_user_role(
     role_data: UserRoleUpdate,
     current_user: User = Depends(get_current_user)
 ):
-    """Update a user's role to staff or customer (admin only)"""
+    """Update a user's role to staff, store_owner, or customer (admin only)"""
     if not current_user or not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     # Validate role
-    if role_data.role not in ["customer", "staff"]:
-        raise HTTPException(status_code=400, detail="Role must be 'customer' or 'staff'")
+    valid_roles = ["customer", "staff", "store_owner"]
+    if role_data.role not in valid_roles:
+        raise HTTPException(status_code=400, detail=f"Role must be one of: {', '.join(valid_roles)}")
     
     user = await db.users.find_one({"user_id": user_id})
     if not user:
@@ -2598,12 +2681,14 @@ async def update_user_role(
     
     # Update role
     is_staff = role_data.role == "staff"
+    is_store_owner = role_data.role == "store_owner"
     await db.users.update_one(
         {"user_id": user_id},
         {"$set": {
             "role": role_data.role,
             "is_staff": is_staff,
-            "is_admin": False  # Staff cannot be admin
+            "is_store_owner": is_store_owner,
+            "is_admin": False  # Cannot promote to admin via this endpoint
         }}
     )
     

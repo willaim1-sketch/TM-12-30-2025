@@ -29,20 +29,20 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // All sidebar items with role restrictions
 const allSidebarItems = [
-  { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true, staffAllowed: true },
-  { path: "/admin/analytics", icon: TrendingUp, label: "Analytics", staffAllowed: false },
-  { path: "/admin/page-builder", icon: Layout, label: "Page Builder", staffAllowed: false },
-  { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu", staffAllowed: false },
-  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop", staffAllowed: false },
-  { path: "/admin/orders", icon: ShoppingCart, label: "Orders", staffAllowed: true },
-  { path: "/admin/contacts", icon: MessageSquare, label: "Messages", staffAllowed: true },
-  { path: "/admin/testimonials", icon: Star, label: "Testimonials", staffAllowed: false },
-  { path: "/admin/blog", icon: FileText, label: "Blog", staffAllowed: false },
-  { path: "/admin/faq", icon: HelpCircle, label: "FAQ", staffAllowed: false },
-  { path: "/admin/media", icon: Image, label: "Media", staffAllowed: false },
-  { path: "/admin/seo", icon: Globe, label: "SEO", staffAllowed: false },
-  { path: "/admin/users", icon: Users, label: "Users", staffAllowed: false },
-  { path: "/admin/settings", icon: Settings, label: "Settings", staffAllowed: false },
+  { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true, staffAllowed: true, storeOwnerAllowed: true },
+  { path: "/admin/analytics", icon: TrendingUp, label: "Analytics", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/page-builder", icon: Layout, label: "Page Builder", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/orders", icon: ShoppingCart, label: "Orders", staffAllowed: true, storeOwnerAllowed: true },
+  { path: "/admin/contacts", icon: MessageSquare, label: "Messages", staffAllowed: true, storeOwnerAllowed: true },
+  { path: "/admin/testimonials", icon: Star, label: "Testimonials", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/blog", icon: FileText, label: "Blog", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/faq", icon: HelpCircle, label: "FAQ", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/media", icon: Image, label: "Media", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/seo", icon: Globe, label: "SEO", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/users", icon: Users, label: "Users", staffAllowed: false, storeOwnerAllowed: false }, // Admin only
+  { path: "/admin/settings", icon: Settings, label: "Settings", staffAllowed: false, storeOwnerAllowed: true }, // But platform fees hidden
 ];
 
 const DashboardHome = () => {
@@ -63,8 +63,8 @@ const DashboardHome = () => {
           axios.get(`${API}/admin/contacts`, { withCredentials: true })
         ];
         
-        // Admins can see all stats
-        if (user?.is_admin) {
+        // Admins and store owners can see all stats
+        if (user?.is_admin || user?.is_store_owner) {
           requests.push(
             axios.get(`${API}/admin/menu/items`, { withCredentials: true }),
             axios.get(`${API}/admin/testimonials`, { withCredentials: true })
@@ -76,8 +76,8 @@ const DashboardHome = () => {
         setStats({
           orders: responses[0].data?.length || 0,
           contacts: responses[1].data?.filter(c => !c.is_read)?.length || 0,
-          menuItems: user?.is_admin ? (responses[2]?.data?.length || 0) : 0,
-          testimonials: user?.is_admin ? (responses[3]?.data?.length || 0) : 0
+          menuItems: (user?.is_admin || user?.is_store_owner) ? (responses[2]?.data?.length || 0) : 0,
+          testimonials: (user?.is_admin || user?.is_store_owner) ? (responses[3]?.data?.length || 0) : 0
         });
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -88,7 +88,7 @@ const DashboardHome = () => {
   }, [user]);
 
   // Show different stat cards based on role
-  const statCards = user?.is_admin ? [
+  const statCards = (user?.is_admin || user?.is_store_owner) ? [
     { label: "Total Orders", value: stats.orders, icon: ShoppingCart, color: "text-green-500" },
     { label: "Menu Items", value: stats.menuItems, icon: UtensilsCrossed, color: "text-red-400" },
     { label: "Unread Messages", value: stats.contacts, icon: MessageSquare, color: "text-yellow-500" },
@@ -192,6 +192,8 @@ const AdminDashboard = () => {
   const sidebarItems = allSidebarItems.filter(item => {
     // Admins see everything
     if (user?.is_admin) return true;
+    // Store owners see most things except Users
+    if (user?.is_store_owner) return item.storeOwnerAllowed;
     // Staff only see allowed items
     return item.staffAllowed;
   });

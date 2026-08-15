@@ -259,12 +259,17 @@ const UserManager = () => {
                           Admin
                         </span>
                       )}
-                      {user.is_staff && !user.is_admin && (
+                      {user.is_store_owner && !user.is_admin && (
+                        <span className="px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
+                          Store Owner
+                        </span>
+                      )}
+                      {user.is_staff && !user.is_admin && !user.is_store_owner && (
                         <span className="px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-400 rounded-full">
                           Staff
                         </span>
                       )}
-                      {user.role === "customer" && !user.is_admin && !user.is_staff && (
+                      {user.role === "customer" && !user.is_admin && !user.is_staff && !user.is_store_owner && (
                         <span className="px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">
                           Customer
                         </span>
@@ -460,19 +465,32 @@ const UserManager = () => {
                   Customer - Can place orders only
                 </SelectItem>
                 <SelectItem value="staff" className="text-white hover:bg-white/10">
-                  Staff - Can manage orders
+                  Staff - Can manage orders & messages
+                </SelectItem>
+                <SelectItem value="store_owner" className="text-white hover:bg-white/10">
+                  Store Owner - Full store access (no platform fees)
                 </SelectItem>
               </SelectContent>
             </Select>
             
             <div className="mt-4 p-3 rounded-lg bg-white/5 text-sm text-white/60">
-              {newRole === "staff" ? (
+              {newRole === "store_owner" ? (
+                <div>
+                  <strong className="text-green-400">Store Owner permissions:</strong>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    <li>Manage menu, orders, and messages</li>
+                    <li>Access analytics and media</li>
+                    <li>Edit site settings and blog</li>
+                    <li className="text-yellow-400">Cannot see platform fees or user management</li>
+                  </ul>
+                </div>
+              ) : newRole === "staff" ? (
                 <div>
                   <strong className="text-purple-400">Staff permissions:</strong>
                   <ul className="mt-2 list-disc list-inside space-y-1">
                     <li>View and manage orders</li>
                     <li>Update order status</li>
-                    <li>Send order emails</li>
+                    <li>Respond to customer messages</li>
                   </ul>
                 </div>
               ) : (
