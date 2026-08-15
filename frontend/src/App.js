@@ -200,8 +200,9 @@ const ProtectedRoute = ({ children }) => {
 function AppRouter() {
   const location = useLocation();
 
-  // Check for session_id in hash SYNCHRONOUSLY during render (for admin Google OAuth)
-  if (location.hash?.includes('session_id=')) {
+  // Check for session_id in hash SYNCHRONOUSLY during render (for admin Google OAuth ONLY)
+  // Only intercept if the path is admin-related to avoid breaking customer OAuth
+  if (location.hash?.includes('session_id=') && location.pathname.startsWith('/admin')) {
     return <AdminAuthCallback />;
   }
 
