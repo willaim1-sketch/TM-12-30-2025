@@ -150,7 +150,7 @@ const BlogPage = () => {
             Hungry Yet?
           </h2>
           <p className="text-white/60 mb-8">
-            Order our delicious tamales online and pick them up fresh!
+            Order BBQ from Nic Nackables Flavorhood
           </p>
           <Link to="/order">
             <Button className="btn-primary" data-testid="blog-footer-order-btn">Order Now</Button>

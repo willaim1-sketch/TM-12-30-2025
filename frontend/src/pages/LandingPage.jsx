@@ -232,7 +232,7 @@ const HeroSection = ({ settings }) => {
           </motion.p>
           
           <motion.h1 variants={fadeInUp} className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold text-white leading-tight">
-            <span className="text-white">{settings?.hero_title || "Big, Bold Tamales"}</span>
+            <span className="text-white">{settings?.hero_title || "Big, Bold BBQ Flavors"}</span>
           </motion.h1>
           
           <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-white/80 max-w-2xl mt-4">
@@ -256,7 +256,7 @@ const HeroSection = ({ settings }) => {
                   />
                 ) : null}
                 <svg viewBox="0 0 100 140" className={`w-full h-full drop-shadow-2xl ${settings?.mascot_image ? 'hidden' : ''}`}>
-                  {/* Chef silhouette with tamale - using warm red/maroon tones for visibility */}
+                  {/* Chef silhouette with BBQ and More - using warm red/maroon tones for visibility */}
                   <defs>
                     <linearGradient id="silhouetteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" stopColor="#7f1d1d" />
@@ -287,7 +287,7 @@ const HeroSection = ({ settings }) => {
           </motion.div>
           
           <motion.p variants={fadeInUp} className="text-white/80 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
-            {settings?.hero_subtitle || "Just like Mom makes! Big portions, bold flavors, and the famous Super Dooper Dooper Tamale that put us on the map."}
+            {settings?.hero_subtitle || "Just like Mom makes! Big portions, bold flavors, and BBQ that helped put California on the Map."}
           </motion.p>
           
           <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -691,7 +691,7 @@ const OrderCTASection = () => {
             Skip the Line, <span className="text-red-500 italic">Order Online</span>
           </motion.h2>
           <motion.p variants={fadeInUp} className="text-white/80 text-lg max-w-2xl mx-auto">
-            Big tamales, beans, rice, and guac - ready when you are. Order now and pick up hot & fresh!
+            Big BBQ Flavor in the Flavorhood - Nic Nackables BBQ. Order now and pick up hot & fresh!
           </motion.p>
           <motion.div variants={fadeInUp}>
             <Link to="/order">
@@ -899,7 +899,7 @@ const Footer = ({ settings }) => {
               {settings?.site_name || "Nic Nackables"}
             </h3>
             <p className="text-white/60 mb-6 text-lg">
-              Home-style fast food tamales made with love. Big portions, bold flavors!
+              Home-style BBQ made with love. Big portions, bold flavors!
             </p>
             <div className="flex flex-wrap gap-4">
               {settings?.facebook_url && (
@@ -965,7 +965,7 @@ const Footer = ({ settings }) => {
         </div>
 
         <div className="border-t border-white/10 pt-8 text-center text-white/50 text-base">
-          <p>&copy; {new Date().getFullYear()} {settings?.site_name || "Nic Nackables"}. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {settings?.site_name || "Nic Nackables"}. by Lawrence Williams. All rights reserved.</p>
         </div>
       </div>
     </footer>
