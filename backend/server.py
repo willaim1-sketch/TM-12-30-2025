@@ -666,11 +666,9 @@ async def get_current_user(request: Request) -> Optional[User]:
             payload = jwt.decode(access_token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
             if payload.get("type") != "access":
                 return None
-            user = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
+            user = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0, "password_hash": 0})
             if user:
-                # Remove password_hash from response
-                user.pop("password_hash", None)
-                return User(**user)
+                return _safe_user_from_dict(user)
         except jwt.ExpiredSignatureError:
             return None
         except jwt.InvalidTokenError:
@@ -686,12 +684,39 @@ async def get_current_user(request: Request) -> Optional[User]:
             if expires_at.tzinfo is None:
                 expires_at = expires_at.replace(tzinfo=timezone.utc)
             if expires_at >= datetime.now(timezone.utc):
-                user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
+                user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0, "password_hash": 0})
                 if user:
-                    user.pop("password_hash", None)
-                    return User(**user)
+                    return _safe_user_from_dict(user)
     
     return None
+
+def _safe_user_from_dict(user_dict: dict) -> User:
+    """Safely create a User object from a dictionary, handling missing/extra fields"""
+    # Handle created_at field - convert string to datetime if needed
+    created_at = user_dict.get("created_at")
+    if isinstance(created_at, str):
+        try:
+            created_at = datetime.fromisoformat(created_at)
+        except (ValueError, TypeError):
+            created_at = datetime.now(timezone.utc)
+    elif not isinstance(created_at, datetime):
+        created_at = datetime.now(timezone.utc)
+    
+    return User(
+        user_id=user_dict["user_id"],
+        email=user_dict["email"],
+        first_name=user_dict.get("first_name", ""),
+        last_name=user_dict.get("last_name", ""),
+        name=user_dict.get("name", ""),
+        phone=user_dict.get("phone"),
+        picture=user_dict.get("picture"),
+        role=user_dict.get("role", "customer"),
+        is_admin=user_dict.get("is_admin", False),
+        is_staff=user_dict.get("is_staff", False),
+        is_store_owner=user_dict.get("is_store_owner", False),
+        newsletter_subscribed=user_dict.get("newsletter_subscribed", True),
+        created_at=created_at
+    )
 
 async def require_admin(request: Request) -> User:
     user = await get_current_user(request)
@@ -1555,9 +1580,25 @@ async def process_session(session_id: str, request: Request):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
-    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
     
-    response = JSONResponse(content=user)
+    # Build response with explicit fields
+    user_response = {
+        "user_id": user["user_id"],
+        "email": user["email"],
+        "first_name": user.get("first_name", ""),
+        "last_name": user.get("last_name", ""),
+        "name": user.get("name", ""),
+        "phone": user.get("phone"),
+        "picture": user.get("picture"),
+        "role": user.get("role", "customer"),
+        "is_admin": user.get("is_admin", False),
+        "is_staff": user.get("is_staff", False),
+        "is_store_owner": user.get("is_store_owner", False),
+        "newsletter_subscribed": user.get("newsletter_subscribed", True)
+    }
+    
+    response = JSONResponse(content=user_response)
     response.set_cookie(
         key="session_token",
         value=session_token,
