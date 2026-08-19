@@ -15,7 +15,14 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const sessionId = searchParams.get("session_id");
+      // Check for session_id in query params first, then in hash
+      let sessionId = searchParams.get("session_id");
+      
+      // If not in query params, check the hash fragment
+      if (!sessionId && window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        sessionId = hashParams.get("session_id");
+      }
       
       if (!sessionId) {
         setError("No session ID received from authentication provider");
