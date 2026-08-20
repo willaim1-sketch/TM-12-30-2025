@@ -152,10 +152,10 @@ const BlogPostPage = () => {
       <section className="py-16 px-6 bg-[#1A1A1A] border-t border-white/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-display font-bold text-white mb-4">
-            Ready to Try Our Tamales?
+            Ready to Try Our BBQ?
           </h2>
           <p className="text-white/60 mb-8">
-            Order online and experience authentic gourmet flavors!
+            Order BBQ from Nic Nackables Flavorhood
           </p>
           <Link to="/order">
             <Button className="btn-primary" data-testid="post-footer-order-btn">Order Now</Button>
