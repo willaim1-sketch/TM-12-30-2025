@@ -13,6 +13,7 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import ReturnPolicyPage from "./pages/ReturnPolicyPage";
+import ContactPage from "./pages/ContactPage";
 import CustomerAuth from "./pages/CustomerAuth";
 import AuthCallback from "./pages/AuthCallback";
 import AccountPage from "./pages/AccountPage";
@@ -20,6 +21,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+
+// Components
+import ChatBot from "./components/ChatBot";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -218,6 +222,7 @@ function AppRouter() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/return-policy" element={<ReturnPolicyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         {/* Customer Auth Routes */}
         <Route path="/login" element={<CustomerAuth />} />
         <Route path="/register" element={<CustomerAuth />} />
@@ -250,6 +255,7 @@ function App() {
         <BrowserRouter>
           <AuthProvider>
             <AppRouter />
+            <ChatBot />
           </AuthProvider>
         </BrowserRouter>
       </div>

@@ -58,6 +58,8 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Merch store
 - [x] Customer registration/login (email+password or Google)
 - [x] Simplified auth flow - customers go to homepage after login
+- [x] **Contact Us Page** - Form with Name, Phone, Email, Message fields, themed with mascot
+- [x] **AI Chatbot** - GPT-powered assistant in bottom right corner, trained on menu and business info
 - [x] **Order History** - logged-in users can view past orders on /order page
 
 ### Admin Panel
@@ -188,4 +190,4 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 | **Emergent Object Store** | Active | Cloud media persistence |
 
 ---
-*Last Updated: December 2025 (Help Guide, CSV Export, Menu Images)*
+*Last Updated: December 2025 (Contact Page, AI Chatbot)*

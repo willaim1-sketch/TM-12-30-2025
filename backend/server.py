@@ -1009,6 +1009,132 @@ async def submit_contact_form(submission: ContactSubmissionCreate, background_ta
     return contact
 
 # =============================================================================
+# CHATBOT ROUTES
+# =============================================================================
+
+class ChatMessage(BaseModel):
+    message: str
+    session_id: str
+
+# Store chat histories in memory (per session)
+chat_sessions: Dict[str, list] = {}
+
+@api_router.post("/chatbot/message")
+async def chatbot_message(chat_msg: ChatMessage):
+    """AI Chatbot endpoint that answers questions about the restaurant"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
+        if not EMERGENT_LLM_KEY:
+            return {"response": "I'm having trouble connecting right now. Please try again later or contact us directly!"}
+        
+        # Get menu items for context
+        menu_items = await db.menu_items.find({"is_available": True}, {"_id": 0}).to_list(100)
+        menu_categories = await db.menu_categories.find({}, {"_id": 0}).to_list(50)
+        
+        # Get site settings for business info
+        settings = await db.site_settings.find_one({}, {"_id": 0})
+        
+        # Build menu context
+        menu_context = "## Our Menu\n"
+        for cat in menu_categories:
+            cat_items = [i for i in menu_items if i.get("category_id") == cat.get("category_id")]
+            if cat_items:
+                menu_context += f"\n### {cat.get('name', 'Category')}\n"
+                for item in cat_items:
+                    menu_context += f"- **{item.get('name')}**: ${item.get('price', 0):.2f} - {item.get('description', '')}\n"
+        
+        # Build business info context
+        business_info = f"""
+## About Nic Nackables BBQ & More
+We're a BBQ restaurant serving authentic, slow-smoked BBQ in Los Angeles.
+
+**Contact Information:**
+- Phone: (323) 555-RIBS
+- Email: info@nicnackablesbbq.com
+- Website: nicnackablesbbq.com
+
+**Ordering:**
+- You can order online through our website
+- Walk-in orders are welcome
+- We offer catering for events of all sizes
+
+**Payment Methods:**
+- Credit/Debit cards (Stripe)
+- Cash App, Venmo, PayPal (QR codes available)
+
+**Our Specialties:**
+- Slow-smoked brisket (18+ hours)
+- Fall-off-the-bone ribs
+- Hand-pulled pork
+- Signature BBQ sauces
+- Southern-style sides
+
+**Catering:**
+- Yes, we cater events!
+- Contact us for custom menus and pricing
+- We can handle small gatherings to large events
+"""
+
+        system_message = f"""You are Nic, the friendly BBQ assistant for Nic Nackables BBQ & More. You're helpful, warm, and passionate about BBQ.
+
+Your personality:
+- Friendly and welcoming, like a good BBQ host
+- Knowledgeable about our menu and BBQ in general
+- Use casual language but stay professional
+- Occasionally use BBQ-related expressions
+- Keep responses concise but helpful (2-4 sentences typically)
+
+{business_info}
+
+{menu_context}
+
+Important guidelines:
+- Only answer questions related to our restaurant, menu, ordering, and catering
+- If asked about things unrelated to the restaurant, politely redirect to how you can help with food/ordering
+- Never make up prices or items not on the menu
+- Encourage customers to place orders or contact us for more info
+- If you don't know something specific, suggest they contact us directly
+"""
+        
+        # Initialize or retrieve chat history
+        if chat_msg.session_id not in chat_sessions:
+            chat_sessions[chat_msg.session_id] = []
+        
+        # Create chat instance
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=chat_msg.session_id,
+            system_message=system_message
+        ).with_model("openai", "gpt-5.4")
+        
+        # Send current message (send_message returns the response text directly)
+        response_text = await chat.send_message(UserMessage(text=chat_msg.message))
+        
+        # Handle both string and object responses
+        if hasattr(response_text, 'content'):
+            response_content = response_text.content
+        else:
+            response_content = str(response_text)
+        
+        # Store in session history
+        chat_sessions[chat_msg.session_id].append({"role": "user", "content": chat_msg.message})
+        chat_sessions[chat_msg.session_id].append({"role": "assistant", "content": response_content})
+        
+        # Clean up old sessions (keep only last 100)
+        if len(chat_sessions) > 100:
+            oldest_sessions = list(chat_sessions.keys())[:-100]
+            for session in oldest_sessions:
+                del chat_sessions[session]
+        
+        return {"response": response_content}
+        
+    except Exception as e:
+        logger.error(f"Chatbot error: {str(e)}")
+        return {"response": "I'm having a little trouble right now. Feel free to call us at (323) 555-RIBS or email info@nicnackablesbbq.com for immediate assistance!"}
+
+# =============================================================================
 # ORDER & PAYMENT ROUTES
 # =============================================================================
 
