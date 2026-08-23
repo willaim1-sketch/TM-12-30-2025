@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   Users, Search, Trash2, Key, Mail, Phone, Calendar,
-  Shield, User as UserIcon, AlertTriangle, Eye, EyeOff, UserCog
+  Shield, User as UserIcon, AlertTriangle, Eye, EyeOff, UserCog, Download
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -200,6 +200,14 @@ const UserManager = () => {
             {users.length} registered user{users.length !== 1 ? "s" : ""}
           </p>
         </div>
+        <Button
+          onClick={() => window.open(`${API}/admin/users/export/csv`, '_blank')}
+          className="btn-secondary"
+          data-testid="export-csv-btn"
+        >
+          <Download size={18} className="mr-2" />
+          Export Emails CSV
+        </Button>
       </div>
 
       {/* Search Bar */}

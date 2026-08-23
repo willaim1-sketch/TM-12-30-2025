@@ -270,9 +270,9 @@ const StaffPOS = () => {
                     onClick={() => addToCart(item)}
                   >
                     <td className="p-2">
-                      {item.image ? (
+                      {item.image_url ? (
                         <img 
-                          src={item.image.startsWith('/api') ? `${API}${item.image}` : item.image} 
+                          src={item.image_url.startsWith('/api') ? `${API}${item.image_url}` : item.image_url} 
                           alt={item.name}
                           className="w-12 h-12 object-cover rounded"
                         />

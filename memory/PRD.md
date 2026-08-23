@@ -99,6 +99,19 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Orders marked with `is_pos_order: true` flag
 - [x] **POS badge** in Orders list to identify POS orders
 - [x] **"Taken by: {staff_name}"** displayed in order list and detail views
+- [x] **Menu item images** support (use `image_url` field)
+
+### Admin Help & Guide (December 2025)
+- [x] **Help/Guide page** - `/admin/help` with comprehensive admin manual
+- [x] Branded with Nic Nackables mascot throughout
+- [x] Expandable sections covering: Getting Started, POS, Orders, Menu, Media, Users, Settings, Analytics
+- [x] "Nic's Tip" feature boxes with mascot personality
+- [x] Accessible to all admin roles (Admin, Staff, Store Owner)
+
+### CSV Export (December 2025)
+- [x] **Export customer emails** as CSV from User Management page
+- [x] Includes: Email, First Name, Last Name, Phone, Newsletter status, Join date
+- [x] Downloads as `customer_emails_YYYYMMDD.csv`
 
 ### Homepage Media Section Controls (December 2025)
 - [x] **Toggle** to show/hide the entire media section below hero
@@ -175,4 +188,4 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 | **Emergent Object Store** | Active | Cloud media persistence |
 
 ---
-*Last Updated: December 2025 (POS Email & Creator Tracking)*
+*Last Updated: December 2025 (Help Guide, CSV Export, Menu Images)*

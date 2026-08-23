@@ -2783,6 +2783,49 @@ async def update_user_role(
     )
     return updated_user
 
+@api_router.get("/admin/users/export/csv")
+async def export_customer_emails_csv(current_user: User = Depends(require_admin)):
+    """Export customer emails as CSV for marketing (admin only)"""
+    from fastapi.responses import StreamingResponse
+    import io
+    import csv
+    
+    # Get all users who are customers (not admin/staff)
+    users = await db.users.find(
+        {"is_admin": {"$ne": True}, "is_staff": {"$ne": True}},
+        {"_id": 0, "email": 1, "first_name": 1, "last_name": 1, "name": 1, "phone": 1, "created_at": 1, "newsletter_subscribed": 1}
+    ).to_list(10000)
+    
+    # Create CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow(["Email", "First Name", "Last Name", "Full Name", "Phone", "Newsletter Subscribed", "Joined Date"])
+    
+    # Write data
+    for user in users:
+        writer.writerow([
+            user.get("email", ""),
+            user.get("first_name", ""),
+            user.get("last_name", ""),
+            user.get("name", ""),
+            user.get("phone", ""),
+            "Yes" if user.get("newsletter_subscribed") else "No",
+            user.get("created_at", "")[:10] if user.get("created_at") else ""
+        ])
+    
+    output.seek(0)
+    
+    # Return as downloadable CSV
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=customer_emails_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv"
+        }
+    )
+
 # Activity Logging and Online Users
 @api_router.post("/admin/log-activity")
 async def log_activity(data: dict, user: User = Depends(require_store_owner_or_admin)):
