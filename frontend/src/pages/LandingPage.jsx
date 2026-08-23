@@ -948,6 +948,7 @@ const Footer = ({ settings }) => {
               <li><Link to="/order" className="text-white/60 hover:text-red-500 transition-colors text-lg">Order Online</Link></li>
               <li><Link to="/merch" className="text-white/60 hover:text-red-500 transition-colors text-lg">Merch Shop</Link></li>
               <li><Link to="/blog" className="text-white/60 hover:text-red-500 transition-colors text-lg">Blog</Link></li>
+              <li><Link to="/return-policy" className="text-white/60 hover:text-red-500 transition-colors text-lg">Return Policy</Link></li>
               <li><a href="#about" className="text-white/60 hover:text-red-500 transition-colors text-lg">About Us</a></li>
               <li><Link to="/admin/login" className="text-white/60 hover:text-red-500 transition-colors text-lg" data-testid="footer-admin-login">Admin Login</Link></li>
             </ul>

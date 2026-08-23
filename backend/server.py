@@ -2741,6 +2741,57 @@ async def update_user_role(
     )
     return updated_user
 
+# Activity Logging and Online Users
+@api_router.post("/admin/log-activity")
+async def log_activity(data: dict, user: User = Depends(require_store_owner_or_admin)):
+    """Log admin/staff page visits and activities"""
+    activity = {
+        "user_id": user.user_id,
+        "user_email": user.email,
+        "user_name": user.name or f"{user.first_name} {user.last_name}".strip(),
+        "user_role": "admin" if user.is_admin else ("store_owner" if user.is_store_owner else "staff"),
+        "page": data.get("page", ""),
+        "action": data.get("action", "view"),
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    await db.admin_activity.insert_one(activity)
+    
+    # Update user's last active timestamp
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"last_active": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"status": "logged"}
+
+@api_router.get("/admin/online-users")
+async def get_online_users(user: User = Depends(require_store_owner_or_admin)):
+    """Get list of currently online admin/staff users (active in last 5 minutes)"""
+    five_mins_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+    
+    online_users = await db.users.find(
+        {
+            "last_active": {"$gt": five_mins_ago},
+            "$or": [
+                {"is_admin": True},
+                {"is_staff": True},
+                {"is_store_owner": True}
+            ]
+        },
+        {"_id": 0, "user_id": 1, "email": 1, "first_name": 1, "last_name": 1, "name": 1, "is_admin": 1, "is_staff": 1, "is_store_owner": 1, "last_active": 1}
+    ).to_list(50)
+    
+    return online_users
+
+@api_router.get("/admin/activity-log")
+async def get_activity_log(user: User = Depends(require_admin), limit: int = 100):
+    """Get recent admin activity log (admin only)"""
+    activities = await db.admin_activity.find(
+        {},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    return activities
 
 
 # Get all enabled payment methods (public)

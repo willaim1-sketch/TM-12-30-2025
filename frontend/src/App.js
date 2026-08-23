@@ -12,6 +12,7 @@ import OrderPage from "./pages/OrderPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import ReturnPolicyPage from "./pages/ReturnPolicyPage";
 import CustomerAuth from "./pages/CustomerAuth";
 import AuthCallback from "./pages/AuthCallback";
 import AccountPage from "./pages/AccountPage";
@@ -216,6 +217,7 @@ function AppRouter() {
         <Route path="/order/success" element={<OrderSuccessPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/return-policy" element={<ReturnPolicyPage />} />
         {/* Customer Auth Routes */}
         <Route path="/login" element={<CustomerAuth />} />
         <Route path="/register" element={<CustomerAuth />} />

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { 
   LayoutDashboard, UtensilsCrossed, ShoppingCart, MessageSquare, 
   Settings, Image, FileText, HelpCircle, LogOut, Menu, X,
-  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp, Users
+  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp, Users, Receipt, Circle
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { AuthContext } from "../../App";
@@ -24,22 +24,24 @@ import SEOManager from "./SEOManager";
 import PageBuilder from "./PageBuilder";
 import VisitorStats from "./VisitorStats";
 import UserManager from "./UserManager";
+import StaffPOS from "./StaffPOS";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // All sidebar items with role restrictions
 const allSidebarItems = [
   { path: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true, staffAllowed: true, storeOwnerAllowed: true },
+  { path: "/admin/pos", icon: Receipt, label: "Quick Order (POS)", staffAllowed: true, storeOwnerAllowed: true },
   { path: "/admin/analytics", icon: TrendingUp, label: "Analytics", staffAllowed: false, storeOwnerAllowed: true },
   { path: "/admin/page-builder", icon: Layout, label: "Page Builder", staffAllowed: false, storeOwnerAllowed: true },
-  { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu", staffAllowed: false, storeOwnerAllowed: true },
-  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/menu", icon: UtensilsCrossed, label: "Menu", staffAllowed: true, storeOwnerAllowed: true },
+  { path: "/admin/merch", icon: ShoppingBag, label: "Merch Shop", staffAllowed: true, storeOwnerAllowed: true },
   { path: "/admin/orders", icon: ShoppingCart, label: "Orders", staffAllowed: true, storeOwnerAllowed: true },
   { path: "/admin/contacts", icon: MessageSquare, label: "Messages", staffAllowed: true, storeOwnerAllowed: true },
   { path: "/admin/testimonials", icon: Star, label: "Testimonials", staffAllowed: false, storeOwnerAllowed: true },
   { path: "/admin/blog", icon: FileText, label: "Blog", staffAllowed: false, storeOwnerAllowed: true },
   { path: "/admin/faq", icon: HelpCircle, label: "FAQ", staffAllowed: false, storeOwnerAllowed: true },
-  { path: "/admin/media", icon: Image, label: "Media", staffAllowed: false, storeOwnerAllowed: true },
+  { path: "/admin/media", icon: Image, label: "Media", staffAllowed: true, storeOwnerAllowed: true },
   { path: "/admin/seo", icon: Globe, label: "SEO", staffAllowed: false, storeOwnerAllowed: true },
   { path: "/admin/users", icon: Users, label: "Users", staffAllowed: false, storeOwnerAllowed: false }, // Admin only
   { path: "/admin/settings", icon: Settings, label: "Settings", staffAllowed: false, storeOwnerAllowed: true }, // But platform fees hidden
@@ -53,6 +55,7 @@ const DashboardHome = () => {
     contacts: 0,
     testimonials: 0
   });
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -60,7 +63,8 @@ const DashboardHome = () => {
         // Staff can only see orders and contacts
         const requests = [
           axios.get(`${API}/admin/orders`, { withCredentials: true }),
-          axios.get(`${API}/admin/contacts`, { withCredentials: true })
+          axios.get(`${API}/admin/contacts`, { withCredentials: true }),
+          axios.get(`${API}/admin/online-users`, { withCredentials: true })
         ];
         
         // Admins and store owners can see all stats
@@ -76,15 +80,31 @@ const DashboardHome = () => {
         setStats({
           orders: responses[0].data?.length || 0,
           contacts: responses[1].data?.filter(c => !c.is_read)?.length || 0,
-          menuItems: (user?.is_admin || user?.is_store_owner) ? (responses[2]?.data?.length || 0) : 0,
-          testimonials: (user?.is_admin || user?.is_store_owner) ? (responses[3]?.data?.length || 0) : 0
+          menuItems: (user?.is_admin || user?.is_store_owner) ? (responses[3]?.data?.length || 0) : 0,
+          testimonials: (user?.is_admin || user?.is_store_owner) ? (responses[4]?.data?.length || 0) : 0
         });
+        
+        setOnlineUsers(responses[2].data || []);
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
     };
 
     fetchStats();
+    
+    // Log activity
+    axios.post(`${API}/admin/log-activity`, { page: "/admin", action: "view" }, { withCredentials: true }).catch(() => {});
+    
+    // Refresh online users every 30 seconds
+    const interval = setInterval(() => {
+      axios.get(`${API}/admin/online-users`, { withCredentials: true })
+        .then(res => setOnlineUsers(res.data || []))
+        .catch(() => {});
+      // Send heartbeat
+      axios.post(`${API}/admin/log-activity`, { page: "/admin", action: "heartbeat" }, { withCredentials: true }).catch(() => {});
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [user]);
 
   // Show different stat cards based on role
@@ -120,11 +140,41 @@ const DashboardHome = () => {
         ))}
       </div>
 
+      {/* Online Users - Green Indicator */}
+      {onlineUsers.length > 0 && (
+        <div className="card-dark p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Circle size={12} className="text-green-500 fill-green-500 animate-pulse" />
+            <h3 className="text-white font-semibold">Online Now ({onlineUsers.length})</h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {onlineUsers.map(u => (
+              <div 
+                key={u.user_id} 
+                className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full"
+              >
+                <Circle size={8} className="text-green-500 fill-green-500" />
+                <span className="text-white text-sm">
+                  {u.name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}
+                </span>
+                <span className="text-xs text-white/50">
+                  {u.is_admin ? '(Admin)' : u.is_store_owner ? '(Owner)' : '(Staff)'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="card-dark p-6">
           <h2 className="text-xl font-display font-bold text-white mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            {user?.is_admin && (
+            <Link to="/admin/pos" className="block p-4 bg-green-600/20 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors">
+              <p className="text-green-400 font-semibold">Quick Order (POS)</p>
+              <p className="text-white/60 text-sm">Create orders for walk-in customers</p>
+            </Link>
+            {(user?.is_admin || user?.is_store_owner || user?.is_staff) && (
               <Link to="/admin/menu" className="block p-4 bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors">
                 <p className="text-white font-semibold">Manage Menu</p>
                 <p className="text-white/60 text-sm">Add or edit menu items</p>
@@ -321,6 +371,7 @@ const AdminDashboard = () => {
         <div className="flex-1 p-6 lg:p-8 overflow-auto">
           <Routes>
             <Route path="/" element={<DashboardHome />} />
+            <Route path="/pos/*" element={<StaffPOS />} />
             <Route path="/analytics/*" element={<VisitorStats />} />
             <Route path="/page-builder/*" element={<PageBuilder />} />
             <Route path="/menu/*" element={<MenuManager />} />
