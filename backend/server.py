@@ -353,17 +353,24 @@ class Order(BaseModel):
     pickup_date: str
     pickup_time: str
     comments: Optional[str] = None
+    created_by: Optional[str] = None  # Staff/Admin user_id who created POS order
+    created_by_name: Optional[str] = None  # Staff/Admin name for display
+    is_pos_order: bool = False  # Flag to identify POS orders
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class OrderCreate(BaseModel):
-    customer_name: str
-    customer_email: EmailStr
-    customer_phone: str
+    customer_name: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_phone: Optional[str] = None
+    customer_info: Optional[dict] = None  # Alternative format from POS: {name, email, phone}
     items: List[OrderItem]
-    pickup_date: str
-    pickup_time: str
+    pickup_date: Optional[str] = None
+    pickup_time: Optional[str] = None
     comments: Optional[str] = None
-    payment_method: Optional[str] = "stripe"  # stripe, paypal, venmo, cashapp
+    notes: Optional[str] = None  # POS order notes
+    payment_method: Optional[str] = "stripe"  # stripe, paypal, venmo, cashapp, manual
+    placed_by_staff: Optional[str] = None  # Staff/Admin user_id for POS orders
+    staff_name: Optional[str] = None  # Staff/Admin name for POS orders
 
 class ContactSubmission(BaseModel):
     submission_id: str = Field(default_factory=lambda: f"contact_{uuid.uuid4().hex[:12]}")
@@ -1063,23 +1070,46 @@ async def create_order(order_data: OrderCreate, request: Request):
     # Get payment method (default to stripe)
     payment_method = getattr(order_data, 'payment_method', 'stripe') or 'stripe'
     
+    # Check if this is a POS order (has customer_info or placed_by_staff)
+    is_pos_order = order_data.customer_info is not None or order_data.placed_by_staff is not None
+    
+    # Extract customer info - handle both POS format and regular format
+    if order_data.customer_info:
+        customer_name = order_data.customer_info.get("name", "Walk-in Customer")
+        customer_email = order_data.customer_info.get("email", "")
+        customer_phone = order_data.customer_info.get("phone", "")
+    else:
+        customer_name = order_data.customer_name or "Customer"
+        customer_email = order_data.customer_email or ""
+        customer_phone = order_data.customer_phone or ""
+    
     # Try to get current user for order history linking
     current_user = await get_current_user(request)
     user_id = current_user.user_id if current_user else None
     
+    # For POS orders, track who created it
+    created_by = None
+    created_by_name = None
+    if is_pos_order and order_data.placed_by_staff:
+        created_by = order_data.placed_by_staff
+        created_by_name = order_data.staff_name or "Staff"
+    
     # Create order
     order = Order(
         user_id=user_id,
-        customer_name=order_data.customer_name,
-        customer_email=order_data.customer_email,
-        customer_phone=order_data.customer_phone,
+        customer_name=customer_name,
+        customer_email=customer_email,
+        customer_phone=customer_phone,
         items=order_data.items,
         subtotal=subtotal,
         tax=tax,
         total=total,
-        pickup_date=order_data.pickup_date,
-        pickup_time=order_data.pickup_time,
-        comments=order_data.comments
+        pickup_date=order_data.pickup_date or "ASAP",
+        pickup_time=order_data.pickup_time or "Now",
+        comments=order_data.comments or order_data.notes,
+        created_by=created_by,
+        created_by_name=created_by_name,
+        is_pos_order=is_pos_order
     )
     
     order_dict = order.model_dump()

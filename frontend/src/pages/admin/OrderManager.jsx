@@ -404,10 +404,20 @@ const OrderManager = () => {
                     <Badge className={`${paymentStatusColors[order.payment_status]} text-white`}>
                       {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
                     </Badge>
+                    {order.is_pos_order && (
+                      <Badge className="bg-purple-600 text-white">
+                        POS
+                      </Badge>
+                    )}
                   </div>
                   <h3 className="text-white font-semibold">{order.customer_name}</h3>
                   <p className="text-white/60 text-sm">{order.customer_email}</p>
                   <p className="text-white/60 text-sm">{order.customer_phone}</p>
+                  {order.created_by_name && (
+                    <p className="text-purple-400 text-sm mt-1">
+                      📋 Taken by: {order.created_by_name}
+                    </p>
+                  )}
                 </div>
 
                 <div className="text-left lg:text-right">
@@ -648,11 +658,23 @@ const OrderManager = () => {
                   <h3 className="text-xl text-white font-semibold">{selectedOrder.customer_name}</h3>
                   <p className="text-white/60">{selectedOrder.customer_email}</p>
                   <p className="text-white/60">{selectedOrder.customer_phone}</p>
+                  {selectedOrder.created_by_name && (
+                    <p className="text-purple-400 text-sm mt-2">
+                      📋 Order taken by: <span className="font-semibold">{selectedOrder.created_by_name}</span>
+                    </p>
+                  )}
                 </div>
                 <div className="text-right">
-                  <Badge className={`${statusColors[selectedOrder.status]} text-white mb-2`}>
-                    {selectedOrder.status}
-                  </Badge>
+                  <div className="flex gap-2 justify-end mb-2">
+                    <Badge className={`${statusColors[selectedOrder.status]} text-white`}>
+                      {selectedOrder.status}
+                    </Badge>
+                    {selectedOrder.is_pos_order && (
+                      <Badge className="bg-purple-600 text-white">
+                        POS Order
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-white/60 text-sm">
                     Pickup: {selectedOrder.pickup_date}
                   </p>

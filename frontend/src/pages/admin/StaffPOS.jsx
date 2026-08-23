@@ -331,6 +331,7 @@ const StaffPOS = () => {
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Customer Name (optional)"
                 className="input-dark text-sm h-8"
+                data-testid="pos-customer-name"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -340,6 +341,18 @@ const StaffPOS = () => {
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 placeholder="Phone (optional)"
                 className="input-dark text-sm h-8"
+                data-testid="pos-customer-phone"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-white/50 text-sm">@</span>
+              <Input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="Email Address (optional)"
+                className="input-dark text-sm h-8"
+                data-testid="pos-customer-email"
               />
             </div>
           </div>

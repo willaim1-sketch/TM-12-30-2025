@@ -88,6 +88,18 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - [x] Single-file migration via clicking Local badge or cloud button
 - [x] Local files deleted after successful migration to reclaim disk space
 
+### Staff POS System (December 2025)
+- [x] **Quick Order (POS) page** - `/admin/pos` for walk-in customers
+- [x] Menu items displayed in spreadsheet format with search and category filters
+- [x] Cart with quantity controls and custom item support
+- [x] **Customer info capture**: Name, Phone, and **Email Address** fields
+- [x] Order notes/special instructions
+- [x] **Creator tracking**: Records Staff/Admin ID and name who took the order
+- [x] Order confirmation modal with print capability
+- [x] Orders marked with `is_pos_order: true` flag
+- [x] **POS badge** in Orders list to identify POS orders
+- [x] **"Taken by: {staff_name}"** displayed in order list and detail views
+
 ### Homepage Media Section Controls (December 2025)
 - [x] **Toggle** to show/hide the entire media section below hero
 - [x] **Display Type selector** - switch between Video or Image mode
@@ -107,12 +119,14 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 - `/api/settings` - Site settings (GET/PUT)
 - `/api/menu/*` - Menu items and categories
 - `/api/orders/*` - Order management
+- `/api/orders/create` - Create order (supports both regular and POS orders with `customer_info`, `placed_by_staff`, `staff_name`)
 - `/api/orders/my-orders` - Customer order history
 - `/api/track-visit` - Visitor tracking (POST)
 - `/api/admin/visitor-stats` - Analytics dashboard (GET)
 - `/api/auth/*` - Authentication (login, register, logout, me, etc.)
 - `/api/admin/users` - User management (GET, PUT, DELETE)
 - `/api/admin/users/{id}/role` - Role changes (PUT)
+- `/api/admin/users/online` - Track online users (GET)
 - `/api/admin/storage/stats` - Storage statistics (GET)
 - `/api/admin/storage/migrate` - Bulk migration to cloud (POST)
 - `/api/admin/storage/migrate-single/{media_id}` - Single file migration (POST)
@@ -134,8 +148,9 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 ## Future Backlog
 
 ### P1 - High Priority
+- Add placeholder images to 14 seeded BBQ menu items for better POS visuals
 - Verify SendGrid email integration for password resets/order notifications (currently logging to console)
-- Refactor `server.py` into modular routers (~3300 lines currently)
+- Refactor `server.py` into modular routers (~3500 lines currently)
 
 ### P2 - Medium Priority  
 - Add-ons functionality improvements
@@ -160,4 +175,4 @@ Build a modern, high-converting restaurant website for "Nic Nackables BBQ & More
 | **Emergent Object Store** | Active | Cloud media persistence |
 
 ---
-*Last Updated: December 2025*
+*Last Updated: December 2025 (POS Email & Creator Tracking)*
