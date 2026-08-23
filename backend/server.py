@@ -458,6 +458,12 @@ class SiteSettings(BaseModel):
     # Platform Fee Settings (Admin only - hidden from store owners and customers)
     platform_fee_type: str = "none"  # "none", "flat", "percentage"
     platform_fee_amount: float = 0.0  # Flat amount in dollars OR percentage (e.g., 5.0 = 5%)
+    # Return Policy Settings (Admin only)
+    return_policy_phone: str = "(512) 555-0123"
+    return_policy_email: str = "support@nicnackables.com"
+    return_policy_food_text: str = "Due to the nature of our products, we cannot accept returns on food items. Once your order has been prepared and picked up or delivered, it cannot be returned for health and safety reasons. All sales of food products are final."
+    return_policy_fix_text: str = "If there's an issue with your order, we will fix it. Our goal is your complete satisfaction."
+    return_policy_merch_text: str = "For non-food merchandise (t-shirts, hats, etc.), we accept returns within 14 days of purchase for unworn, unwashed items with original tags attached."
 
 class SiteSettingsUpdate(BaseModel):
     site_name: Optional[str] = None
@@ -507,6 +513,12 @@ class SiteSettingsUpdate(BaseModel):
     # Platform Fee Settings (Admin only)
     platform_fee_type: Optional[str] = None  # "none", "flat", "percentage"
     platform_fee_amount: Optional[float] = None
+    # Return Policy Settings (Admin only)
+    return_policy_phone: Optional[str] = None
+    return_policy_email: Optional[str] = None
+    return_policy_food_text: Optional[str] = None
+    return_policy_fix_text: Optional[str] = None
+    return_policy_merch_text: Optional[str] = None
 
 class BlogPost(BaseModel):
     post_id: str = Field(default_factory=lambda: f"post_{uuid.uuid4().hex[:12]}")

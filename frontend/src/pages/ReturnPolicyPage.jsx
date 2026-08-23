@@ -1,9 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { ArrowLeft, ShieldCheck, AlertCircle, Phone, Mail, CheckCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 
+const API = process.env.REACT_APP_BACKEND_URL;
+
 const ReturnPolicyPage = () => {
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(`${API}/api/settings`);
+        setSettings(response.data);
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // Default values
+  const phone = settings?.return_policy_phone || settings?.phone || "(512) 555-0123";
+  const email = settings?.return_policy_email || settings?.email || "support@nicnackables.com";
+  const foodPolicyText = settings?.return_policy_food_text || "Due to the nature of our products, we cannot accept returns on food items. Once your order has been prepared and picked up or delivered, it cannot be returned for health and safety reasons. All sales of food products are final.";
+  const fixPolicyText = settings?.return_policy_fix_text || "If there&apos;s an issue with your order, we will fix it. Our goal is your complete satisfaction.";
+  const merchPolicyText = settings?.return_policy_merch_text || "For non-food merchandise (t-shirts, hats, etc.), we accept returns within 14 days of purchase for unworn, unwashed items with original tags attached. Please contact us to initiate a return. Shipping costs for returns are the responsibility of the customer unless the item is defective.";
+  const siteName = settings?.site_name || "Nic Nackables BBQ & More";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-red-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0D0D0D]">
       {/* Header */}
@@ -14,7 +50,7 @@ const ReturnPolicyPage = () => {
             <span>Back to Home</span>
           </Link>
           <Link to="/" className="text-2xl font-display font-bold text-red-500">
-            Nic Nackables
+            {siteName}
           </Link>
         </div>
       </header>
@@ -27,10 +63,10 @@ const ReturnPolicyPage = () => {
             <ShieldCheck className="text-red-500" size={48} />
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">
-            Return & Refund Policy
+            Return &amp; Refund Policy
           </h1>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            At Nic Nackables BBQ & More, we&apos;re committed to your satisfaction with every order.
+            At {siteName}, we&apos;re committed to your satisfaction with every order.
           </p>
         </div>
       </section>
@@ -50,9 +86,7 @@ const ReturnPolicyPage = () => {
                   No Returns on Food Items
                 </h2>
                 <p className="text-white/70 leading-relaxed">
-                  Due to the nature of our products, <strong className="text-white">we cannot accept returns on food items</strong>. 
-                  Once your order has been prepared and picked up or delivered, it cannot be returned for health and safety reasons. 
-                  All sales of food products are final.
+                  {foodPolicyText}
                 </p>
               </div>
             </div>
@@ -69,8 +103,7 @@ const ReturnPolicyPage = () => {
                   We&apos;ll Make It Right
                 </h2>
                 <p className="text-white/70 leading-relaxed mb-4">
-                  If there&apos;s an issue with your order, <strong className="text-white">we will fix it</strong>. 
-                  Our goal is your complete satisfaction. If you receive:
+                  {fixPolicyText} If you receive:
                 </p>
                 <ul className="space-y-3 text-white/70">
                   <li className="flex items-start gap-3">
@@ -115,14 +148,14 @@ const ReturnPolicyPage = () => {
             </ul>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href="tel:+1234567890" className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+              <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
                 <Phone size={20} />
-                <span>Call Us</span>
+                <span>{phone}</span>
               </a>
-              <Link to="/#contact" className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+              <a href={`mailto:${email}`} className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
                 <Mail size={20} />
-                <span>Send a Message</span>
-              </Link>
+                <span>{email}</span>
+              </a>
             </div>
           </div>
 
@@ -132,9 +165,7 @@ const ReturnPolicyPage = () => {
               Merchandise Returns
             </h2>
             <p className="text-white/70 leading-relaxed">
-              For non-food merchandise (t-shirts, hats, etc.), we accept returns within <strong className="text-white">14 days</strong> of 
-              purchase for unworn, unwashed items with original tags attached. Please contact us to initiate a return. 
-              Shipping costs for returns are the responsibility of the customer unless the item is defective.
+              {merchPolicyText}
             </p>
           </div>
 

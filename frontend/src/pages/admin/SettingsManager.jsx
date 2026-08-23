@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail, DollarSign, CheckCircle, Percent, Lock } from "lucide-react";
+import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail, DollarSign, CheckCircle, Percent, Lock, ShieldCheck, Phone } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -417,6 +417,12 @@ const SettingsManager = () => {
             <TabsTrigger value="platform" className="data-[state=active]:bg-red-600">
               <Lock size={16} className="mr-1" />
               Platform Fees
+            </TabsTrigger>
+          )}
+          {user?.is_admin && (
+            <TabsTrigger value="return-policy" className="data-[state=active]:bg-red-600">
+              <ShieldCheck size={16} className="mr-1" />
+              Return Policy
             </TabsTrigger>
           )}
         </TabsList>
@@ -2079,6 +2085,100 @@ const SettingsManager = () => {
                   </p>
                 </div>
               )}
+            </div>
+          </TabsContent>
+        )}
+
+        {/* Return Policy Tab - Admin Only */}
+        {user?.is_admin && (
+          <TabsContent value="return-policy">
+            <div className="card-dark p-6 space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-green-500/20 rounded-lg">
+                  <ShieldCheck className="text-green-500" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white">Return Policy Settings</h3>
+                  <p className="text-white/60 text-sm">Customize the content displayed on your Return Policy page.</p>
+                </div>
+              </div>
+              
+              {/* Contact Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white/70">Support Phone Number</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Phone size={16} className="text-white/40" />
+                    <Input
+                      value={settings.return_policy_phone || ""}
+                      onChange={(e) => updateSettings("return_policy_phone", e.target.value)}
+                      placeholder="(555) 123-4567"
+                      className="input-dark"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white/70">Support Email</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Mail size={16} className="text-white/40" />
+                    <Input
+                      value={settings.return_policy_email || ""}
+                      onChange={(e) => updateSettings("return_policy_email", e.target.value)}
+                      placeholder="support@yoursite.com"
+                      className="input-dark"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Food Policy Text */}
+              <div>
+                <Label className="text-white/70">Food Return Policy Text</Label>
+                <p className="text-white/40 text-sm mb-2">Explains why food items cannot be returned</p>
+                <Textarea
+                  value={settings.return_policy_food_text || ""}
+                  onChange={(e) => updateSettings("return_policy_food_text", e.target.value)}
+                  placeholder="Due to the nature of our products, we cannot accept returns on food items..."
+                  className="input-dark h-24"
+                />
+              </div>
+              
+              {/* Fix Policy Text */}
+              <div>
+                <Label className="text-white/70">&quot;We&apos;ll Make It Right&quot; Text</Label>
+                <p className="text-white/40 text-sm mb-2">Explains how you fix order issues</p>
+                <Textarea
+                  value={settings.return_policy_fix_text || ""}
+                  onChange={(e) => updateSettings("return_policy_fix_text", e.target.value)}
+                  placeholder="If there's an issue with your order, we will fix it..."
+                  className="input-dark h-24"
+                />
+              </div>
+              
+              {/* Merch Policy Text */}
+              <div>
+                <Label className="text-white/70">Merchandise Return Policy Text</Label>
+                <p className="text-white/40 text-sm mb-2">Policy for non-food items (t-shirts, hats, etc.)</p>
+                <Textarea
+                  value={settings.return_policy_merch_text || ""}
+                  onChange={(e) => updateSettings("return_policy_merch_text", e.target.value)}
+                  placeholder="For non-food merchandise, we accept returns within 14 days..."
+                  className="input-dark h-24"
+                />
+              </div>
+              
+              {/* Preview Link */}
+              <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                <p className="text-white/60 text-sm mb-2">Preview your return policy page:</p>
+                <a 
+                  href="/return-policy" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-red-400 hover:text-red-300 underline"
+                >
+                  View Return Policy Page →
+                </a>
+              </div>
             </div>
           </TabsContent>
         )}
