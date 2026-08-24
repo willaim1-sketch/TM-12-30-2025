@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { 
   LayoutDashboard, UtensilsCrossed, ShoppingCart, MessageSquare, 
   Settings, Image, FileText, HelpCircle, LogOut, Menu, X,
-  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp, Users, Receipt, Circle, BookOpen
+  Star, Globe, ShoppingBag, Layout, Palette, TrendingUp, Users, Receipt, Circle, BookOpen, Bot
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { AuthContext } from "../../App";
@@ -26,6 +26,7 @@ import VisitorStats from "./VisitorStats";
 import UserManager from "./UserManager";
 import StaffPOS from "./StaffPOS";
 import HelpGuide from "./HelpGuide";
+import ChatbotTraining from "./ChatbotTraining";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -45,6 +46,7 @@ const allSidebarItems = [
   { path: "/admin/media", icon: Image, label: "Media", staffAllowed: true, storeOwnerAllowed: true },
   { path: "/admin/seo", icon: Globe, label: "SEO", staffAllowed: false, storeOwnerAllowed: true },
   { path: "/admin/users", icon: Users, label: "Users", staffAllowed: false, storeOwnerAllowed: false }, // Admin only
+  { path: "/admin/chatbot-training", icon: Bot, label: "Chatbot Training", staffAllowed: false, storeOwnerAllowed: false }, // Admin only
   { path: "/admin/settings", icon: Settings, label: "Settings", staffAllowed: false, storeOwnerAllowed: true }, // But platform fees hidden
   { path: "/admin/help", icon: BookOpen, label: "Help / Guide", staffAllowed: true, storeOwnerAllowed: true },
 ];
@@ -388,6 +390,7 @@ const AdminDashboard = () => {
             <Route path="/users/*" element={<UserManager />} />
             <Route path="/settings/*" element={<SettingsManager />} />
             <Route path="/help/*" element={<HelpGuide />} />
+            <Route path="/chatbot-training/*" element={<ChatbotTraining />} />
           </Routes>
         </div>
       </main>

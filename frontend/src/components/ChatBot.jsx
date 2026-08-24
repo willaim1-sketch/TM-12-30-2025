@@ -12,17 +12,40 @@ const CHATBOT_AVATAR = "https://customer-assets-0z36b82j.emergentagent.net/job_d
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Hey there! 👋 I'm Nic, your BBQ buddy! I can help you with our menu, hours, ordering, catering, and more. What can I help you with today?",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [greeting, setGreeting] = useState("Hey there! 👋 I'm Nic, your BBQ buddy! I can help you with our menu, hours, ordering, catering, and more. What can I help you with today?");
   const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Fetch chatbot settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get(`${API}/api/chatbot/settings`);
+        setIsEnabled(response.data.enabled);
+        if (response.data.greeting) {
+          setGreeting(response.data.greeting);
+        }
+        // Set initial greeting message
+        setMessages([{
+          role: "assistant",
+          content: response.data.greeting || greeting,
+        }]);
+      } catch (error) {
+        console.error("Failed to fetch chatbot settings:", error);
+        // Set default greeting
+        setMessages([{
+          role: "assistant",
+          content: greeting,
+        }]);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,6 +100,11 @@ const ChatBot = () => {
     "What are your hours?",
     "How do I order?",
   ];
+
+  // Don't render if chatbot is disabled
+  if (!isEnabled) {
+    return null;
+  }
 
   return (
     <>

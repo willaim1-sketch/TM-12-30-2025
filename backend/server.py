@@ -471,6 +471,9 @@ class SiteSettings(BaseModel):
     return_policy_food_text: str = "Due to the nature of our products, we cannot accept returns on food items. Once your order has been prepared and picked up or delivered, it cannot be returned for health and safety reasons. All sales of food products are final."
     return_policy_fix_text: str = "If there's an issue with your order, we will fix it. Our goal is your complete satisfaction."
     return_policy_merch_text: str = "For non-food merchandise (t-shirts, hats, etc.), we accept returns within 14 days of purchase for unworn, unwashed items with original tags attached."
+    # Chatbot Settings
+    chatbot_enabled: bool = True  # Toggle to enable/disable chatbot
+    chatbot_greeting: str = "Hey there! 👋 I'm Nic, your BBQ buddy! I can help you with our menu, hours, ordering, catering, and more. What can I help you with today?"
 
 class SiteSettingsUpdate(BaseModel):
     site_name: Optional[str] = None
@@ -526,6 +529,31 @@ class SiteSettingsUpdate(BaseModel):
     return_policy_food_text: Optional[str] = None
     return_policy_fix_text: Optional[str] = None
     return_policy_merch_text: Optional[str] = None
+    # Chatbot Settings
+    chatbot_enabled: Optional[bool] = None
+    chatbot_greeting: Optional[str] = None
+
+# Chatbot Knowledge Base Model for RAG
+class ChatbotKnowledge(BaseModel):
+    knowledge_id: str = Field(default_factory=lambda: f"kb_{uuid.uuid4().hex[:12]}")
+    title: str  # Topic/title for organization
+    content: str  # The actual knowledge content
+    category: str = "general"  # general, menu, catering, policies, faq, etc.
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ChatbotKnowledgeCreate(BaseModel):
+    title: str
+    content: str
+    category: str = "general"
+    is_active: bool = True
+
+class ChatbotKnowledgeUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class BlogPost(BaseModel):
     post_id: str = Field(default_factory=lambda: f"post_{uuid.uuid4().hex[:12]}")
@@ -1023,6 +1051,11 @@ chat_sessions: Dict[str, list] = {}
 async def chatbot_message(chat_msg: ChatMessage):
     """AI Chatbot endpoint that answers questions about the restaurant"""
     try:
+        # Check if chatbot is enabled
+        settings = await db.site_settings.find_one({}, {"_id": 0})
+        if not settings or not settings.get("chatbot_enabled", True):
+            return {"response": "Our chat assistant is currently offline. Please contact us directly at info@nicnackablesbbq.com or call (323) 555-RIBS!", "disabled": True}
+        
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY")
@@ -1033,8 +1066,8 @@ async def chatbot_message(chat_msg: ChatMessage):
         menu_items = await db.menu_items.find({"is_available": True}, {"_id": 0}).to_list(100)
         menu_categories = await db.menu_categories.find({}, {"_id": 0}).to_list(50)
         
-        # Get site settings for business info
-        settings = await db.site_settings.find_one({}, {"_id": 0})
+        # Get RAG knowledge base entries
+        knowledge_entries = await db.chatbot_knowledge.find({"is_active": True}, {"_id": 0}).to_list(100)
         
         # Build menu context
         menu_context = "## Our Menu\n"
@@ -1045,14 +1078,21 @@ async def chatbot_message(chat_msg: ChatMessage):
                 for item in cat_items:
                     menu_context += f"- **{item.get('name')}**: ${item.get('price', 0):.2f} - {item.get('description', '')}\n"
         
+        # Build RAG knowledge context
+        rag_context = ""
+        if knowledge_entries:
+            rag_context = "\n## Additional Business Information\n"
+            for entry in knowledge_entries:
+                rag_context += f"\n### {entry.get('title', 'Info')}\n{entry.get('content', '')}\n"
+        
         # Build business info context
         business_info = f"""
 ## About Nic Nackables BBQ & More
 We're a BBQ restaurant serving authentic, slow-smoked BBQ in Los Angeles.
 
 **Contact Information:**
-- Phone: (323) 555-RIBS
-- Email: info@nicnackablesbbq.com
+- Phone: {settings.get('phone', '(323) 555-RIBS')}
+- Email: {settings.get('email', 'info@nicnackablesbbq.com')}
 - Website: nicnackablesbbq.com
 
 **Ordering:**
@@ -1089,6 +1129,8 @@ Your personality:
 {business_info}
 
 {menu_context}
+
+{rag_context}
 
 Important guidelines:
 - Only answer questions related to our restaurant, menu, ordering, and catering
@@ -1133,6 +1175,56 @@ Important guidelines:
     except Exception as e:
         logger.error(f"Chatbot error: {str(e)}")
         return {"response": "I'm having a little trouble right now. Feel free to call us at (323) 555-RIBS or email info@nicnackablesbbq.com for immediate assistance!"}
+
+@api_router.get("/chatbot/settings")
+async def get_chatbot_settings():
+    """Get chatbot settings (public - for checking if enabled)"""
+    settings = await db.site_settings.find_one({}, {"_id": 0})
+    return {
+        "enabled": settings.get("chatbot_enabled", True) if settings else True,
+        "greeting": settings.get("chatbot_greeting", "Hey there! 👋 I'm Nic, your BBQ buddy! I can help you with our menu, hours, ordering, catering, and more. What can I help you with today?") if settings else "Hey there! 👋 I'm Nic, your BBQ buddy!"
+    }
+
+# =============================================================================
+# CHATBOT KNOWLEDGE BASE (RAG) ROUTES - Admin Only
+# =============================================================================
+
+@api_router.get("/admin/chatbot/knowledge")
+async def get_chatbot_knowledge(user: User = Depends(require_admin)):
+    """Get all chatbot knowledge base entries"""
+    entries = await db.chatbot_knowledge.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return entries
+
+@api_router.post("/admin/chatbot/knowledge")
+async def create_chatbot_knowledge(data: ChatbotKnowledgeCreate, user: User = Depends(require_admin)):
+    """Create a new knowledge base entry"""
+    entry = ChatbotKnowledge(**data.model_dump())
+    entry_dict = entry.model_dump()
+    entry_dict["created_at"] = entry_dict["created_at"].isoformat()
+    entry_dict["updated_at"] = entry_dict["updated_at"].isoformat()
+    await db.chatbot_knowledge.insert_one(entry_dict)
+    # Remove _id from response
+    entry_dict.pop("_id", None)
+    return entry_dict
+
+@api_router.put("/admin/chatbot/knowledge/{knowledge_id}")
+async def update_chatbot_knowledge(knowledge_id: str, data: ChatbotKnowledgeUpdate, user: User = Depends(require_admin)):
+    """Update a knowledge base entry"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if update_data:
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.chatbot_knowledge.update_one(
+            {"knowledge_id": knowledge_id},
+            {"$set": update_data}
+        )
+    entry = await db.chatbot_knowledge.find_one({"knowledge_id": knowledge_id}, {"_id": 0})
+    return entry
+
+@api_router.delete("/admin/chatbot/knowledge/{knowledge_id}")
+async def delete_chatbot_knowledge(knowledge_id: str, user: User = Depends(require_admin)):
+    """Delete a knowledge base entry"""
+    await db.chatbot_knowledge.delete_one({"knowledge_id": knowledge_id})
+    return {"status": "deleted"}
 
 # =============================================================================
 # ORDER & PAYMENT ROUTES

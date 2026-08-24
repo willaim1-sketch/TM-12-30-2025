@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail, DollarSign, CheckCircle, Percent, Lock, ShieldCheck, Phone } from "lucide-react";
+import { Save, CreditCard, Image, Eye, EyeOff, Info, AlertCircle, Upload, Plus, X, Mail, DollarSign, CheckCircle, Percent, Lock, ShieldCheck, Phone, Bot } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -423,6 +423,12 @@ const SettingsManager = () => {
             <TabsTrigger value="return-policy" className="data-[state=active]:bg-red-600">
               <ShieldCheck size={16} className="mr-1" />
               Return Policy
+            </TabsTrigger>
+          )}
+          {user?.is_admin && (
+            <TabsTrigger value="chatbot" className="data-[state=active]:bg-red-600">
+              <Bot size={16} className="mr-1" />
+              Chatbot
             </TabsTrigger>
           )}
         </TabsList>
@@ -2178,6 +2184,81 @@ const SettingsManager = () => {
                 >
                   View Return Policy Page →
                 </a>
+              </div>
+            </div>
+          </TabsContent>
+        )}
+
+        {/* CHATBOT SETTINGS TAB - Admin Only */}
+        {user?.is_admin && (
+          <TabsContent value="chatbot">
+            <div className="card-dark p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+                    <Bot className="text-red-500" />
+                    AI Chatbot Settings
+                  </h3>
+                  <p className="text-white/60 mt-1">
+                    Control your AI-powered customer assistant that appears in the bottom-right corner
+                  </p>
+                </div>
+              </div>
+              
+              {/* Enable/Disable Toggle */}
+              <div className="bg-white/5 rounded-lg p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-white font-semibold">Enable Chatbot</p>
+                  <p className="text-white/60 text-sm">When disabled, the chatbot will not appear on your website</p>
+                </div>
+                <Switch
+                  checked={settings.chatbot_enabled !== false}
+                  onCheckedChange={(checked) => updateSettings("chatbot_enabled", checked)}
+                  data-testid="chatbot-toggle"
+                />
+              </div>
+              
+              {/* Greeting Message */}
+              <div>
+                <Label className="text-white/70">Welcome Message</Label>
+                <p className="text-white/40 text-sm mb-2">The first message customers see when they open the chatbot</p>
+                <Textarea
+                  value={settings.chatbot_greeting || ""}
+                  onChange={(e) => updateSettings("chatbot_greeting", e.target.value)}
+                  placeholder="Hey there! 👋 I'm Nic, your BBQ buddy! I can help you with our menu, hours, ordering, catering, and more. What can I help you with today?"
+                  className="input-dark h-24"
+                />
+              </div>
+              
+              {/* Link to Training Page */}
+              <div className="bg-gradient-to-r from-red-900/20 to-orange-900/20 rounded-lg p-5 border border-red-500/20">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Bot className="text-red-500" size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-white font-semibold mb-1">Train Your Chatbot with Custom Knowledge</h4>
+                    <p className="text-white/70 text-sm mb-3">
+                      Add specific information about your business, policies, hours, and more. 
+                      The AI will use this knowledge to give accurate, helpful responses.
+                    </p>
+                    <a 
+                      href="/admin/chatbot-training"
+                      className="inline-flex items-center gap-2 btn-primary px-4 py-2 rounded-lg text-sm"
+                    >
+                      <Bot size={16} />
+                      Go to Chatbot Training
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Preview */}
+              <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                <p className="text-white/60 text-sm mb-2">
+                  The chatbot automatically knows your menu items, prices, and contact info. 
+                  Use the Training page to add additional knowledge like catering policies, special hours, or FAQ answers.
+                </p>
               </div>
             </div>
           </TabsContent>
